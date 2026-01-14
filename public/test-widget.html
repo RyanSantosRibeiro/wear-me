@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Wearme Widget</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .product-image {
+            width: 100%;
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        h1 { margin: 0 0 10px 0; font-size: 24px; font-weight: 800; }
+        p { color: #666; margin-bottom: 30px; }
+        
+        #wearme-btn {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="product-card">
+        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop" class="product-image" alt="Produto">
+        <h1>Conjunto Sportswear</h1>
+        <p>Premium athletic wear for your daily performance.</p>
+        
+        <!-- 3. Elemento Alvo -->
+        <div id="wearme-btn"></div>
+    </div>
+
+    <!-- 1. Importa o Widget -->
+    <script src="/widget.js"></script>
+    
+    <!-- 2. Configura -->
+    <script>
+        Wearme.init({
+            apiKey: 'pk_test_wearme_123',
+            productImage: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop',
+            buttonSelector: '#wearme-btn'
+        });
+    </script>
+</body>
+</html>
