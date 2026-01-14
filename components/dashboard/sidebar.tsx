@@ -68,6 +68,7 @@ export function Sidebar({ role, menuOptions }: { role: string; menuOptions?: any
 
   const navigation: MenuGroup[] = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
+    { name: "Logs de Uso", href: "/dashboard/logs", icon: BrainCircuit },
     { name: "Configurações", href: "/dashboard/settings", icon: Settings },
     { name: "Assinatura", href: "/dashboard/subscription", icon: DollarSign },
   ]
@@ -85,7 +86,7 @@ export function Sidebar({ role, menuOptions }: { role: string; menuOptions?: any
       <div className="flex h-14 items-center border-b px-4 w-64">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <Building2 className="h-6 w-6 shrink-0" />
-          {isExpanded && <span>SaaS Sistema</span>}
+          {isExpanded && <span>Wearme</span>}
         </Link>
       </div>
 
@@ -104,8 +105,8 @@ export function Sidebar({ role, menuOptions }: { role: string; menuOptions?: any
               <div key={item.name}>
                 <div
                   className={cn(
-                    "min-h-[48px] flex items-center gap-4 px-4 py-3 border-l-[3px] transition-all hover:bg-[#f0f2f5]",
-                    isActive ? "border-[#1ca0b5] bg-[#f0f2f5]" : "border-transparent",
+                    "min-h-[48px] flex items-center gap-4 px-4 py-3 border-l-[3px] transition-all hover:bg-accent",
+                    isActive ? "border-primary bg-accent" : "border-transparent",
                   )}
                 >
                   {/* LINK PRINCIPAL */}
@@ -143,13 +144,13 @@ export function Sidebar({ role, menuOptions }: { role: string; menuOptions?: any
                           href={sub.href}
                           className={cn(
                             "block px-3 py-2 rounded text-sm transition-colors flex items-center gap-4",
-                            subActive ? "bg-primary/5 text-[#008069]" : "text-[#54656f] hover:bg-[#f0f2f5]",
+                            subActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent",
                           )}
                         >
                           <Icon className="h-5 w-5 shrink-0" />
                           {sub.name}
                           {sub?.flag && (
-                            <span className="font-medium ml-auto bg-[#1ca0b5] text-white px-2 py-1 rounded">
+                            <span className="font-medium ml-auto bg-primary text-primary-foreground px-2 py-1 rounded text-[10px]">
                               {sub.flag}
                             </span>
                           )}
@@ -168,8 +169,8 @@ export function Sidebar({ role, menuOptions }: { role: string; menuOptions?: any
               key={item.href}
               href={item.href}
               className={cn(
-                "min-h-[48px] flex items-center gap-4 px-4 py-3 border-l-[3px] transition-all hover:bg-[#f0f2f5]",
-                isActive ? "border-[#1ca0b5] bg-[#f0f2f5]" : "border-transparent",
+                "min-h-[48px] flex items-center gap-4 px-4 py-3 border-l-[3px] transition-all hover:bg-accent",
+                isActive ? "border-primary bg-accent" : "border-transparent",
               )}
             >
               <Icon className="h-5 w-5 shrink-0" />

@@ -5,7 +5,8 @@ import { SecuritySettings } from "@/components/dashboard/security-settings"
 import { redirect } from "next/navigation"
 import { SubscriptionPanel } from "@/components/dashboard/settings/subscription"
 import { PageHeader } from "@/components/PageHeader"
-import { User, Shield, Zap } from "lucide-react"
+import { User, Shield, Zap, Settings } from "lucide-react"
+import CopyButton from "./copyButton"
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -20,6 +21,13 @@ export default async function SettingsPage() {
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single()
 
   const { data: subscription } = await supabase.from("subscriptions").select("*").eq("user_id", user.id).single()
+
+  // Fetch WearMe Config
+  const { data: wearmeConfig } = await supabase
+    .from("wearme_configs")
+    .select("*")
+    .eq("owner_id", user.id)
+    .single()
 
   const plans = [];
 
@@ -53,6 +61,13 @@ export default async function SettingsPage() {
             <Shield size={16} />
             Segurança
           </TabsTrigger>
+          <TabsTrigger
+            value="wearme"
+            className="rounded-xl px-6 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-primary font-bold transition-all flex items-center gap-2"
+          >
+            <Settings size={16} />
+            Integração WearMe
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-8 animate-in fade-in duration-500">
@@ -78,14 +93,53 @@ export default async function SettingsPage() {
             </div>
           </div>
         </TabsContent>
+
+        <TabsContent value="wearme" className="space-y-8 animate-in fade-in duration-500">
+          <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+            <div className="p-8 border-b border-gray-50 bg-gray-50/50">
+              <h3 className="text-xl font-black text-gray-900">Configurações da Integração</h3>
+              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Configure a URL do seu site e gerencie sua API Key</p>
+            </div>
+            <div className="p-8 space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">URL do Site</label>
+                <input
+                  type="url"
+                  name="site_url"
+                  defaultValue={wearmeConfig?.site_url || ""}
+                  placeholder="https://minhaloja.com"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                />
+                <p className="text-xs text-gray-500 mt-2">Esta URL será usada para validar requisições e evitar uso não autorizado da sua API Key.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">API Key</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={wearmeConfig?.api_key || "Carregando..."}
+                    readOnly
+                    className="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 font-mono text-sm"
+                  />
+                  <CopyButton
+                    text={wearmeConfig?.api_key || ""}
+                  />
+                </div>
+                <p className="text-xs text-amber-600 mt-2 font-semibold">⚠️ Não compartilhe sua API Key publicamente. Ela dá acesso total à sua integração.</p>
+              </div>
+
+              <div className="pt-4">
+                <button className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                  Salvar Configurações
+                </button>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
       </Tabs>
 
       <div className="pt-4 border-t border-gray-100">
-        <div className="flex items-center gap-2 mb-6">
-          <Zap className="text-primary" size={20} />
-          <h3 className="text-lg font-black text-gray-900">Plano e Faturamento</h3>
-        </div>
-        <SubscriptionPanel subscription={subscription} processing={false} plans={plans} />
       </div>
     </div>
   )

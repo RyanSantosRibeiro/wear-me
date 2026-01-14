@@ -63,8 +63,8 @@ export default function SignUpPage() {
       <div className="w-full max-w-sm">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Criar conta</CardTitle>
-            <CardDescription>Preencha os dados abaixo para criar sua conta</CardDescription>
+            <CardTitle className="text-2xl">Criar conta no WearMe</CardTitle>
+            <CardDescription>Comece a transformar a experiência de compra dos seus clientes com IA</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignUp}>
@@ -110,6 +110,20 @@ export default function SignUpPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
+                </div>
+                <div className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    required
+                    className="mt-1 w-4 h-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="terms" className="text-sm text-gray-600">
+                    Eu li e concordo com os{" "}
+                    <Link href="/docs/terms.md" target="_blank" className="text-primary font-semibold hover:underline">
+                      Termos de Uso e Política de Privacidade
+                    </Link>
+                  </label>
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
                 <Button type="submit" className="w-full" disabled={isLoading}>

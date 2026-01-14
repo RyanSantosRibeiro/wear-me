@@ -94,7 +94,27 @@ async function handlePaymentEvent(paymentId: string) {
 
   console.log(`[v0] Payment valid for user ${userId}, plan ${plan.name}`)
 
-  // 5. Create Subscription Record
+  // 5. Log Payment to payment_logs table
+  const { error: logError } = await supabase.from("payment_logs").insert({
+    user_id: userId,
+    payment_id: paymentId,
+    payment_status: paymentData.status,
+    amount: paymentData.transaction_amount,
+    currency: paymentData.currency_id || 'BRL',
+    plan_id: planId,
+    plan_name: plan.name,
+    payment_method: paymentData.payment_method_id,
+    payer_email: paymentData.payer?.email,
+    metadata: paymentData // Store full payment data for audit
+  })
+
+  if (logError) {
+    console.error("[v0] Error logging payment:", logError)
+  } else {
+    console.log("[v0] Payment logged successfully")
+  }
+
+  // 6. Create Subscription Record
   // We assume this is a monthly subscription from the checkout logic
   const now = new Date()
   const periodEnd = new Date()
@@ -129,18 +149,21 @@ async function handlePaymentEvent(paymentId: string) {
     throw subError
   }
 
-  // 6. Activate WearMe Config
+  // 7. Activate WearMe Config and RESET requests_count
   if (sassSlug === "wearme") {
     const { error: configError } = await supabase
       .from("wearme_configs")
       .update({
         subscription_id: subscription.id,
+        requests_count: 0, // RESET counter on new payment
         updated_at: now.toISOString()
       })
       .eq("owner_id", userId)
 
     if (configError) {
       console.error("Error activating wearme config:", configError)
+    } else {
+      console.log("[v0] WearMe config updated and requests_count reset to 0")
     }
   }
 

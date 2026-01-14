@@ -35,50 +35,50 @@ export const LoginForm: React.FC<any> = ({
 
   return (
     <div className="flex min-h-screen w-full bg-white">
-      {/* LEFT SIDE permanece igual */}
-      <div className="hidden lg:flex w-1/2 bg-[#111b21] relative flex-col justify-between p-12 overflow-hidden text-white">
+      {/* LEFT SIDE - WearMe Branding */}
+      <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-rose-100 via-pink-50 to-amber-50 relative flex-col justify-between p-12 overflow-hidden text-gray-800">
         {/* Abstract Background Shapes */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#1ca0b5] rounded-full blur-[140px] opacity-10"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white rounded-full blur-[140px] opacity-10"></div>
 
         <div className="relative z-10">
-          <div className="flex items-center gap-2 font-bold text-2xl text-white tracking-tight mb-8">
-            <svg className="w-8 h-8 text-[#1ca0b5]" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" /></svg>
-            CMS | we.digi
+          <div className="flex items-center gap-2 font-bold text-2xl text-gray-800 tracking-tight mb-8">
+            <svg className="w-8 h-8 text-rose-400" fill="currentColor" viewBox="0 0 24 24"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z" /></svg>
+            WearMe
           </div>
 
-          <h2 className="text-4xl font-bold leading-tight mb-6">
+          <h2 className="text-4xl font-bold leading-tight mb-6 text-gray-900">
             Bem-vindo de volta. <br />
-            Suas vendas não param.
+            Seu provador virtual aguarda.
           </h2>
-          <p className="text-slate-400 text-lg max-w-md">
-            Acesse seu dashboard para acompanhar seus leads e gerenciar sua equipe de atendimento.
+          <p className="text-gray-600 text-lg max-w-md">
+            Acesse seu dashboard para gerenciar integrações, acompanhar uso e transformar a experiência de compra dos seus clientes.
           </p>
         </div>
 
-        {/* Abstract Metrics Card Visual */}
-        <div className="relative z-10 mt-12 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 p-6 rounded-2xl max-w-md transform rotate-1 hover:rotate-0 transition-transform duration-500">
+        {/* Virtual Try-On Metrics Card */}
+        <div className="relative z-10 mt-12 bg-white/60 backdrop-blur-lg border border-rose-200 p-6 rounded-2xl max-w-md transform rotate-1 hover:rotate-0 transition-transform duration-500 shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="text-xs text-slate-300 uppercase font-semibold tracking-wider">Conversões Hoje</div>
-              <div className="text-2xl font-bold text-white">+24.5%</div>
+              <div className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Gerações Hoje</div>
+              <div className="text-2xl font-bold text-gray-900">+156</div>
             </div>
-            <div className="w-10 h-10 bg-[#1ca0b5] rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+            <div className="w-10 h-10 bg-rose-200 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
             </div>
           </div>
           <div className="space-y-2">
-            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-              <div className="h-full bg-[#1ca0b5] w-[70%]"></div>
+            <div className="h-1.5 bg-rose-100 rounded-full overflow-hidden">
+              <div className="h-full bg-rose-400 w-[85%]"></div>
             </div>
-            <div className="flex justify-between text-xs text-slate-400">
-              <span>Meta Diária</span>
-              <span>70/100</span>
+            <div className="flex justify-between text-xs text-gray-600">
+              <span>Limite Mensal</span>
+              <span>850/1000</span>
             </div>
           </div>
         </div>
 
-        <div className="relative z-10 text-xs text-slate-500 mt-auto">
-          © 2024 CMS | we.digi Inc. Secure Login.
+        <div className="relative z-10 text-xs text-gray-500 mt-auto">
+          © 2026 WearMe. Provador Virtual com IA.
         </div>
       </div>
 

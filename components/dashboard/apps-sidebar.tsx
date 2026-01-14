@@ -153,7 +153,7 @@ export function AppsSidebar({ role, slug }: { role: string; slug?: string }) {
       <div className="flex h-14 items-center border-b px-4 w-64">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
           <Building2 className="h-6 w-6 shrink-0" />
-          {isExpanded && <span>SaaS Sistema</span>}
+          {isExpanded && <span>Wearme</span>}
         </Link>
       </div>
 

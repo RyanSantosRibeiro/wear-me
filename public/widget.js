@@ -194,6 +194,46 @@
             letter-spacing: 0.05em;
         }
 
+        .wearme-consent-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .wearme-consent-box:hover {
+            background: #f3f4f6;
+        }
+
+        .wearme-consent-box.active {
+            border-color: var(--wearme-primary);
+            background: #f3f4f6;
+        }
+
+        .wearme-consent-box input {
+            margin-top: 0.25rem;
+            width: 1.125rem;
+            height: 1.125rem;
+            cursor: pointer;
+        }
+
+        .wearme-consent-text {
+            font-size: 0.7rem;
+            line-height: 1.4;
+            color: #4b5563;
+        }
+
+        .wearme-consent-text strong {
+            color: #111827;
+            font-weight: 700;
+        }
+
         .wearme-image-container {
             aspect-ratio: 3/4;
             border-radius: 1rem;
@@ -462,7 +502,7 @@
 
         .wearme-completed-actions {
             display: grid;
-            grid-template-cols: 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 1rem;
         }
 
@@ -504,6 +544,38 @@
 
         .wearme-hidden { display: none !important; }
 
+        .wearme-error-toast {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+            z-index: 9999999;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            max-width: 90%;
+        }
+
+        .wearme-error-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .wearme-error-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
+        }
+
         @media (max-width: 480px) {
             .wearme-modal {
                 max-height: 100vh;
@@ -531,21 +603,88 @@
             previewUrl: null,
             resultImage: null,
             processingStep: 0,
-            generationMode: 'front'
+            generationMode: 'front',
+            hasConsent: false
         },
         elements: {},
 
-        init(options) {
+        async init(options) {
             this.config = { ...this.config, ...options };
+
+            // Handle Session ID from storage if it exists
+            this.sessionId = localStorage.getItem('wearme_session_id');
+
+            // Handle Consent Persistence
+            if (sessionStorage.getItem('wearme_consent_accepted') === 'true') {
+                this.state.hasConsent = true;
+            }
+
+            // --- CLIENT-SIDE CACHE CHECK ---
+            const cacheKey = `wearme_res_${this.config.productImage}`;
+            const cachedResult = sessionStorage.getItem(cacheKey);
+
+            if (cachedResult) {
+                console.log("Found cached result in sessionStorage for this product.");
+                this.state.resultImage = cachedResult;
+                this.state.status = 'completed';
+            }
+            // -------------------------------
 
             // Detect if running locally
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                 this.config.apiUrl = '/api/wearme/generate';
+                // For status check url locally
+                this.config.statusUrl = '/api/wearme/status';
+            } else {
+                this.config.statusUrl = 'https://wear-me-opal.vercel.app/api/wearme/status';
             }
 
-            this.injectStyles();
-            this.createModal();
-            this.setupTrigger();
+            // Check API Status before rendering anything
+            const canRun = await this.checkStatus();
+
+            if (canRun) {
+                this.injectStyles();
+                this.createModal();
+                this.setupTrigger();
+            } else {
+                console.warn('Wearme: Verification failed or quota exceeded.');
+            }
+        },
+
+        showError(message) {
+            const toast = document.createElement('div');
+            toast.className = 'wearme-error-toast';
+            toast.innerHTML = `
+                <svg class="wearme-error-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 10);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        },
+
+        async checkStatus() {
+            try {
+                const res = await fetch(`${this.config.statusUrl}?apiKey=${this.config.apiKey}`);
+                if (!res.ok) return false;
+
+                const data = await res.json();
+                console.log("WearMe Status:", data);
+
+                return data.active && data.canGenerate;
+            } catch (e) {
+                console.error("WearMe: Failed to check status", e);
+                return false;
+            }
         },
 
         injectStyles() {
@@ -609,9 +748,13 @@
             this.elements.content = overlay.querySelector('.wearme-content');
             this.elements.footer = overlay.querySelector('.wearme-footer');
             this.elements.close = overlay.querySelector('.wearme-close');
-
             this.elements.close.onclick = () => this.close();
             this.render();
+        },
+
+        // We can keep this for extra safety or remove it to rely only on sessionStorage
+        async checkPreviousSession() {
+            // Logic moved to init for immediate sessionStorage check
         },
 
         open() {
@@ -689,19 +832,27 @@
                         </button>
                     </div>
 
-                    <div class="wearme-tip-box">
+                    <!--<div class="wearme-tip-box">
                         <div class="wearme-tip-icon">${SVG_ICONS.imageIcon.replace('width="24" height="24"', 'width="14" height="14"')}</div>
                         <div class="wearme-tip-text">
                             <h4>Dica profissional</h4>
                             <p>Para o modo "3 Ângulos", nossa IA irá extrapolar a visualização baseada na sua foto de frente.</p>
                         </div>
-                    </div>
+                    </div>-->
+                    ${!this.state.hasConsent ? `
+                        <div class="wearme-consent-box ${this.state.hasConsent ? 'active' : ''}" id="wearme-consent-trigger">
+                            <input type="checkbox" id="wearme-consent-checkbox" ${this.state.hasConsent ? 'checked' : ''}>
+                            <div class="wearme-consent-text">
+                                Eu concordo com o <strong>processamento de dados e armazenamento da minha foto</strong> para fins de provador virtual, em conformidade com a <strong>LGPD</strong>.
+                            </div>
+                        </div>
+                    ` : ''}
                 </div>
             `;
 
             this.elements.footer.innerHTML = `
-                <button id="wearme-start-btn" class="wearme-btn-primary" ${!this.state.userImage ? 'disabled' : ''}>
-                    ${this.state.userImage ? 'Gerar Provador Virtual' : 'Selecione uma foto'}
+                <button id="wearme-start-btn" class="wearme-btn-primary" ${(!this.state.userImage || !this.state.hasConsent) ? 'disabled' : ''}>
+                    ${!this.state.userImage ? 'Selecione uma foto' : !this.state.hasConsent ? 'Aceite os termos' : 'Gerar Provador Virtual'}
                     ${SVG_ICONS.sparkles.replace('width="24" height="24"', 'width="18" height="18"')}
                 </button>
             `;
@@ -731,7 +882,30 @@
                 btn.onclick = () => this.setState({ generationMode: btn.dataset.mode });
             });
 
-            startBtn.onclick = () => this.startProcessing();
+            const consentTrigger = this.elements.content.querySelector('#wearme-consent-trigger');
+            const consentCheckbox = this.elements.content.querySelector('#wearme-consent-checkbox');
+
+            if (consentTrigger) {
+                consentTrigger.onclick = (e) => {
+                    if (e.target !== consentCheckbox) {
+                        consentCheckbox.checked = !consentCheckbox.checked;
+                    }
+                    this.setState({ hasConsent: consentCheckbox.checked });
+
+                    // Save persistence to sessionStorage
+                    if (consentCheckbox.checked) {
+                        sessionStorage.setItem('wearme_consent_accepted', 'true');
+                    } else {
+                        sessionStorage.removeItem('wearme_consent_accepted');
+                    }
+                };
+            }
+
+            startBtn.onclick = () => {
+                if (this.state.hasConsent) {
+                    this.startProcessing();
+                }
+            };
         },
 
         renderProcessing() {
@@ -810,6 +984,9 @@
             this.elements.footer.innerHTML = '';
 
             this.elements.content.querySelector('#wearme-reset-btn').onclick = () => {
+                // Remove cached result so it doesn't auto-load next time
+                sessionStorage.removeItem(`wearme_res_${this.config.productImage}`);
+
                 this.setState({
                     status: 'idle',
                     userImage: null,
@@ -821,6 +998,9 @@
         },
 
         async startProcessing() {
+            // Clear the old cache as we are starting a new generation
+            sessionStorage.removeItem(`wearme_res_${this.config.productImage}`);
+
             this.setState({ status: 'processing', processingStep: 0 });
 
             // Fake steps animation
@@ -835,6 +1015,18 @@
                 formData.append('userImage', this.state.userImage);
                 formData.append('mode', this.state.generationMode);
                 formData.append('apiKey', this.config.apiKey);
+                formData.append('sessionId', this.sessionId);
+
+                // Add Consent Data to the request (LGPD Compliance)
+                if (this.state.hasConsent) {
+                    formData.append('consentData', JSON.stringify({
+                        accepted: true,
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        compliance: 'LGPD/GPDR',
+                        ip_preference: 'anonymized'
+                    }));
+                }
 
                 console.log("enviando", { formData });
                 const response = await fetch(this.config.apiUrl, {
@@ -849,14 +1041,17 @@
                 const data = await response.json();
 
                 if (data.success && data.imageUrl) {
+                    // Update the local cache
+                    sessionStorage.setItem(`wearme_res_${this.config.productImage}`, data.imageUrl);
+
                     this.setState({ status: 'completed', resultImage: data.imageUrl });
                 } else {
-                    alert('Erro ao processar imagem. Tente novamente.');
+                    this.showError('Erro ao processar imagem. Tente novamente.');
                     this.setState({ status: 'idle' });
                 }
             } catch (err) {
                 console.error(err);
-                alert('Ocorreu um erro técnico. Tente novamente mais tarde.');
+                this.showError('Ocorreu um erro técnico. Tente novamente mais tarde.');
                 this.setState({ status: 'idle' });
             }
         }
