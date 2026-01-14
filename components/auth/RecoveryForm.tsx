@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '../ui/button'
 import { useSearchParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 interface RecoveryFormProps {
   sendNewPassword: ({ new_password }: { new_password: string }) => Promise<{ error: string | null }>

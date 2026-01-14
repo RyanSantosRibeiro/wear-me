@@ -1,5 +1,5 @@
 export async function createCheckoutLink({
-  items,
+  items = [],
   metadata = {},
   payer = {},
   back_urls = {
@@ -8,7 +8,7 @@ export async function createCheckoutLink({
     pending: `${process.env.APP_URL}/checkout/pendente`
   },
   auto_return = "approved"
-}) {
+}: any) {
   const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
 
   const response = await fetch("https://api.mercadopago.com/checkout/preferences", {

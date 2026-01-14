@@ -34,7 +34,7 @@ export function CompanyPlan({ company }: { company: any }) {
         </div>
 
         {!subscription && (
-          <Button asChild>
+          <Button>
             <Link href="/dashboard/billing">
               <CreditCard className="mr-2 h-4 w-4" />
               Assinar plano

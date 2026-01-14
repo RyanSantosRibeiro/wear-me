@@ -27,6 +27,6 @@ export default async function AppsPage() {
   
   
   return (
-   
+   <></>
   )
 }

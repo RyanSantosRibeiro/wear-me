@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
       // 🔍 Buscar usuário existente pelo email
       const { data: users, error: listError } =
-        await supabase.auth.admin.listUsers({
+        await supabase.auth.admin.listUsers({ //@ts-ignore
           email,
           perPage: 1,
         });
