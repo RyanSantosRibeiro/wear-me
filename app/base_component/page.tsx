@@ -11,22 +11,22 @@ export default async function AppsPage() {
     getCompany(supabase),
   ]);
 
-  
-  
+
+
   if (!user) {
-    redirect("/auth/login")
+    redirect("/login")
   }
-  
-  if(!profile || profile?.role !== "admin") {
+
+  if (!profile || profile?.role !== "admin") {
     redirect("/dashboard")
   }
-  
-  if(!company) {
-      redirect("/onboarding")
-    }
-  
-  
+
+  if (!company) {
+    redirect("/onboarding")
+  }
+
+
   return (
-   <></>
+    <></>
   )
 }

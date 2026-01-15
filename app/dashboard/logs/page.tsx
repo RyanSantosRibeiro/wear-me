@@ -21,7 +21,7 @@ export default async function LogsPage() {
     } = await supabase.auth.getUser()
 
     if (!user) {
-        redirect("/auth/login")
+        redirect("/login")
     }
 
     // Fetch logs for the current user's configs

@@ -43,7 +43,7 @@ export async function signIn({email, password}: {email: string, password: string
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    return { error: error.message }
+    return { error: error.message, ...error }
   }
 
   revalidatePath('/', 'layout')

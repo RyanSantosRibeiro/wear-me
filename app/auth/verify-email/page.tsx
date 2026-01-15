@@ -19,7 +19,7 @@ export default function VerifyEmailPage() {
           <CardContent className="text-center">
             <p className="text-sm text-muted-foreground">
               Não recebeu o email?{" "}
-              <Link href="/auth/signup" className="underline underline-offset-4">
+              <Link href="//signup" className="underline underline-offset-4">
                 Tentar novamente
               </Link>
             </p>

@@ -10,9 +10,9 @@ export const LoginForm: React.FC<any> = ({
   onLogin,
   onRecoveryPassword,
   loading,
-  error,
 }) => {
   const [mode, setMode] = useState<Mode>('login')
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -22,9 +22,13 @@ export const LoginForm: React.FC<any> = ({
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onLogin(formData)
+    const data = await onLogin(formData)
+    console.log({ data })
+    if(data.code === 'email_not_confirmed') {
+      setError('Email não confirmado! Verifique sua caixa de emails.')
+    }
   }
 
   const handleRecoveryPassword = async (e: React.FormEvent) => {

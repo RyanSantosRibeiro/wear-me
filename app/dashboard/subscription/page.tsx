@@ -13,7 +13,7 @@ export default async function SubscriptionPage() {
     } = await supabase.auth.getUser()
 
     if (!user) {
-        redirect("/auth/login")
+        redirect("/login")
     }
 
     // 1. Fetch Active Subscription
@@ -40,6 +40,8 @@ export default async function SubscriptionPage() {
             .order("price", { ascending: true })
         plans = plansData || []
     }
+
+    console.log("[v0] Plans:", plans)
 
     // If no plans found in DB, show a friendly message or empty state instructions
     // (Avoiding fallback mock data to respect the 'sass_slug' filter requirement strictly)
@@ -121,7 +123,15 @@ export default async function SubscriptionPage() {
                                 </CardHeader>
 
                                 <CardContent className="flex-1 mt-6">
-                                    {plan.features ? (
+                                    {/* {
+                                        "features": [
+                                            "dashboard",
+                                            "basic_reports",
+                                            "email_support"
+                                        ],
+                                        "max_users": 5
+                                    } */}
+                                    {plan.metadata?.features ? (
                                         <ul className="space-y-3">
                                             {(plan.metadata?.features || plan.features || []).map((feature: string, i: number) => (
                                                 <li key={i} className="flex items-start gap-3 text-sm font-medium text-muted-foreground text-left">

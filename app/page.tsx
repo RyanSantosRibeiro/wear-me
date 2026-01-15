@@ -39,11 +39,11 @@ export default function HomePage() {
           <a href="#pricing" className="hover:text-primary transition-colors">Planos</a>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/auth/login" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors px-4 py-2">
+          <Link href="/login" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors px-4 py-2">
             Entrar
           </Link>
           <Link
-            href="/auth/signup"
+            href="//signup"
             className="bg-primary hover:opacity-90 text-primary-foreground rounded-full px-6 py-2 text-sm font-bold shadow-xl shadow-primary/10 flex items-center justify-center transition-all active:scale-95"
           >
             Começar Agora
@@ -79,7 +79,7 @@ export default function HomePage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
               <Link
-                href="/auth/signup"
+                href="//signup"
                 className="h-14 px-8 bg-foreground text-background hover:bg-foreground/90 text-lg font-bold rounded-2xl shadow-2xl shadow-foreground/10 group flex items-center justify-center transition-all active:scale-95 w-full sm:w-auto"
               >
                 Criar Conta Grátis
@@ -402,7 +402,7 @@ export default function HomePage() {
               </ul>
 
               <Link
-                href="/auth/signup"
+                href="//signup"
                 className="block w-full py-4 bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold rounded-xl text-center transition-colors"
               >
                 Começar Grátis
@@ -454,7 +454,7 @@ export default function HomePage() {
                 </ul>
 
                 <Link
-                  href="/auth/signup"
+                  href="//signup"
                   className="block w-full py-4 bg-white text-rose-600 font-bold rounded-xl text-center hover:bg-rose-50 transition-colors shadow-xl"
                 >
                   Começar Agora
@@ -643,7 +643,7 @@ export default function HomePage() {
             </p>
             <div className="flex justify-center">
               <Link
-                href="/auth/signup"
+                href="//signup"
                 className="h-16 px-10 bg-white text-primary hover:bg-gray-100 text-xl font-black rounded-full shadow-xl flex items-center justify-center transition-all active:scale-95 hover:shadow-2xl"
               >
                 Quero experimentar
