@@ -636,7 +636,7 @@
                 // For status check url locally
                 this.config.statusUrl = '/api/wearme/status';
             } else {
-                this.config.statusUrl = 'https://wear-me-opal.vercel.app/api/wearme/status';
+                this.config.statusUrl = 'https://wearme.vercel.app/api/wearme/status';
             }
 
             // Check API Status before rendering anything

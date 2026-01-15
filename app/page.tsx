@@ -294,7 +294,7 @@ export default function HomePage() {
               <div className="space-y-2 opacity-90">
                 <div className="text-gray-500">{"<!-- 1. Importe o SDK -->"}</div>
                 <div>
-                  <span className="text-purple-400">&lt;script</span> <span className="text-blue-400">src</span>=<span className="text-green-400">"https://wear-me-opal.vercel.app/widget.js"</span><span className="text-purple-400">&gt;&lt;/script&gt;</span>
+                  <span className="text-purple-400">&lt;script</span> <span className="text-blue-400">src</span>=<span className="text-green-400">"https://wearme.vercel.app/widget.js"</span><span className="text-purple-400">&gt;&lt;/script&gt;</span>
                 </div>
 
                 <div className="text-gray-500 pt-4">{"<!-- 2. Configure -->"}</div>
