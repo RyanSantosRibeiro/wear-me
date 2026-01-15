@@ -4,6 +4,7 @@ import { WearmeWidget } from "@/components/wearme-widget"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Script from "next/script"
+import logo from "@/assets/img/logo.png"
 import {
   Camera,
   Scissors,
@@ -30,10 +31,7 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
-            <Shirt size={18} className="text-primary-foreground fill-current" />
-          </div>
-          <span className="font-black text-xl tracking-tighter text-foreground">Wearme.</span>
+          <img src={logo.src} alt="WearMe" className="w-auto h-8" />
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-muted-foreground">
           <a href="#demo" className="hover:text-primary transition-colors">Como Funciona</a>
@@ -382,8 +380,8 @@ export default function HomePage() {
               <div className="mb-6">
                 <div className="flex items-baseline gap-2">
                   <span className="text-5xl font-black text-gray-90">
-                      R$ {isAnnual ? '175,12' : '199,00'}
-                    </span>
+                    R$ {isAnnual ? '175,12' : '199,00'}
+                  </span>
                   <span className="text-gray-500 font-semibold">/mês</span>
                 </div>
                 <p className="text-sm text-gray-500 mt-2">Leve essa experiência para seus clientes</p>
@@ -660,10 +658,7 @@ export default function HomePage() {
       < footer className="py-12 px-6 border-t border-border bg-white" >
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-foreground rounded flex items-center justify-center text-background">
-              <Shirt size={14} />
-            </div>
-            <span className="font-bold text-lg tracking-tight">Wearme.</span>
+            <img src={logo.src} alt="WearMe" className="w-auto h-8" />
           </div>
           <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">© 2026 Wearme Technologies.</p>
         </div>

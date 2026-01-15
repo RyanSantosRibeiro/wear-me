@@ -593,7 +593,7 @@
             apiKey: '',
             productImage: '',
             buttonSelector: '',
-            apiUrl: 'https://wear-me-opal.vercel.app/api/wearme/generate', // Fallback to production URL
+            apiUrl: 'https://wearme.vercel.app/api/wearme/generate', // Fallback to production URL
             brandName: 'Wearme AI v2.0'
         },
         state: {
