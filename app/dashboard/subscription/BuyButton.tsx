@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { Loader2, CreditCard } from "lucide-react"
+import { Loader2 } from "lucide-react"
 
 interface SubscribeButtonProps {
     planId: string
@@ -18,9 +18,7 @@ export function SubscribeButton({ planId, planName, isPopular, className }: Subs
     const handleSubscribe = async () => {
         try {
             setLoading(true)
-            
-            // 🔥 Certifique-se que este caminho é o mesmo onde você salvou a Route Handler (POST)
-            const response = await fetch("/api/mercadopago/subscription", {
+            const response = await fetch("/api/mercadopago/checkout", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -29,23 +27,21 @@ export function SubscribeButton({ planId, planName, isPopular, className }: Subs
             })
 
             const data = await response.json()
-            console.log("[Subscription Button Response]:", data)
 
             if (!response.ok) {
-                throw new Error(data.message || "Erro ao iniciar processo de assinatura")
+                throw new Error(data.message || "Erro ao iniciar checkout")
             }
 
             if (data.checkout_url) {
-                // Redireciona para o Checkout Pro (Assinatura Recorrente)
                 window.location.href = data.checkout_url
             } else {
-                throw new Error("Não foi possível gerar o link de pagamento.")
+                throw new Error("URL de checkout não retornada")
             }
 
         } catch (error) {
-            console.error("[Subscription Button Error]:", error)
-            toast.error("Falha na Assinatura", {
-                description: error instanceof Error ? error.message : "Tente novamente mais tarde."
+            console.error(error)
+            toast.error("Erro ao iniciar assinatura", {
+                description: error instanceof Error ? error.message : "Tente novamente mais tarde"
             })
         } finally {
             setLoading(false)
@@ -61,13 +57,10 @@ export function SubscribeButton({ planId, planName, isPopular, className }: Subs
             {loading ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Preparando Checkout...
+                    Processando...
                 </>
             ) : (
-                <>
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Assinar {planName}
-                </>
+                `Assinar ${planName}`
             )}
         </Button>
     )

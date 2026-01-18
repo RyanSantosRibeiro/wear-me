@@ -7,6 +7,7 @@ import { Activity, Key, Code, AlertCircle, Lock, Zap } from "lucide-react"
 import Link from "next/link"
 import crypto from "crypto"
 import { PageHeader } from "@/components/PageHeader"
+import ScriptSection from "@/components/ui/script-section"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -25,7 +26,7 @@ export default async function DashboardPage() {
     .eq("owner_id", user.id)
     .single()
 
-  console.log({ config: config?.subscriptions?.plans, configError })
+  console.log({ config: config, configError })
   // Auto-create from Dashboard (Application Layer)
   if (!config) {
     // Generate a secure 64-char hex key explicitly
@@ -41,7 +42,7 @@ export default async function DashboardPage() {
       ])
       .select()
       .single()
-
+    console.log({ newConfig })
     if (newConfig) {
       config = newConfig
     } else if (error) {
@@ -59,6 +60,7 @@ export default async function DashboardPage() {
   const usagePercent = config ? Math.min(100, Math.round((config.requests_count / config.requests_limit) * 100)) : 0
   const isPro = config?.subscriptions?.status === 'active'
   const plan = config?.subscriptions?.plans
+  const missingUrl = !!config?.site_url
 
   return (
     <div className="space-y-10 p-8 max-w-7xl mx-auto">
@@ -85,6 +87,27 @@ export default async function DashboardPage() {
           <Link href="/dashboard/subscription" className="relative z-10 w-full md:w-auto">
             <Button size="lg" className="font-bold w-full md:w-auto px-10 h-14 rounded-2xl shadow-2xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
               Ver Planos Premium
+            </Button>
+          </Link>
+        </div>
+      )}
+      {!missingUrl && (
+        <div className="bg-gradient-to-br from-primary/5 via-white to-primary/10 border border-primary/20 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center justify-between gap-8 shadow-sm relative overflow-hidden group">
+          <div className="absolute -top-12 -right-12 p-8 opacity-[0.05] pointer-events-none rotate-12 transition-transform group-hover:scale-110">
+            <Zap size={240} className="text-primary" />
+          </div>
+          <div className="flex items-center gap-6 relative z-10">
+            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-primary/10 text-primary shrink-0">
+              <Lock size={32} />
+            </div>
+            <div>
+              <h3 className="text-2xl font-black text-gray-900">URL do seu site não configurada</h3>
+              <p className="text-gray-500 font-medium max-w-md mt-1">Configure a URL do seu site para que possamos proteger o seu widget.</p>
+            </div>
+          </div>
+          <Link href="/dashboard/settings" className="relative z-10 w-full md:w-auto">
+            <Button size="lg" className="font-bold w-full md:w-auto px-10 h-14 rounded-2xl shadow-2xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              Configurar URL
             </Button>
           </Link>
         </div>
@@ -187,28 +210,7 @@ export default async function DashboardPage() {
           </Badge>
         </div>
         <div className="p-0">
-          <div className="bg-[#0f172a] text-blue-100/90 p-10 overflow-x-auto font-mono text-sm leading-relaxed relative group">
-            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button variant="outline" size="sm" className="bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white rounded-xl">
-                Copiar Código
-              </Button>
-            </div>
-            <pre>
-              <code className="block">
-                {`<!-- 1. SDK Wearme -->
-<script src="https://api.wearme.com.br/widget.js"></script>
-
-<!-- 2. Inicialização -->
-<script>
-  Wearme.init({
-    apiKey: '${config?.api_key || "SUA_API_KEY"}',
-    productImage: 'URL_DA_IMAGEM_AQUI',
-    buttonSelector: '#seu-botao-id'
-  });
-</script>`}
-              </code>
-            </pre>
-          </div>
+          <ScriptSection />
         </div>
       </div>
     </div>

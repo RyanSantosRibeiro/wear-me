@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createCheckoutLink } from "@/lib/mercadopago/checkout";
+import { createCheckoutLink } from "@/lib/mercadopago/createCheckoutLink";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
@@ -20,10 +20,10 @@ export async function POST(req: Request) {
     }
 
     const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
     const body = await req.json();
     const planSlug = body?.plan || "plan_pro";
@@ -31,10 +31,10 @@ export async function POST(req: Request) {
     console.log("[MercadoPago] Criando link de checkout...");
 
     const { data: plan } = await supabase
-    .from("plans")
-    .select("*")
-    .eq("slug", planSlug)
-    .single();
+      .from("plans")
+      .select("*")
+      .eq("slug", planSlug)
+      .single();
 
     if (!plan) {
       return NextResponse.json(
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log({mp})
+    console.log({ mp })
 
     const url = mp?.init_point || mp?.sandbox_init_point;
 

@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
         if (!apiKey) {
             return NextResponse.json({ error: "API Key is required" }, { status: 400 });
         }
-
+        console.log("WearMe API Key:", apiKey);
         const supabase = await createAdminClient();
         const { data: config, error } = await supabase
             .from("wearme_configs")
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
 
         console.log("WearMe Status:", config);
-
+        console.log("WearMe Error:", error);
         if (error || !config) {
             return NextResponse.json({ error: "Invalid API Key" }, { status: 401 });
         }

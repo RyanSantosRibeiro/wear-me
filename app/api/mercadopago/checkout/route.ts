@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createCheckoutLink } from "@/lib/mercadopago/checkout";
+import { createCheckoutLink } from "@/lib/mercadopago/createCheckoutLink";
 import { createClient } from "@/lib/supabase/server";
 
 const SASS_SLUG = "wearme"

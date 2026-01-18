@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
+import { redirect, useSearchParams } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 type Mode = 'login' | 'recovery' | 'success'
 
@@ -13,6 +15,7 @@ export const LoginForm: React.FC<any> = ({
 }) => {
   const [mode, setMode] = useState<Mode>('login')
   const [error, setError] = useState<string | null>(null)
+  const searchParams = useSearchParams()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -36,6 +39,22 @@ export const LoginForm: React.FC<any> = ({
     await onRecoveryPassword({ email: formData.email })
     setMode('success')
   }
+
+  useEffect(() => {
+    const login = async () => {
+      const code = searchParams.get('code')
+
+      const supabase = await createClient();
+      const { data: session, error } = await supabase.auth.exchangeCodeForSession(code!);
+      console.log({code})
+      console.log({session, error})
+
+      if (session?.user) {
+        return redirect('/dashboard');
+      }
+    }
+    login()
+  }, [])
 
   return (
     <div className="flex min-h-screen w-full bg-white">

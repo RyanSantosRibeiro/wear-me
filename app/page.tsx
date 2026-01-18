@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { WearmeWidget } from "@/components/wearme-widget"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -19,15 +19,30 @@ import {
   CheckCircle2,
   Expand,
   Shirt,
-  X
+  X,
+  Linkedin,
+  Instagram
 } from "lucide-react"
+import ScriptSection from "@/components/ui/script-section"
 
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAnnual, setIsAnnual] = useState(false)
+  const [plans, setPlans] = useState([])
+
+  useEffect(() => {
+    const fechtPlans = async () => {
+      const response = await fetch("/api/plans");
+      const data = await response.json();
+      console.log(data);
+      setPlans(data)
+    };
+    fechtPlans();
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#fafafa] selection:bg-primary/20">
+    <div className="h-auto min-h-screen bg-[#fafafa] selection:bg-primary/20">
       {/* Navigation */}
       <nav className="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -52,12 +67,12 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-6 overflow-hidden min-h-screen flex items-center">
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden min-h-screen flex items-center h-auto">
         {/* Background Decor */}
         <div className="absolute top-0 right-0 -z-10 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 mix-blend-multiply" />
         <div className="absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] bg-secondary/30 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 mix-blend-multiply" />
 
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center h-auto">
           {/* Left Column: Text Content */}
           <div className="space-y-8 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-primary/10 shadow-sm animate-bounce-subtle mx-auto lg:mx-0">
@@ -65,7 +80,7 @@ export default function HomePage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tecnologia IA v2.0 Live</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tecnologia Gemini IA</span>
             </div>
 
             <h1 className="text-5xl md:text-4xl lg:text-6xl font-black tracking-tight text-foreground leading-[0.95]">
@@ -92,17 +107,17 @@ export default function HomePage() {
 
             <div className="pt-8 flex items-center justify-center lg:justify-start gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
               {/* Trust Badges / Logos Placeholder */}
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Trusted by leading brands</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">O futuro da moda online</p>
             </div>
           </div>
 
           {/* Right Column: PDP Simulation (The "Wearme" Interface) */}
           <div className="relative w-full max-w-lg mx-auto lg:max-w-none h-auto">
             {/* 3D Floating Effect Container */}
-            <div className="relative bg-white border border-border rounded-[2.5rem] shadow-2xl shadow-primary/10 overflow-hidden min-h-[60vh] flex items-center justify-center transform hover:rotate-y-1 transition-transform duration-500">
+            <div className="relative bg-white border border-border rounded-[2.5rem] shadow-2xl shadow-primary/10 overflow-hidden min-h-[90vh] flex items-center justify-center transform hover:rotate-y-1 transition-transform duration-500">
 
               {/* Background: Product Page Mockup */}
-              <div className={`absolute inset-0 flex flex-col transition-all duration-500 ${isModalOpen ? 'opacity-30 scale-95 blur-sm' : 'opacity-100 scale-100'}`}>
+              <div className={`absolute inset-0 flex flex-col transition-all duration-500 h-fit ${isModalOpen ? 'opacity-30 scale-95 blur-sm' : 'opacity-100 scale-100'}`}>
                 {/* Mockup Header */}
                 <div className="h-14 border-b border-gray-50 flex items-center justify-between px-6">
                   <div className="w-20 h-2 bg-gray-100 rounded-full" />
@@ -113,11 +128,11 @@ export default function HomePage() {
                 </div>
 
                 {/* Mockup Content */}
-                <div className="flex-1 p-6 flex flex-col md:flex-row gap-6 items-center md:items-start overflow-hidden">
+                <div className="flex-1 p-6 flex flex-col lg:flex-row gap-6 items-center lg:items-start overflow-hidden h-auto">
                   {/* Product Image */}
-                  <div className="w-full md:w-1/2 aspect-[3/4] bg-gray-100 rounded-2xl relative overflow-hidden shadow-inner group">
-                    <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop" alt="Model" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-
+                  <div className="w-full lg:w-1/2 lg:aspect-[3/4] bg-gray-100 rounded-2xl relative overflow-hidden shadow-inner group min-h-[300px]">
+                    {/* <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop" alt="Model" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" /> */}
+                    <img src="https://www.zenoficial.com.br/cdn/shop/files/11573_002_AnaPaula1.jpg?v=1760753084&width=823" alt="Model" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 min-h-[400px]" />
                     {/* Floating Tag */}
                     <div className="absolute top-3 left-3 px-2 py-1 bg-white/90 backdrop-blur-md rounded-lg text-[10px] font-bold shadow-sm">
                       Nova Coleção
@@ -147,7 +162,8 @@ export default function HomePage() {
                             // @ts-ignore
                             window.Wearme.init({
                               apiKey: '023ec83bdbf73177a680807fc144bfea',
-                              productImage: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop',
+                              productImage: 'https://www.zenoficial.com.br/cdn/shop/files/11573_002_AnaPaula1.jpg?v=1760753084&width=823',
+                              // productImage: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop',
                               buttonSelector: '#wearme-btn'
                             });
                           }
@@ -269,60 +285,34 @@ export default function HomePage() {
             <p className="text-lg text-white/60 font-medium leading-relaxed max-w-lg">
               Não é necessário conhecimento avançado de programação. Basta copiar e colar nosso script no cabeçalho da sua loja (Shopify, WooCommerce, VTEX, etc).
             </p>
-            <ul className="space-y-4 pt-4">
+            <ul className="space-y-4 py-4">
               {[
-                "Compatível com qualquer CMS",
                 "Carregamento assíncrono (não pesa o site)",
-                "Personalizável via CSS"
+                "Personalizável via CSS",
+                "Compatível com qualquer CMS",
               ].map((item, i) => (
                 <li key={i} className="flex items-center gap-3">
-                  <CheckCircle2 size={20} className="text-primary" />
+                  <CheckCircle2 size={20} className="text-white" />
                   <span className="font-bold">{item}</span>
                 </li>
               ))}
+
             </ul>
+              <ul className="flex items-center gap-8 flex-row flex-wrap">
+                {[
+                "https://cdn.shopify.com/b/shopify-brochure2-assets/d9340911ca8c679b148dd4a205ad2ffa.svg",
+                "https://vtex.com/_next/static/media/vtex-logo.80485bcf.svg",
+                "https://woocommerce.com/wp-content/themes/woo/images/woo-logo.svg",
+                "https://wake.tech/wp-content/themes/wakecommerce/assets/images/wake-logo-white.png"
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-3">
+                  <img src={item} alt="" className="w-auto h-8 filter brightness-0 invert" />
+                </li>
+              ))}
+              </ul>
           </div>
 
-          <div className="relative group">
-            <div className="absolute -inset-2 bg-gradient-to-r from-primary to-purple-500 rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity blur-lg" />
-            <div className="bg-[#1e1e1e] rounded-xl p-6 font-mono text-sm shadow-2xl overflow-hidden border border-white/10 relative">
-              <div className="flex gap-2 mb-6">
-                <div className="w-3 h-3 rounded-full bg-red-500/50" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
-                <div className="w-3 h-3 rounded-full bg-green-500/50" />
-              </div>
-              <div className="space-y-2 opacity-90">
-                <div className="text-gray-500">{"<!-- 1. Importe o SDK -->"}</div>
-                <div>
-                  <span className="text-purple-400">&lt;script</span> <span className="text-blue-400">src</span>=<span className="text-green-400">"https://wearme.vercel.app/widget.js"</span><span className="text-purple-400">&gt;&lt;/script&gt;</span>
-                </div>
-
-                <div className="text-gray-500 pt-4">{"<!-- 2. Configure -->"}</div>
-                <div><span className="text-purple-400">&lt;script&gt;</span></div>
-                <div className="pl-4">
-                  <span className="text-yellow-400">Wearme</span>.<span className="text-blue-300">init</span>({'{'}
-                </div>
-                <div className="pl-8">
-                  <span className="text-blue-400">apiKey</span>: <span className="text-green-400">'sua_chave_publica'</span>,
-                </div>
-                <div className="pl-8">
-                  <span className="text-blue-400">productImage</span>: <span className="text-green-400">'[url_foto_principal]'</span>,
-                </div>
-                <div className="pl-8">
-                  <span className="text-blue-400">buttonSelector</span>: <span className="text-green-400">'#wearme-btn'</span>
-                </div>
-                <div className="pl-4">{'}'});</div>
-                <div><span className="text-purple-400">&lt;/script&gt;</span></div>
-
-                <div className="text-gray-500 pt-4">{"<!-- 3. Elemento Alvo -->"}</div>
-                <div>
-                  <span className="text-purple-400">&lt;div</span> <span className="text-blue-400">id</span>=<span className="text-green-400">"wearme-btn"</span><span className="text-purple-400">&gt;&lt;/div&gt;</span>
-                </div>
-              </div>
-
-              <div className="absolute top-6 right-6 text-xs font-bold text-white/20 uppercase tracking-widest">code snippet</div>
-            </div>
-          </div>
+          <ScriptSection/>
         </div>
       </section >
 
@@ -348,7 +338,7 @@ export default function HomePage() {
           </div>
 
           {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4 mb-12">
+          {/* <div className="flex items-center justify-center gap-4 mb-12">
             <span className={`text-sm font-bold transition-colors ${!isAnnual ? 'text-gray-900' : 'text-gray-400'}`}>
               Mensal
             </span>
@@ -364,103 +354,54 @@ export default function HomePage() {
             <span className="ml-2 px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">
               Economize 8%
             </span>
-          </div>
+          </div> */}
 
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
             {/* Basic Plan */}
-            <div className="bg-white rounded-3xl border-2 border-gray-200 p-8 shadow-lg hover:shadow-xl transition-all">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-black text-gray-900">Básico</h3>
-                <div className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full">
-                  Para Começar
-                </div>
-              </div>
+            {
+              plans?.map((plan:any) => {
+                if(!plan?.id) return null;
+                const highlight = plan.slug === 'luxury-fit';
 
-              <div className="mb-6">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-black text-gray-90">
-                    R$ {isAnnual ? '175,12' : '199,00'}
-                  </span>
-                  <span className="text-gray-500 font-semibold">/mês</span>
-                </div>
-                <p className="text-sm text-gray-500 mt-2">Leve essa experiência para seus clientes</p>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                {[
-                  '100 gerações por mês',
-                  'Widget personalizável',
-                  'Suporte por email',
-                  'Integração básica'
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />
-                    <span className="text-gray-700 font-medium">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="//signup"
-                className="block w-full py-4 bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold rounded-xl text-center transition-colors"
-              >
-                Começar Grátis
-              </Link>
-            </div>
-
-            {/* Enterprise Plan */}
-            <div className="bg-gradient-to-r from-primary to-pink-400 rounded-3xl p-8 shadow-2xl shadow-rose-500/30 relative overflow-hidden transform hover:scale-105 transition-all">
-              {/* Shine Effect */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-black text-white">Profissional</h3>
-                  <div className="px-3 py-1 bg-white/20 backdrop-blur-sm text-white text-xs font-bold rounded-full">
-                    Mais Popular
+                return (
+                <div key={plan.id} className={`${highlight ? 'bg-gradient-to-r from-primary to-pink-400' : 'bg-white'} rounded-3xl border-2 border-gray-200 p-8 shadow-lg hover:shadow-xl transition-all ${highlight ? 'border-emerald-200' : ''}`}>
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-2xl font-black text-gray-900">{plan.name}</h3>
+                    <div className={`${highlight ? 'bg-white' : 'bg-gray-100'} px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full`}>
+                      Para Começar
+                    </div>
                   </div>
-                </div>
 
-                <div className="mb-6">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-black text-white">
-                      R$ {isAnnual ? '219,12' : '249,00'}
-                    </span>
-                    <span className="text-white/80 font-semibold">/mês</span>
+                  <div className="mb-6">
+                    <div className="flex items-baseline gap-2">
+                      <span className={`text-5xl font-black ${highlight ? 'text-white' : 'text-gray-90'}`}>
+                        R$ {plan.price}
+                      </span>
+                      <span className={`text-gray-500 font-semibold ${highlight ? 'text-white' : 'text-gray-90'}`}>/mês</span>
+                    </div>
+                    <p className={`text-sm ${highlight ? 'text-white' : 'text-gray-500'} mt-2`}>Leve essa experiência para seus clientes</p>
                   </div>
-                  {isAnnual && (
-                    <p className="text-sm text-white/80 mt-2">
-                      R$ 2.199 cobrado anualmente
-                    </p>
-                  )}
-                  <p className="text-sm text-white/90 mt-2 font-semibold">Ideal para lojas em crescimento</p>
+
+                  <ul className="space-y-3 mb-8">
+                    {plan.metadata.features.map((feature:string, i:number) => (
+                      <li key={i} className={`flex items-center gap-3 ${highlight ? 'text-white' : 'text-gray-700'}`}>
+                        <CheckCircle2 size={20} className={`text-emerald-500 shrink-0 ${highlight ? 'text-white' : 'text-gray-700'}`} />
+                        <span className={`text-md font-medium ${highlight ? 'text-white' : 'text-gray-700'}`}>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href="/signup"
+                    className={`block w-full py-4 ${highlight ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-200 text-gray-900 font-bold rounded-xl text-center transition-colors`}
+                  >
+                    Começar Grátis
+                  </Link>
                 </div>
-
-                <ul className="space-y-4 mb-8">
-                  {[
-                    '1.000 gerações por mês',
-                    'Widget totalmente personalizável',
-                    'Suporte prioritário',
-                    'Analytics avançado',
-                    'API completa',
-                    'Sem marca d\'água'
-                  ].map((feature, i) => (
-                    <li key={i} className="flex items-center gap-3">
-                      <CheckCircle2 size={20} className="text-white shrink-0" />
-                      <span className="text-white font-medium">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href="//signup"
-                  className="block w-full py-4 bg-white text-rose-600 font-bold rounded-xl text-center hover:bg-rose-50 transition-colors shadow-xl"
-                >
-                  Começar Agora
-                </Link>
-              </div>
-            </div>
+              )
+              })
+            }
           </div>
 
           {/* Coupon Section */}
@@ -660,7 +601,17 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <img src={logo.src} alt="WearMe" className="w-auto h-8" />
           </div>
-          <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">© 2026 Wearme Technologies.</p>
+          <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">© 2026 Ryan Santos - 61.595.042/0001-07.</p>
+          <ul className="flex items-center gap-2">
+            {/* linkdin */}
+            <a href="https://www.linkedin.com/in/ryan-santos-ribeiro/" target="_blank" rel="noopener noreferrer">
+              <Linkedin className="w-6 h-6" />
+            </a>
+            {/* instagram */}
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
+              <Instagram className="w-6 h-6" />
+            </a>
+          </ul>
         </div>
       </footer >
 

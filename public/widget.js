@@ -701,8 +701,8 @@
             btn.className = 'wearme-trigger-btn';
             btn.innerHTML = `
                 <div class="wearme-trigger-shine"></div>
-                ${SVG_ICONS.shirt.replace('width="24" height="24"', 'width="18" height="18"')}
-                <span>Provador Virtual</span>
+                ${SVG_ICONS.sparkles.replace('width="24" height="24"', 'width="18" height="18"')} 
+                <span>Experimentar</span>
             `;
 
             const subtext = document.createElement('p');
@@ -852,7 +852,7 @@
 
             this.elements.footer.innerHTML = `
                 <button id="wearme-start-btn" class="wearme-btn-primary" ${(!this.state.userImage || !this.state.hasConsent) ? 'disabled' : ''}>
-                    ${!this.state.userImage ? 'Selecione uma foto' : !this.state.hasConsent ? 'Aceite os termos' : 'Gerar Provador Virtual'}
+                    ${!this.state.userImage ? 'Selecione uma foto' : !this.state.hasConsent ? 'Aceite os termos' : 'Experimentar'}
                     ${SVG_ICONS.sparkles.replace('width="24" height="24"', 'width="18" height="18"')}
                 </button>
             `;

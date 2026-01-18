@@ -71,6 +71,7 @@ export function Sidebar({ role, menuOptions }: { role: string; menuOptions?: any
     { name: "Logs de Uso", href: "/dashboard/logs", icon: BrainCircuit },
     { name: "Configurações", href: "/dashboard/settings", icon: Settings },
     { name: "Assinatura", href: "/dashboard/subscription", icon: DollarSign },
+    { name: "Parceiros", href: "/dashboard/partners", icon: Users },
   ]
 
   return (

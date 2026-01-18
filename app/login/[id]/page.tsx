@@ -19,7 +19,7 @@ export default async function SignIn({
     data: { user }
   } = await supabase.auth.getUser();
   if (user && viewProp.id !== 'update_password') {
-    return redirect('/dashboard12');
+    return redirect('/dashboard');
   } else if(viewProp.id === 'update_password') {
     return <RecoveryForm sendNewPassword={sendNewPassword}/>
   }

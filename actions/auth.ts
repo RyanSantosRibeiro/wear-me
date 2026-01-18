@@ -4,7 +4,7 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-export async function signUp({email, password, name}: {email: string, password: string, name: string}) {
+export async function signUp({email, password, name, redirectTo}: {email: string, password: string, name: string, redirectTo: string}) {
   const supabase = await createClient()
 
   const data = {
@@ -17,6 +17,7 @@ export async function signUp({email, password, name}: {email: string, password: 
     email: data.email,
     password: data.password,
     options: {
+      emailRedirectTo: redirectTo || 'https://wearme.vercel.app/auth/callback', 
       data: {
         name: data.name,
       },

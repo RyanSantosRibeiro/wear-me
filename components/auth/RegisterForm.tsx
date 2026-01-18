@@ -1,20 +1,22 @@
 'use client'
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
+import { signUp } from '@/actions/authClient';
 
 interface RegisterFormProps {
-   onRegister: (data: any) => void;
    loading: boolean;
    error: string | null;
 }
 
-export const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, loading, error }) => {
+export const RegisterForm: React.FC<RegisterFormProps> = ({ loading, error }) => {
+   // get invite from url
+   const [invite, setInvite] = useState<string | null>(null);
    const [formData, setFormData] = useState({
-      fullName: '',
-      companyName: '',
+      name: '',
       email: '',
-      password: ''
+      password: '',
+      redirectTo: ``,
    });
 
    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,8 +25,25 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, loading,
 
    const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-      onRegister(formData);
+      signUp(formData);
+      if (invite) {
+         // save on localStorage
+         localStorage.setItem(`${window.location.origin}-invite`, invite);
+      }
    };
+
+   useEffect(() => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const invite = urlParams.get('invite');
+      if (invite) {
+         // save on localStorage
+         setInvite(invite);
+      }
+      setFormData(prev => ({
+         ...prev,
+         redirectTo: `${window.location.origin}/auth/callback`
+      }));
+   }, []);
 
    return (
       <div className="flex min-h-screen w-full bg-white">
@@ -58,13 +77,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, loading,
                      <div className="w-6 h-6 rounded-full bg-rose-200 flex items-center justify-center text-rose-600">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
                      </div>
-                     <span className="font-medium text-gray-700">50 gerações grátis por mês</span>
+                     <span className="font-medium text-gray-700">Diminua as devoluções</span>
                   </div>
                   <div className="flex items-center gap-3">
                      <div className="w-6 h-6 rounded-full bg-rose-200 flex items-center justify-center text-rose-600">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
                      </div>
-                     <span className="font-medium text-gray-700">Sem necessidade de cartão de crédito</span>
+                     <span className="font-medium text-gray-700">Seus clientes compram mais certeza</span>
                   </div>
                </div>
             </div>
@@ -92,36 +111,23 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister, loading,
             <div className="w-full max-w-md">
                <div className="text-center lg:text-left mb-8">
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">Crie sua conta no WearMe</h1>
-                  <p className="text-gray-600">Comece com 50 gerações grátis por mês. Sem cartão de crédito.</p>
+                  <p className="text-gray-600">Melhore a experiência de compra de seus clientes com IA.</p>
                </div>
 
                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="grid grid-cols-2 gap-4">
-                     <div>
-                        <label className="block text-sm font-medium text-[#3b4a54] mb-1">Nome Completo</label>
-                        <input
-                           type="text"
-                           name="fullName"
-                           required
-                           value={formData.fullName}
-                           onChange={handleChange}
-                           className="w-full px-4 py-2.5 border border-[#e9edef] rounded-lg focus:ring-2 focus:ring-[#1ca0b5] focus:border-[#1ca0b5] outline-none transition-all bg-[#f0f2f5] focus:bg-white"
-                           placeholder="Seu nome"
-                        />
-                     </div>
-                     <div>
-                        <label className="block text-sm font-medium text-[#3b4a54] mb-1">Nome da Empresa</label>
-                        <input
-                           type="text"
-                           name="companyName"
-                           value={formData.companyName}
-                           onChange={handleChange}
-                           className="w-full px-4 py-2.5 border border-[#e9edef] rounded-lg focus:ring-2 focus:ring-[#1ca0b5] focus:border-[#1ca0b5] outline-none transition-all bg-[#f0f2f5] focus:bg-white"
-                           placeholder="Sua empresa"
-                        />
-                     </div>
-                  </div>
 
+                  <div>
+                     <label className="block text-sm font-medium text-[#3b4a54] mb-1">Nome Completo</label>
+                     <input
+                        type="text"
+                        name="name"
+                        required
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2.5 border border-[#e9edef] rounded-lg focus:ring-2 focus:ring-[#1ca0b5] focus:border-[#1ca0b5] outline-none transition-all bg-[#f0f2f5] focus:bg-white"
+                        placeholder="Seu nome"
+                     />
+                  </div>
                   <div>
                      <label className="block text-sm font-medium text-[#3b4a54] mb-1">E-mail Profissional</label>
                      <input
