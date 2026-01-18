@@ -80,8 +80,8 @@ export default async function DashboardPage() {
               <Lock size={32} />
             </div>
             <div>
-              <h3 className="text-2xl font-black text-gray-900">Modo Gratuito Ativo</h3>
-              <p className="text-gray-500 font-medium max-w-md mt-1">Você tem limites de requisição mensais. Faça o upgrade para remover todas as barreiras do seu e-commerce.</p>
+              <h3 className="text-2xl font-black text-gray-900">Você está no plano gratuito</h3>
+              <p className="text-gray-500 font-medium max-w-md mt-1">Você tem limites de requisição. Faça o upgrade para remover todas as barreiras do seu e-commerce.</p>
             </div>
           </div>
           <Link href="/dashboard/subscription" className="relative z-10 w-full md:w-auto">

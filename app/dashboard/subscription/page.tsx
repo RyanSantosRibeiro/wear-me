@@ -34,16 +34,15 @@ export default async function SubscriptionPage() {
     // Filter specifically for "wearme" plans
     let plans: any[] = []
     if (!hasActiveSubscription) {
-        const { data: plansData } = await supabase
+        const { data: plansData, error: plansError } = await supabase
             .from("plans")
             .select("*")
             .eq("is_active", true)
             .eq("sass_slug", "wearme")
             .order("price", { ascending: true })
         plans = plansData || []
+        console.log("[v0] Plans:", {plans: plansData, error: plansError})
     }
-
-    console.log("[v0] Plans:", plans)
 
     // If no plans found in DB, show a friendly message or empty state instructions
     // (Avoiding fallback mock data to respect the 'sass_slug' filter requirement strictly)

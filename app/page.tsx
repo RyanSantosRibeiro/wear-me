@@ -367,7 +367,7 @@ export default function HomePage() {
                 return (
                 <div key={plan.id} className={`${highlight ? 'bg-gradient-to-r from-primary to-pink-400' : 'bg-white'} rounded-3xl border-2 border-gray-200 p-8 shadow-lg hover:shadow-xl transition-all ${highlight ? 'border-emerald-200' : ''}`}>
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-2xl font-black text-gray-900">{plan.name}</h3>
+                    <h3 className={`text-2xl font-black ${highlight ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
                     <div className={`${highlight ? 'bg-white' : 'bg-gray-100'} px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full`}>
                       Para Começar
                     </div>
