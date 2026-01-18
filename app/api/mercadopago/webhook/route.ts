@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     const { type, data, action } = body
 
-    if (type === "payment" && (action === "payment.updated" || action === "payment.created")) {
+    if (type === "payment" && (action === "updated" || action === "created")) {
       await handlePaymentEvent(data.id)
     }
 
@@ -66,8 +66,8 @@ async function handlePaymentEvent(paymentId: string) {
   // 3. Extract Metadata
   const { metadata } = paymentData
   // MP converts metadata keys to snake_case automatically usually, but let's be safe
-  // const userId = metadata.user_id
-  const userId = "7bd9dabe-73a7-479f-9137-4d38103e614d"
+  // const userId = "7bd9dabe-73a7-479f-9137-4d38103e614d" // Teste
+  const userId = metadata.user_id
   const planId = metadata.plan_id || "19def836-e594-4ca0-9fac-9f98ac9145c5"
   const sassSlug = metadata.sass_slug || "wearme"
 

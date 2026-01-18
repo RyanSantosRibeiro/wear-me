@@ -114,7 +114,7 @@ export default function HomePage() {
           {/* Right Column: PDP Simulation (The "Wearme" Interface) */}
           <div className="relative w-full max-w-lg mx-auto lg:max-w-none h-auto">
             {/* 3D Floating Effect Container */}
-            <div className="relative bg-white border border-border rounded-[2.5rem] shadow-2xl shadow-primary/10 overflow-hidden min-h-[90vh] flex items-center justify-center transform hover:rotate-y-1 transition-transform duration-500">
+            <div className="relative bg-white border border-border rounded-[2.5rem] shadow-2xl shadow-primary/10 overflow-hidden min-h-[90vh] md:min-h-[55vh] flex items-center justify-center transform hover:rotate-y-1 transition-transform duration-500">
 
               {/* Background: Product Page Mockup */}
               <div className={`absolute inset-0 flex flex-col transition-all duration-500 h-fit ${isModalOpen ? 'opacity-30 scale-95 blur-sm' : 'opacity-100 scale-100'}`}>

@@ -91,6 +91,21 @@ export async function POST(req: Request) {
       );
     }
 
+    // Salva o link de pré-aprovação no banco para o webhook usar depois
+    const { error: dbError } = await supabase
+      .from("subscriptions")
+      .insert({
+        user_id: user.id,
+        plan_id: plan.id,
+        mercado_pago_subscription_id: mp.id, // O ID da assinatura no MP
+        status: "pending"
+      });
+
+    if (dbError) {
+      console.error("DB Insert Error:", dbError);
+      // Não bloqueia o usuário, mas loga o erro
+    }
+
     return NextResponse.json({
       success: true,
       checkout_url: url,
@@ -104,3 +119,5 @@ export async function POST(req: Request) {
     );
   }
 }
+
+
