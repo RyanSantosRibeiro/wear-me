@@ -10,6 +10,34 @@
         imageIcon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`
     };
 
+    function downloadBase64AsPng(base64, fileName = "image.png") {
+        // Garante que o base64 esteja limpo
+        const base64Data = base64.startsWith("data:image")
+            ? base64.split(",")[1]
+            : base64
+
+        const byteCharacters = atob(base64Data)
+        const byteNumbers = new Array(byteCharacters.length)
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], { type: "image/png" })
+
+        const url = URL.createObjectURL(blob)
+
+        const a = document.createElement("a")
+        a.href = url
+        a.download = fileName
+        document.body.appendChild(a)
+        a.click()
+
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+    }
+
     const STYLES = `
         body {
             --wearme-primary: #000000;
@@ -480,6 +508,12 @@
             position: relative;
         }
 
+        .wearme-result-main img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         .wearme-result-item {
             aspect-ratio: 3/4;
             border-radius: 0.75rem;
@@ -608,8 +642,14 @@
         },
         elements: {},
 
-        async init(options) {
+        async init(options, customState = null) {
+            console.log("Wearme init", options);
             this.config = { ...this.config, ...options };
+            console.log("Wearme state", this.state);
+            console.log("Wearme customState", customState);
+            if (customState) {
+                this.state = { ...this.state, ...customState };
+            }
 
             // Handle Session ID from storage if it exists
             this.sessionId = localStorage.getItem('wearme_session_id');
@@ -622,8 +662,11 @@
             // --- CLIENT-SIDE CACHE CHECK ---
             const cacheKey = `wearme_res_${this.config.productImage}`;
             const cachedResult = sessionStorage.getItem(cacheKey);
+            console.log("Init - Cached result:", cachedResult);
 
             if (cachedResult) {
+                // downloadBase64AsPng(cachedResult, "wearme-result.png")
+
                 console.log("Found cached result in sessionStorage for this product.");
                 this.state.resultImage = cachedResult;
                 this.state.status = 'completed';
@@ -712,7 +755,10 @@
                 Experimente antes de comprar
             `;
 
-            btn.onclick = () => this.open();
+            btn.onclick = () => {
+                console.log("WearMe image: ", this.config.productImage);
+                this.open()
+            };
 
             container.innerHTML = '';
             container.appendChild(btn);
@@ -726,6 +772,7 @@
                 if (e.target === overlay) this.close();
             };
 
+            console.log("Create Modal - Cached result:", this.state.resultImage);
             overlay.innerHTML = `
                 <div class="wearme-modal" onclick="event.stopPropagation()">
                     <div class="wearme-header">
@@ -902,7 +949,16 @@
             }
 
             startBtn.onclick = () => {
+                if (this.state.testMode) {
+                    console.log("testMode", this.state);
+                    this.setState({ status: 'processing', processingStep: 0 });
+                    setTimeout(() => {
+                        this.setState({ status: 'completed', resultImage: this.state.imageTest });
+                    }, 3000);
+                    return;
+                }
                 if (this.state.hasConsent) {
+                    console.log("startProcessing", this.state);
                     this.startProcessing();
                 }
             };

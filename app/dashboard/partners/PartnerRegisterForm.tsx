@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/PageHeader';
 
 const maskCPF = (value: string) => {
+    if (!value) return '';
     return value
         .replace(/\D/g, '')
         .replace(/(\d{3})(\d)/, '$1.$2')
@@ -15,7 +16,8 @@ const maskCPF = (value: string) => {
         .slice(0, 14);
 };
 
-const maskCNPJ = (value: string) => {
+const maskCNPJ = (value: string) => {   
+    if (!value) return '';
     return value
         .replace(/\D/g, '')
         .replace(/(\d{2})(\d)/, '$1.$2')
@@ -226,7 +228,7 @@ export const PartnerRegisterForm: React.FC<{ partnerData: any }> = ({ partnerDat
                             </div>
                         )}
 
-                        <div className="col-span-1 flex items-center justify-center">
+                        <div className="col-span-1 flex flex-col items-center justify-center gap-2">
                             <Button
                                 type="submit"
                                 disabled={loading}

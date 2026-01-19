@@ -29,7 +29,7 @@ console.log("Token do usuário:", accessToken);
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar role={profile?.company_members?.role}/>
+      <Sidebar companyRole={profile?.company_members?.role} role={profile?.role}/>
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* <Header profile={profile as Profile | null} /> */}
         <main className="flex-1 overflow-y-auto">{children}</main>

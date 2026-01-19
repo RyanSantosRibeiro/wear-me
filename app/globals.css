@@ -127,3 +127,109 @@
 body button {
   cursor: pointer;
 }
+.animate-casual,
+.animate-sport,
+.animate-accessories {
+  #wearme-container {
+    animation: fadeInRight 1s cubic-bezier(0.01, 1.18, 0.53, 1.36) forwards;
+  }
+
+ #wearme-floating-1 {
+    animation: fadeInRight 0.9s cubic-bezier(0.01, 1.18, 0.53, 1.36) forwards;
+  }
+
+ #wearme-floating-2 {
+    animation: fadeInRight 0.8s cubic-bezier(0.01, 1.18, 0.53, 1.36) forwards;
+  }
+  
+}
+
+.animate-particle-casual,
+.animate-particle-sport,
+.animate-particle-accessories {
+  animation: fadeInRight 0.8s cubic-bezier(0.01, 1.18, 0.53, 1.36) forwards;
+}
+
+.animate-particle-out {
+  animation: fadeOut 0.8s ease-in-out forwards;
+}
+
+/* .hero-active .bar-progress{
+  animation: progress-bar 6s linear forwards;
+} */
+
+.animate-out {
+  #wearme-container {
+    animation: fadeOut 0.8s ease-in-out forwards;
+  }
+
+ #wearme-floating-1 {
+    animation: fadeOut 0.8s ease-in-out forwards;
+    animation-delay: 0.1s;
+  }
+
+ #wearme-floating-2 {
+    animation: fadeOut 0.8s ease-in-out forwards;
+    animation-delay: 0.2s;
+  }
+}
+
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(-60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  20% {
+    /* recua um pouco */
+    transform: translateX(30px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-80px);
+  }
+}
+
+@keyframes progress-bar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}

@@ -126,13 +126,23 @@ Task: Digital Fashion Portrait.
 
 Create a new, highly detailed photograph of a person in a professional fashion setting.
 
-- SUBJECT: Capture the likeness, face, and body structure of the individual in Reference 1.
-- ATTIRE & VIBE: Dress the subject in a similar design, color, and fabric style as the garment seen in Reference 2.
-- ATMOSPHERE: Set the scene with professional studio lighting and a clean background inspired by the aesthetics of Reference 2.
+- SUBJECT:
+Capture the likeness, facial features, and body structure of the individual in Reference 1.
+
+- ITEM TYPE HANDLING:
+If Reference 2 depicts a garment, dress the subject wearing the clothing with similar design, color palette, materials, and fit.
+If Reference 2 depicts an accessory (such as glasses, jewelry, watch, bag, or footwear), generate the subject naturally wearing or holding the accessory in a realistic and context-appropriate way.
+
+- ATTIRE & STYLING:
+When applicable, ensure the accessory integrates naturally with the subject’s outfit, respecting proportions, placement, and realistic interaction with the body.
+
+- ATMOSPHERE:
+Set the scene with professional studio lighting and a clean background inspired by the aesthetics of Reference 2.
 
 Goal:
-Synthesize a completely original image that blends the identity from Reference 1 with the fashion style and environment of Reference 2. 
-Ensure the clothing flows naturally over the subject's anatomy. The result must be a unique creative work, not a copy of either input.
+Synthesize a completely original image that blends the identity from Reference 1 with the fashion item and environment of Reference 2.
+Ensure all elements interact naturally with the subject’s anatomy.
+The final image must be a unique creative work, not a copy of either reference.
 `;
 
         if (mode === 'angles') {

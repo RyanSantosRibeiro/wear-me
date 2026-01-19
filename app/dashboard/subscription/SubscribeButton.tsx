@@ -3,16 +3,17 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
-import { Loader2, CreditCard } from "lucide-react"
+import { Loader2, CreditCard, Check } from "lucide-react"
 
 interface SubscribeButtonProps {
     planId: string
     planName: string
     isPopular?: boolean
     className?: string
+    sameSubscription?: boolean
 }
 
-export function SubscribeButton({ planId, planName, isPopular, className }: SubscribeButtonProps) {
+export function SubscribeButton({ planId, planName, isPopular, className, sameSubscription }: SubscribeButtonProps) {
     const [loading, setLoading] = useState(false)
 
     const handleSubscribe = async () => {
@@ -55,13 +56,18 @@ export function SubscribeButton({ planId, planName, isPopular, className }: Subs
     return (
         <Button
             onClick={handleSubscribe}
-            disabled={loading}
-            className={className}
+            disabled={loading || sameSubscription}
+            className={`${className} ${sameSubscription ? 'opacity-50 !cursor-not-allowed' : ''}`}
         >
             {loading ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Preparando Checkout...
+                </>
+            ) : sameSubscription ? (
+                <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Plano Atual
                 </>
             ) : (
                 <>

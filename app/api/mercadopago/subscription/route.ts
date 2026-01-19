@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSubscriptionLink } from "@/lib/mercadopago/createSubscriptionLink";
+import { cancelSubscription, createSubscriptionLink } from "@/lib/mercadopago/createSubscriptionLink";
 import { createClient } from "@/lib/supabase/server";
 
 const SASS_SLUG = "wearme";
@@ -61,8 +61,8 @@ export async function POST(req: Request) {
      * Diferente do Checkout Pro comum, assinaturas usam 'reason' e 'auto_recurring'
      */
     const subscriptionPayload = {
-      planName: `Assinatura ${SASS_SLUG}: ${plan.name}`,
-      planPrice: Number(plan.price),
+      planName: plan.name,
+      plan,
       userEmail: user.email!,
       // O external_reference é crucial para o Webhook saber quem pagou
       metadata: {
@@ -79,6 +79,8 @@ export async function POST(req: Request) {
     
     // Agora chama a função de assinatura que criamos anteriormente
     const mp = await createSubscriptionLink(subscriptionPayload);
+
+    console.log("[MercadoPago] Resposta da Assinatura:", mp);
 
     // No /preapproval, o campo é init_point
     const url = mp?.init_point;
@@ -115,6 +117,71 @@ export async function POST(req: Request) {
     console.error("Subscription Checkout Error:", error);
     return NextResponse.json(
       { error: true, message: "Erro interno ao processar assinatura", errorData: error },
+      { status: 500 }
+    );
+  }
+}
+
+// Cancelar assinatura
+export async function DELETE(req: Request) {
+  console.log("[Checkout router] Iniciando rota de Cancelamento de Assinatura Mercado Pago");
+
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: true, message: "Não autenticado" },
+        { status: 401 }
+      );
+    }
+
+    // Busca a assinatura no banco
+    const { data: subscription, error: subscriptionError } = await supabase
+      .from("subscriptions")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (subscriptionError || !subscription) {
+      console.error("Subscription fetch error:", subscriptionError);
+      return NextResponse.json(
+        { error: true, message: "Assinatura não encontrada" },
+        { status: 404 }
+      );
+    }
+
+    console.log(`[MercadoPago] Cancelando Assinatura: ${subscription.plan_id}`);
+
+    // Cancela a assinatura no Mercado Pago
+    const mp = await cancelSubscription(subscription.mercado_pago_subscription_id);
+
+    console.log("[MercadoPago] Resposta do Cancelamento:", mp);
+
+    // Atualiza o status da assinatura no banco
+    const { error: dbError } = await supabase
+      .from("subscriptions")
+      .update({ status: "cancelled" })
+      .eq("id", subscription.id);
+
+    if (dbError) {
+      console.error("DB Update Error:", dbError);
+      // Não bloqueia o usuário, mas loga o erro
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Assinatura cancelada com sucesso",
+    });
+
+  } catch (error) {
+    console.error("Subscription Cancel Error:", error);
+    return NextResponse.json(
+      { error: true, message: "Erro interno ao cancelar assinatura", errorData: error },
       { status: 500 }
     );
   }

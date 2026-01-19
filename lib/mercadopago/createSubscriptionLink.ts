@@ -1,12 +1,12 @@
 export async function createSubscriptionLink({
   planName,
-  planPrice,
+  plan,
   userEmail,
   metadata = {},
   back_url = `${process.env.APP_URL}/checkout/sucesso`,
 }: {
   planName: string;
-  planPrice: number;
+  plan: any;
   userEmail: string;
   metadata?: any;
   back_url?: string;
@@ -20,17 +20,19 @@ export async function createSubscriptionLink({
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      reason: planName, // Nome que aparece na fatura
+      reason: plan.name, // Nome que aparece na fatura
       payer_email: userEmail,
       auto_recurring: {
         frequency: 1,
-        frequency_type: "months", // Cobrança mensal
-        transaction_amount: planPrice,
-        currency_id: "BRL",
+        frequency_type: plan.recurrence, // Cobrança mensal
+        // transaction_amount: 3,
+        transaction_amount: plan.price,
+        currency_id: plan.currency,
       },
+      metadata,
       back_url: back_url,
       status: "pending", // Indica que aguarda o primeiro pagamento para ativar
-      external_reference: metadata.userId || "", // Útil para identificar no webhook
+      external_reference: JSON.stringify(metadata), // Útil para identificar no webhook
     }),
   });
 
@@ -43,6 +45,31 @@ export async function createSubscriptionLink({
   }
 
   // O retorno contém o 'init_point' para o qual você deve redirecionar o usuário
+  return await response.json();
+}
+
+export async function cancelSubscription(subscriptionId: string) {
+  const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
+
+  const response = await fetch(`https://api.mercadopago.com/preapproval/${subscriptionId}`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      status: "cancelled",
+    }),
+  });
+
+  console.log("[MercadoPago] Resposta do Cancelamento:", response);
+
+  if (!response.ok) {
+    const err = await response.text();
+    console.error("Erro MP Detalhado:", err);
+    throw new Error("Erro Mercado Pago Cancelamento: " + err);
+  }
+
   return await response.json();
 }
 
