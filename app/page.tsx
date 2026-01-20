@@ -53,14 +53,17 @@ export default function HomePage() {
           <a href="#demo" className="hover:text-primary transition-colors">Como Funciona</a>
           <a href="#integration" className="hover:text-primary transition-colors">Instalação</a>
           <a href="#pricing" className="hover:text-primary transition-colors">Planos</a>
+          <a href="#contact" className="hover:text-primary transition-colors">Contato</a>
+          <a href="/partners" className="hover:text-primary transition-colors">Parceiros</a>
+
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 hidden lg:flex">
           <Link href="/login" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors px-4 py-2">
             Entrar
           </Link>
           <Link
             href="//signup"
-            className="bg-primary hover:opacity-90 text-primary-foreground rounded-full px-6 py-2 text-sm font-bold shadow-xl shadow-primary/10 flex items-center justify-center transition-all active:scale-95"
+            className="bg-primary hover:opacity-90 text-primary-foreground rounded-full px-6 py-2 text-xs lg:text-sm font-bold shadow-xl shadow-primary/10 flex items-center justify-center transition-all active:scale-95"
           >
             Começar Agora
           </Link>

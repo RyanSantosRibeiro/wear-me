@@ -491,7 +491,7 @@
         .wearme-completed {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1rem;
         }
 
         .wearme-result-grid {
@@ -628,7 +628,7 @@
             productImage: '',
             buttonSelector: '',
             apiUrl: 'https://wearme.vercel.app/api/wearme/generate', // Fallback to production URL
-            brandName: 'Wearme AI v2.0'
+            brandName: 'by Wearme AI v2.0'
         },
         state: {
             isOpen: false,
@@ -1018,8 +1018,11 @@
                     ` : `
                         <div class="wearme-result-main">
                             <img src="${this.state.resultImage}" alt="Result">
-                            <div style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem; background: rgba(255,255,255,0.9); padding: 0.75rem; border-radius: 0.75rem; text-align: center; font-size: 0.75rem; font-weight: 700;">
-                                ✨ Look gerado com IA
+                            <div style="position: absolute; top: 1rem; left: 1rem; right: 1rem; background: rgba(255,255,255,0.4);border: 3px solid rgba(255,255,255,0.8); padding: 0.75rem; border-radius: 0.3rem; text-align: center; font-size: 0.75rem; font-weight: 700;width: fit-content">
+                                ✨ IA
+                            </div>
+                            <div style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem; background: rgba(255,255,255,0.9); padding: 0.75rem; border-radius: 0.3rem; text-align: center; font-size: 0.75rem; font-weight: 700;">
+                                🎁 Envie para quem vai te surpreender
                             </div>
                         </div>
                     `}

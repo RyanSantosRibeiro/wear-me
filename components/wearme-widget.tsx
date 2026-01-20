@@ -15,7 +15,8 @@ import {
     ImageIcon
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
+import imgCasual from "@/assets/img/casual.png"
+import imgWoman from "@/assets/img/woman.png"
 import { createPortal } from "react-dom"
 
 interface WearmeWidgetProps {
@@ -32,17 +33,44 @@ type ProcessingStep = {
 export function WearmeWidget({ productImage, productTitle = "Este Produto", onOpenChange }: WearmeWidgetProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [mounted, setMounted] = useState(false)
+    const [step, setStep] = useState(0)
+
 
     useEffect(() => {
         setMounted(true)
+
+        const interval = setInterval(() => {
+            setStep(prev => {
+                console.log("Atualizando step:", prev)
+                if (prev === 1) {
+                    setIsOpen(true)
+                }
+
+                if (step === 6) {
+                    setPreviewUrls([imgWoman.src])
+                    setStatus('processing')
+                    setProcessingStep(0)
+                }
+
+                if (step === 7) {
+                    setResultImage(imgCasual.src)
+                    setStatus('completed')
+                }
+
+                return prev >= 9 ? 0 : prev + 1
+            })
+        }, 1800)
+
+        return () => clearInterval(interval)
     }, [])
+
 
     useEffect(() => {
         onOpenChange?.(isOpen)
     }, [isOpen, onOpenChange])
 
     const [activeTab, setActiveTab] = useState<'upload' | 'camera'>('upload')
-    const [userImages, setUserImages] = useState<File[]>([])
+    const [userImages, setUserImages] = useState("")
     const [previewUrls, setPreviewUrls] = useState<string[]>([])
 
     // States: idle -> processing -> completed
@@ -60,67 +88,7 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
         { label: "Finalizando detalhes", status: 'pending' }
     ]
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files.length > 0) {
-            const newFiles = Array.from(e.target.files).slice(0, 3 - userImages.length)
-            if (newFiles.length > 0) {
-                setUserImages([...userImages, ...newFiles])
-                const newUrls = newFiles.map(file => URL.createObjectURL(file))
-                setPreviewUrls([...previewUrls, ...newUrls])
-            }
-        }
-    }
 
-    const removeImage = (index: number) => {
-        const newImages = [...userImages]
-        const newUrls = [...previewUrls]
-        newImages.splice(index, 1)
-        newUrls.splice(index, 1)
-        setUserImages(newImages)
-        setPreviewUrls(newUrls)
-    }
-
-    const startProcessing = async () => {
-        if (userImages.length === 0) return
-
-        setStatus('processing')
-        setProcessingStep(0)
-
-        // 1. Visual Steps Animation (ux)
-        for (let i = 0; i < steps.length; i++) {
-            setProcessingStep(i)
-            await new Promise(resolve => setTimeout(resolve, 800)) // Slightly faster steps
-        }
-
-        try {
-            // 2. Real API Call
-            const formData = new FormData()
-            formData.append("productImage", productImage)
-            formData.append("userImage", userImages[0])
-            formData.append("mode", generationMode)
-
-            const response = await fetch('/api/wearme/generate', {
-                method: 'POST',
-                body: formData
-            })
-
-            if (!response.ok) throw new Error("Failed to generate")
-
-            const data = await response.json()
-
-            if (data.success && data.imageUrl) {
-                setResultImage(data.imageUrl)
-                setStatus('completed')
-            } else {
-                console.error("API Error", data.error)
-                // Optional: Show error toast here
-                setStatus('idle')
-            }
-        } catch (error) {
-            console.error("Generation failed:", error)
-            setStatus('idle')
-        }
-    }
 
     const reset = () => {
         setStatus('idle')
@@ -141,30 +109,30 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
     }, [isOpen])
 
     return (
-        <>
-            {/* Trigger Button */}
-            <button
-                onClick={() => setIsOpen(true)}
-                className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-bold shadow-lg shadow-gray-200 hover:bg-black hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center gap-2 relative overflow-hidden group"
-            >
-                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                <Shirt size={18} />
-                <span>Provador Virtual</span>
-            </button>
-            <p className="mt-2 text-[10px] text-gray-400 flex items-center justify-center md:justify-start gap-1">
-                <Sparkles size={10} className="text-primary" />
-                Experimente antes de comprar
-            </p>
-
-            {/* Modal Overlay via Portal */}
-            {mounted && isOpen && createPortal(
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div
-                        className="absolute inset-0 bg-black/20 backdrop-blur-md animate-in fade-in duration-300"
-                        onClick={() => setIsOpen(false)}
-                    />
-
-                    <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+        <div className={`flex flex-col widget-animate animate-${step}`}>
+            {
+                !isOpen && (
+                    <div className="flex flex-col">
+                        {/* Trigger Button */}
+                        < button
+                            onClick={() => setIsOpen(true)}
+                            id="wearme-widget-trigger"
+                            className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-bold px-10 shadow-lg shadow-gray-200 hover:bg-black hover:shadow-xl hover:-translate-y-0.5 transition-all active:scale-95 flex items-center justify-center gap-2 relative overflow-hidden group"
+                        >
+                            <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                            <Shirt size={18} />
+                            <span>Provador Virtual</span>
+                        </button >
+                        <p className="mt-2 text-[10px] text-gray-400 flex items-center justify-center md:justify-start gap-1">
+                            <Sparkles size={10} className="text-primary" />
+                            Experimente antes de comprar
+                        </p>
+                    </div>
+                )
+            }
+            {
+                isOpen && (
+                    <div id="wearme-widget-modal" className="relative w-full max-w-[350px] bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[70vh]">
 
                         {/* Header */}
                         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white/80 backdrop-blur-sm z-10 sticky top-0">
@@ -185,6 +153,8 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
                             </button>
                         </div>
 
+                        {/* {status} */}
+
                         {/* Content Area */}
                         <div className="p-6 overflow-y-auto custom-scrollbar flex-1 relative">
 
@@ -192,15 +162,12 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
                                 <div className="space-y-6">
                                     <div className="text-center space-y-2">
                                         <h4 className="text-xl font-black text-gray-900">Vamos vestir você!</h4>
-                                        <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                                            Escolha como você quer ver o resultado final.
-                                        </p>
                                     </div>
 
                                     {/* Image Selection Area */}
-                                    <div className="flex gap-4">
+                                    <div className="flex gap-4 overflow-hidden">
                                         {/* Product Image (Static) */}
-                                        <div className="flex-1 space-y-2">
+                                        <div id="wearme-widget-product-image" className="flex-1 space-y-2">
                                             <p className="text-xs font-bold text-gray-500 text-center uppercase tracking-wide">Produto</p>
                                             <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-xs relative">
                                                 <img src={productImage} alt="Product" className="w-full h-full object-cover" />
@@ -209,42 +176,26 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
                                         </div>
 
                                         {/* User Image (Upload) */}
-                                        <div className="flex-1 space-y-2">
+                                        <div id="wearme-widget-user-image" className="flex-1 space-y-2">
                                             <p className="text-xs font-bold text-gray-500 text-center uppercase tracking-wide">Você</p>
-                                            {previewUrls.length > 0 ? (
-                                                <div className="aspect-[3/4] rounded-2xl overflow-hidden relative group border border-gray-200">
-                                                    <img src={previewUrls[0]} alt="User" className="w-full h-full object-cover" />
-                                                    <button
-                                                        onClick={() => removeImage(0)}
-                                                        className="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full text-red-500 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
-                                                    >
-                                                        <X size={14} />
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                    className="aspect-[3/4] rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all group bg-gray-50/50"
+                                            <div className="aspect-[3/4] rounded-2xl overflow-hidden relative group border border-gray-200">
+                                                <img src={imgWoman.src} alt="User" className="w-full h-full object-cover" />
+                                                <button
+                                                    className="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full text-red-500 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
                                                 >
-                                                    <div className="w-12 h-12 rounded-full bg-white shadow-xs flex items-center justify-center group-hover:scale-110 transition-transform text-gray-400 group-hover:text-primary">
-                                                        <Camera size={24} />
-                                                    </div>
-                                                    <div className="text-center px-2">
-                                                        <p className="text-xs font-bold text-gray-600 group-hover:text-primary">Adicionar Foto</p>
-                                                        <p className="text-[10px] text-gray-400">Corpo inteiro</p>
-                                                    </div>
-                                                </div>
-                                            )}
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <input
+                                    {/* <input
                                         type="file"
                                         ref={fileInputRef}
                                         onChange={handleFileSelect}
                                         accept="image/*"
                                         className="hidden"
-                                    />
+                                    /> */}
 
                                     {/* Generation Mode Selector */}
                                     <div className="bg-gray-50 p-1.5 rounded-xl grid grid-cols-2 gap-1">
@@ -270,18 +221,6 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
                                         </button>
                                     </div>
 
-                                    {/* Instructions */}
-                                    <div className="bg-blue-50/50 rounded-xl p-4 flex gap-3 items-start border border-blue-100/50">
-                                        <div className="bg-blue-100 p-1.5 rounded-full text-blue-600 shrink-0 mt-0.5">
-                                            <ImageIcon size={14} />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <p className="text-xs font-bold text-blue-700">Dica profissional</p>
-                                            <p className="text-[11px] text-blue-600/80 leading-relaxed">
-                                                Para o modo "3 Ângulos", nossa IA irá extrapolar a visualização baseada na sua foto de frente.
-                                            </p>
-                                        </div>
-                                    </div>
 
                                 </div>
                             )}
@@ -365,8 +304,8 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
                         {status === 'idle' && (
                             <div className="p-6 border-t border-gray-100 bg-gray-50/50">
                                 <Button
+                                    id="wearme-widget-button"
                                     disabled={userImages.length === 0}
-                                    onClick={startProcessing}
                                     className="w-full h-12 rounded-xl text-base font-bold shadow-lg shadow-primary/20 disabled:opacity-50 disabled:shadow-none"
                                 >
                                     {userImages.length === 0 ? 'Selecione uma foto' : 'Gerar Provador Virtual'}
@@ -375,9 +314,8 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
                             </div>
                         )}
                     </div>
-                </div>,
-                document.body
-            )}
-        </>
+                )
+            }
+        </div>
     )
 }
