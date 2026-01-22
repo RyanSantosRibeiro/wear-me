@@ -40,7 +40,7 @@
 
     const STYLES = `
         body {
-            --wearme-primary: #000000;
+            --wearme-primary: #111827;
             --wearme-secondary: #6b7280;
             --wearme-accent: #3b82f6;
             --wearme-emerald: #10b981;
@@ -48,6 +48,25 @@
             --wearme-radius: 1rem;
             --wearme-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .wearme-modal-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            max-height: 40px;
+            width: auto;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        @media screen and (max-width: 480px) {
+            .wearme-modal-logo {
+                top: 15px;
+                left: 15px;
+                max-height: 30px;
+            }
         }
 
         .wearme-modal-overlay {
@@ -82,6 +101,7 @@
             flex-direction: column;
             transform: scale(0.95);
             transition: transform 0.3s ease;
+            position: relative;
         }
 
         .wearme-modal-overlay.open .wearme-modal {
@@ -157,7 +177,7 @@
             appearance: none;
             width: 100%;
             padding: 0.875rem 1.5rem;
-            background: #111827;
+            background: var(--wearme-primary);
             color: white;
             border: none;
             border-radius: 0.75rem;
@@ -628,7 +648,9 @@
             productImage: '',
             buttonSelector: '',
             apiUrl: 'https://wearme.vercel.app/api/wearme/generate', // Fallback to production URL
-            brandName: 'Wearme AI v2.0'
+            brandName: 'Wearme AI v2.0',
+            highlightColor: '#111827',
+            logoUrl: ''
         },
         state: {
             isOpen: false,
@@ -734,6 +756,10 @@
             const style = document.createElement('style');
             style.textContent = STYLES;
             document.head.appendChild(style);
+
+            if (this.config.highlightColor) {
+                document.body.style.setProperty('--wearme-primary', this.config.highlightColor);
+            }
         },
 
         setupTrigger() {
@@ -775,6 +801,7 @@
             console.log("Create Modal - Cached result:", this.state.resultImage);
             overlay.innerHTML = `
                 <div class="wearme-modal" onclick="event.stopPropagation()">
+                    ${this.config.logoUrl ? `<img src="${this.config.logoUrl}" class="wearme-modal-logo" />` : ''}
                     <div class="wearme-header">
                         <div class="wearme-logo-group">
                             <div class="wearme-logo-icon">${SVG_ICONS.sparkles.replace('width="24" height="24"', 'width="16" height="16"')}</div>

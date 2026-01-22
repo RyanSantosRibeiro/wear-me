@@ -31,6 +31,20 @@ export default async function SettingsPage() {
 
   const plans = [];
 
+  const handleSave = async () => {
+    try {
+       const {data, error} = await supabase.from("wearme_configs").update({site_url: wearmeConfig?.site_url}).eq("owner_id", user.id).single()
+       if (error) {
+        console.log(error)
+       }
+       if (data) {
+        console.log(data)
+       }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   if (!subscription || subscription === null) {
     const { data: plansData } = await supabase.from("plans").select("*")
     if (plansData) {
@@ -130,7 +144,7 @@ export default async function SettingsPage() {
               </div>
 
               <div className="pt-4">
-                <button className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+                <button onClick={() => handleSave()} className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
                   Salvar Configurações
                 </button>
               </div>

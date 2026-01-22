@@ -12,6 +12,7 @@ import {
   Settings,
   Users,
   ChevronDown,
+  Ruler,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -114,6 +115,7 @@ export function Sidebar({
 
   const navigation: MenuGroup[] = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
+    { name: "Tabela de Medidas", href: "/dashboard/tabela-de-medidas", icon: Ruler },
     { name: "Logs de Uso", href: "/dashboard/logs", icon: BrainCircuit },
     { name: "Configurações", href: "/dashboard/settings", icon: Settings },
     { name: "Assinatura", href: "/dashboard/subscription", icon: DollarSign },

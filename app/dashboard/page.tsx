@@ -7,7 +7,7 @@ import { Activity, Key, Code, AlertCircle, Lock, Zap } from "lucide-react"
 import Link from "next/link"
 import crypto from "crypto"
 import { PageHeader } from "@/components/PageHeader"
-import ScriptSection from "@/components/ui/script-section"
+import ScriptSection from "@/components/ui/wearme-script-section"
 
 export default async function DashboardPage() {
   const supabase = await createClient()

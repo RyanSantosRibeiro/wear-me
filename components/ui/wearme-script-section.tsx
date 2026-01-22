@@ -1,12 +1,37 @@
-const ScriptSection = () => {
+"use client"
+import { wearmeSnippet } from "../scripts/wearmeSnippet"
+import { useState } from "react"
+
+const WearmeScriptSection = () => {
+  // copy wearmeSnippet
+  const [copied, setCopied] = useState(false)
+  const copyCode = async () => {
+    const raw = wearmeSnippet
+      .filter((l: any) => l.type !== "spacer")
+      .map((l: any) => l.raw || l.text || "")
+      .join("\n")
+
+    await navigator.clipboard.writeText(raw)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
     return (
         <div className="relative group text-white">
             <div className="absolute  rounded-2xl opacity-20 group-hover:opacity-40 transition-opacity blur-lg" />
             <div className="bg-[#1e1e1e] rounded-xl p-6 font-mono text-sm shadow-2xl overflow-hidden border border-white/10 relative">
-              <div className="flex gap-2 mb-6">
+              <div className="flex gap-2 mb-6 justify-between">
+                <div className="flex gap-2">
                 <div className="w-3 h-3 rounded-full bg-red-500/50" />
                 <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
                 <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                </div>
+                <button
+                  onClick={copyCode}
+                  className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors"
+                >
+                  {copied ? 'Copiado!' : 'Copiar'}
+                </button>
               </div>
               <div className="space-y-2 opacity-90">
                 <div className="text-gray-500">{"<!-- 1. Importe o SDK -->"}</div>
@@ -37,10 +62,9 @@ const ScriptSection = () => {
                 </div>
               </div>
 
-              <div className="absolute top-6 right-6 text-xs font-bold text-white/20 uppercase tracking-widest">code snippet</div>
             </div>
           </div>
     )
 }
 
-export default ScriptSection
+export default WearmeScriptSection

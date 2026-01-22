@@ -21,16 +21,52 @@ import {
   Shirt,
   X,
   Linkedin,
-  Instagram
+  Instagram,
+  Search,
+  Type
 } from "lucide-react"
-import ScriptSection from "@/components/ui/script-section"
+import ScriptSection from "@/components/ui/wearme-script-section"
 import { HeroSection } from "@/components/Hero"
+import { FindMySizeDemo } from "@/components/FindMySizeDemo"
+import WearmeScriptSection from "@/components/ui/wearme-script-section"
+import WearmeSizeFinderScriptSection from "@/components/ui/findmysize-script-section"
 
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAnnual, setIsAnnual] = useState(false)
   const [plans, setPlans] = useState([])
+  const [copied, setCopied] = useState(false)
+  const installScript = `<!-- Wearme Size Finder & Chart -->
+<div id="wearme-size-widget"></div>
+<div id="wearme-chart-widget"></div>
+
+<script src="https://wearme.com.br/findMySize.js"></script>
+<script src="https://wearme.com.br/sizeChart.js"></script>
+
+<script>
+  // Inicializa Recomendador
+  FindMySize.init({
+    apiKey: 'SUA_CHAVE_AQUI',
+    buttonSelector: '#wearme-size-widget',
+    targetBrandId: 1, // ID da sua marca
+    productImage: 'URL_DA_IMAGEM',
+    productName: 'NOME_DO_PRODUTO'
+  });
+
+  // Inicializa Tabela de Medidas
+  WearmeSizeChart.init({
+    apiKey: 'SUA_CHAVE_AQUI',
+    tableId: 'ID_DA_TABELA',
+    buttonSelector: '#wearme-chart-widget'
+  });
+</script>`
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(installScript)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   useEffect(() => {
     const fechtPlans = async () => {
@@ -68,6 +104,8 @@ export default function HomePage() {
       </nav>
 
       <HeroSection />
+
+
 
       {/* How it Works - 3 Steps */}
       <section id="demo" className="py-24 px-6 bg-white border-y border-gray-100">
@@ -156,8 +194,8 @@ export default function HomePage() {
               ))}
 
             </ul>
-              <ul className="flex items-center gap-8 flex-row flex-wrap">
-                {[
+            <ul className="flex items-center gap-8 flex-row flex-wrap">
+              {[
                 "https://cdn.shopify.com/b/shopify-brochure2-assets/d9340911ca8c679b148dd4a205ad2ffa.svg",
                 "https://vtex.com/_next/static/media/vtex-logo.80485bcf.svg",
                 "https://woocommerce.com/wp-content/themes/woo/images/woo-logo.svg",
@@ -167,12 +205,142 @@ export default function HomePage() {
                   <img src={item} alt="" className="w-auto h-8 filter brightness-0 invert" />
                 </li>
               ))}
-              </ul>
+            </ul>
           </div>
 
-          <ScriptSection/>
+          <WearmeScriptSection />
         </div>
       </section >
+
+      {/* New Feature: Find My Size & Size Chart */}
+      <section className="bg-[#fcfdff] pt-24 border-t border-gray-100 relative overflow-hidden">
+        {/* Decorative background element */}
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-50 rounded-full blur-[140px] -z-10 opacity-70" />
+
+
+
+        <div id="new-feature-demo">
+          <FindMySizeDemo />
+        </div>
+      </section>
+
+      {/* Specific 3 Steps Section */}
+      <section id="como-funciona" className="py-24 px-6 bg-white border-y border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center space-y-4 mb-20">
+            <h2 className="text-sm font-bold text-blue-600 uppercase tracking-[0.3em]">O Algoritmo</h2>
+            <h3 className="text-4xl md:text-5xl font-black text-gray-900">Como funciona o <br /> recomendador?</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative text-center">
+            <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-gray-200 via-blue-200 to-gray-200" />
+
+            {[
+              {
+                step: "01",
+                icon: <Search size={32} />,
+                title: "Referência de Uso",
+                desc: "O cliente seleciona uma marca que ele já usa e confia no dia a dia.",
+                color: "text-blue-500",
+                bg: "bg-blue-50"
+              },
+              {
+                step: "02",
+                icon: <Type size={32} />,
+                title: "Tamanho Atual",
+                desc: "Ele informa qual tamanho costuma comprar nessa marca de referência.",
+                color: "text-cyan-500",
+                bg: "bg-cyan-50"
+              },
+              {
+                step: "03",
+                icon: <Zap size={32} />,
+                title: "Cálculo de Fôrma",
+                desc: "Cruzamos os dados com a fôrma da sua marca e entregamos o tamanho ideal.",
+                color: "text-indigo-500",
+                bg: "bg-indigo-50"
+              }
+            ].map((item, i) => (
+              <div key={i} className="flex flex-col items-center group">
+                <div className={`w-24 h-24 ${item.bg} rounded-3xl flex items-center justify-center ${item.color} shadow-lg shadow-gray-100 relative z-10 group-hover:scale-110 transition-transform duration-500`}>
+                  {item.icon}
+                  <div className="absolute -top-3 -right-3 bg-white border border-gray-100 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shadow-sm text-gray-900">
+                    {item.step}
+                  </div>
+                </div>
+                <div className="mt-8 space-y-3 px-4">
+                  <h4 className="text-xl font-bold text-gray-900">{item.title}</h4>
+                  <p className="text-gray-500 leading-relaxed font-medium">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Installation Section */}
+      <section id="instalacao" className="py-24 px-6 bg-slate-900 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[160px]" />
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-8 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/10 w-fit mx-auto lg:mx-0">
+              <Code size={14} className="text-blue-400" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Setup em 2 minutos</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black leading-tight">Implemente agora na <br /> sua loja virtual.</h2>
+            <ul className="space-y-4 py-4">
+              {[
+                "Basta colar no final do <body>",
+                "Altamente personalizável",
+                "Não afeta o tempo de carregamento",
+                "Compatível com Shopify, VTEX e WooCommerce"
+              ].map((item, i) => (
+                <li key={i} className="flex items-center justify-center lg:justify-start gap-3">
+                  <CheckCircle2 size={20} className="text-blue-400" />
+                  <span className="font-bold text-gray-300">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <ul className="flex items-center gap-8 flex-row flex-wrap">
+              {[
+                "https://cdn.shopify.com/b/shopify-brochure2-assets/d9340911ca8c679b148dd4a205ad2ffa.svg",
+                "https://vtex.com/_next/static/media/vtex-logo.80485bcf.svg",
+                "https://woocommerce.com/wp-content/themes/woo/images/woo-logo.svg",
+                "https://wake.tech/wp-content/themes/wakecommerce/assets/images/wake-logo-white.png"
+              ].map((item, i) => (
+                <li key={i} className="flex items-center gap-3">
+                  <img src={item} alt="" className="w-auto h-8 filter brightness-0 invert" />
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            {/* <div className="relative bg-[#0d1117] rounded-xl overflow-hidden border border-gray-800 shadow-2xl">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-gray-800 bg-[#161b22]">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500/50" />
+                  <div className="w-3 h-3 rounded-full bg-amber-500/50" />
+                  <div className="w-3 h-3 rounded-full bg-emerald-500/50" />
+                </div>
+                <button
+                  onClick={copyToClipboard}
+                  className="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors"
+                >
+                  {copied ? 'Copiado!' : 'Copiar'}
+                </button>
+              </div>
+              <pre className="p-6 text-sm text-blue-300 font-mono overflow-x-auto">
+                <code>{installScript}</code>
+              </pre>
+            </div> */}
+            <WearmeSizeFinderScriptSection />
+          </div>
+        </div>
+      </section>
 
       {/* Pricing Section - Premium */}
       <section id="pricing" className="py-32 px-6 bg-gradient-to-b from-white to-rose-50/30 relative overflow-hidden">
@@ -194,6 +362,8 @@ export default function HomePage() {
               Comece gratuitamente e escale conforme sua loja cresce. Sem taxas ocultas, sem surpresas.
             </p>
           </div>
+
+
 
           {/* Billing Toggle */}
           {/* <div className="flex items-center justify-center gap-4 mb-12">
@@ -218,46 +388,46 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
             {/* Basic Plan */}
             {
-              plans?.map((plan:any) => {
-                if(!plan?.id) return null;
+              plans?.map((plan: any) => {
+                if (!plan?.id) return null;
                 const highlight = plan.slug === 'wearme-business';
 
                 return (
-                <div key={plan.id} className={`${highlight ? 'bg-gradient-to-r from-primary to-pink-400' : 'bg-white'} rounded-3xl border-2 border-gray-200 p-8 shadow-lg hover:shadow-xl transition-all ${highlight ? 'border-emerald-200' : ''}`}>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className={`text-2xl font-black ${highlight ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
-                    <div className={`${highlight ? 'bg-white' : 'bg-gray-100'} px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full`}>
-                      Para Começar
+                  <div key={plan.id} className={`${highlight ? 'bg-gradient-to-r from-primary to-pink-400' : 'bg-white'} rounded-3xl border-2 border-gray-200 p-8 shadow-lg hover:shadow-xl transition-all ${highlight ? 'border-emerald-200' : ''}`}>
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className={`text-2xl font-black ${highlight ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
+                      <div className={`${highlight ? 'bg-white' : 'bg-gray-100'} px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full`}>
+                        Para Começar
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="mb-6">
-                    <div className="flex items-baseline gap-2">
-                      <span className={`text-5xl font-black ${highlight ? 'text-white' : 'text-gray-90'}`}>
-                        R$ {plan.price}
-                      </span>
-                      <span className={`text-gray-500 font-semibold ${highlight ? 'text-white' : 'text-gray-90'}`}>/mês</span>
+                    <div className="mb-6">
+                      <div className="flex items-baseline gap-2">
+                        <span className={`text-5xl font-black ${highlight ? 'text-white' : 'text-gray-90'}`}>
+                          R$ {plan.price}
+                        </span>
+                        <span className={`text-gray-500 font-semibold ${highlight ? 'text-white' : 'text-gray-90'}`}>/mês</span>
+                      </div>
+                      <p className={`text-sm ${highlight ? 'text-white' : 'text-gray-500'} mt-2`}>Leve essa experiência para seus clientes</p>
                     </div>
-                    <p className={`text-sm ${highlight ? 'text-white' : 'text-gray-500'} mt-2`}>Leve essa experiência para seus clientes</p>
+
+                    <ul className="space-y-3 mb-8">
+                      {plan.metadata.features.map((feature: string, i: number) => (
+                        <li key={i} className={`flex items-center gap-3 ${highlight ? 'text-white' : 'text-gray-700'}`}>
+                          <CheckCircle2 size={20} className={`text-emerald-500 shrink-0 ${highlight ? 'text-white' : 'text-gray-700'}`} />
+                          <span className={`text-md font-medium ${highlight ? 'text-white' : 'text-gray-700'}`}>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Link
+                      href="/signup"
+                      className={`block w-full py-4 ${highlight ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-200 text-gray-900 font-bold rounded-xl text-center transition-colors`}
+                    >
+                      Começar Grátis
+                    </Link>
                   </div>
-
-                  <ul className="space-y-3 mb-8">
-                    {plan.metadata.features.map((feature:string, i:number) => (
-                      <li key={i} className={`flex items-center gap-3 ${highlight ? 'text-white' : 'text-gray-700'}`}>
-                        <CheckCircle2 size={20} className={`text-emerald-500 shrink-0 ${highlight ? 'text-white' : 'text-gray-700'}`} />
-                        <span className={`text-md font-medium ${highlight ? 'text-white' : 'text-gray-700'}`}>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link
-                    href="/signup"
-                    className={`block w-full py-4 ${highlight ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-200 text-gray-900 font-bold rounded-xl text-center transition-colors`}
-                  >
-                    Começar Grátis
-                  </Link>
-                </div>
-              )
+                )
               })
             }
           </div>
@@ -298,7 +468,7 @@ export default function HomePage() {
               {[
                 { icon: <Shield size={24} />, label: 'Pagamento Seguro', desc: 'SSL Certificado' },
                 { icon: <Zap size={24} />, label: 'Setup Rápido', desc: 'Em 5 minutos' },
-                { icon: <BarChart3 size={24} />, label: 'ROI Comprovado', desc: '+45% conversão' },
+                { icon: <BarChart3 size={24} />, label: 'Melhor Experiência', desc: 'Mais conversões' },
                 { icon: <Globe size={24} />, label: 'Suporte BR', desc: 'Em português' }
               ].map((item, i) => (
                 <div key={i} className="space-y-2">
