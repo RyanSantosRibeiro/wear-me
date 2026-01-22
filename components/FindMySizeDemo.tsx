@@ -175,7 +175,7 @@ const CarouselMockup = () => {
                         ADIDAS
                     </div>
                 </div>
-
+                {/* aaaaaa */}
                 {/* Product Details & Widget */}
                 <div className="p-8 space-y-6 bg-white">
                     <div className="flex justify-between items-start">
