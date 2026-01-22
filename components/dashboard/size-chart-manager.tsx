@@ -48,37 +48,64 @@ export function SizeChartManager({ initialBrands, userId }: { initialBrands: any
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
 
+    // UI State
+    const [step, setStep] = useState<0 | 1>(0) // 0: Select Type, 1: Edit Form
+    const [chartType, setChartType] = useState<'shoes' | 'clothes'>('shoes')
+
     // Form State
     const [editingId, setEditingId] = useState<string | null>(null)
     const [formData, setFormData] = useState<{
         name: string
         width_score: number
+        // Shoes Data
         charts: SizeChart[]
+        // Clothes Data
+        clothes_charts: any[]
     }>({
         name: "",
         width_score: 3,
-        charts: [{ size_br: 34, measure_cm: 22.5 }]
+        charts: [{ size_br: 34, measure_cm: 22.5 }],
+        clothes_charts: [{ size_br: "P", chest_min: 88, chest_max: 95, length: 70 }]
     })
 
     const supabase = createClient()
 
     const handleAddNew = () => {
         setEditingId(null)
+        setStep(0) // Start at selection
         setFormData({
             name: "",
             width_score: 3,
-            charts: [{ size_br: 34, measure_cm: 22.5 }]
+            charts: [{ size_br: 34, measure_cm: 22.5 }],
+            clothes_charts: [{ size_br: "P", chest_min: 88, chest_max: 95, length: 70 }]
         })
         setIsDialogOpen(true)
     }
 
+    const selectType = (type: 'shoes' | 'clothes') => {
+        setChartType(type)
+        setStep(1)
+    }
+
     const handleEdit = (brand: any) => {
         setEditingId(brand.id)
+        // Infer Type from brand data (assuming brand.category exists, or trying to detect existing charts)
+        // For now relying on brand.category if migration run, or default to shoes
+        const type = brand.category || 'shoes'
+        setChartType(type as any)
+
         setFormData({
             name: brand.name,
             width_score: brand.width_score,
-            charts: brand.size_charts?.map((c: any) => ({ size_br: c.size_br, measure_cm: c.measure_cm })).sort((a: any, b: any) => a.size_br - b.size_br) || []
+            charts: type === 'shoes' ? (brand.size_charts?.map((c: any) => ({ size_br: c.size_br, measure_cm: c.measure_cm })).sort((a: any, b: any) => a.size_br - b.size_br) || []) : [],
+            clothes_charts: type === 'clothes' ? (brand.size_charts_clothes?.map((c: any) => ({
+                size_br: c.size_br,
+                chest_min: c.chest_min_cm,
+                chest_max: c.chest_max_cm,
+                length: c.length_cm
+            })) || []) : []
         })
+        setStep(1) // Jump to form
         setIsDialogOpen(true)
     }
 
@@ -93,6 +120,7 @@ export function SizeChartManager({ initialBrands, userId }: { initialBrands: any
         }
     }
 
+    // --- SHOES HANDLERS ---
     const updateChartRow = (index: number, field: keyof SizeChart, value: string) => {
         const newCharts = [...formData.charts]
         newCharts[index] = { ...newCharts[index], [field]: parseFloat(value) || 0 }
@@ -108,11 +136,31 @@ export function SizeChartManager({ initialBrands, userId }: { initialBrands: any
     }
 
     const removeChartRow = (index: number) => {
+        setFormData({ ...formData, charts: formData.charts.filter((_, i) => i !== index) })
+    }
+
+    // --- CLOTHES HANDLERS ---
+    const updateClothesRow = (index: number, field: string, value: string) => {
+        const newCharts = [...formData.clothes_charts]
+        if (field === 'size_br') {
+            newCharts[index] = { ...newCharts[index], [field]: value }
+        } else {
+            newCharts[index] = { ...newCharts[index], [field]: parseFloat(value) || 0 }
+        }
+        setFormData({ ...formData, clothes_charts: newCharts })
+    }
+
+    const addClothesRow = () => {
         setFormData({
             ...formData,
-            charts: formData.charts.filter((_, i) => i !== index)
+            clothes_charts: [...formData.clothes_charts, { size_br: "", chest_min: 0, chest_max: 0, length: 0 }]
         })
     }
+
+    const removeClothesRow = (index: number) => {
+        setFormData({ ...formData, clothes_charts: formData.clothes_charts.filter((_, i) => i !== index) })
+    }
+
 
     const handleSave = async () => {
         if (!formData.name) return alert("Nome é obrigatório")
@@ -121,21 +169,27 @@ export function SizeChartManager({ initialBrands, userId }: { initialBrands: any
         try {
             let brandId = editingId
 
+            const brandPayload = {
+                name: formData.name,
+                width_score: formData.width_score,
+                category: chartType // NEW FIELD
+            }
+
             if (editingId) {
                 // Update Brand
-                const { error } = await supabase.from('brands').update({
-                    name: formData.name,
-                    width_score: formData.width_score
-                }).eq('id', editingId)
+                const { error } = await supabase.from('brands').update(brandPayload).eq('id', editingId)
                 if (error) throw error
 
-                // Delete old charts (simple strategy: delete all and insert new)
-                await supabase.from('size_charts').delete().eq('brand_id', editingId)
+                // Clear old charts to replace
+                if (chartType === 'shoes') {
+                    await supabase.from('size_charts').delete().eq('brand_id', editingId)
+                } else {
+                    await supabase.from('size_charts_clothes').delete().eq('brand_id', editingId)
+                }
             } else {
                 // Insert Brand
                 const { data, error } = await supabase.from('brands').insert({
-                    name: formData.name,
-                    width_score: formData.width_score,
+                    ...brandPayload,
                     owner_id: userId,
                     is_public: false
                 }).select().single()
@@ -145,20 +199,29 @@ export function SizeChartManager({ initialBrands, userId }: { initialBrands: any
             }
 
             // Insert Charts
-            if (formData.charts.length > 0 && brandId) {
-                const rows = formData.charts.map(c => ({
-                    brand_id: brandId,
-                    size_br: c.size_br,
-                    measure_cm: c.measure_cm
-                }))
-                const { error: chartError } = await supabase.from('size_charts').insert(rows)
-                if (chartError) throw chartError
+            if (brandId) {
+                if (chartType === 'shoes' && formData.charts.length > 0) {
+                    const rows = formData.charts.map(c => ({
+                        brand_id: brandId,
+                        size_br: c.size_br,
+                        measure_cm: c.measure_cm
+                    }))
+                    const { error: chartError } = await supabase.from('size_charts').insert(rows)
+                    if (chartError) throw chartError
+                }
+                else if (chartType === 'clothes' && formData.clothes_charts.length > 0) {
+                    const rows = formData.clothes_charts.map(c => ({
+                        brand_id: brandId,
+                        size_br: c.size_br,
+                        chest_min_cm: c.chest_min,
+                        chest_max_cm: c.chest_max,
+                        length_cm: c.length
+                    }))
+                    const { error: chartError } = await supabase.from('size_charts_clothes').insert(rows)
+                    if (chartError) throw chartError
+                }
             }
 
-            // Refresh Local State (Optimistic or Refetch? Let's just reload page or refetch logic. 
-            // For simple Client Component without extensive caching, refreshing page or updating local state manually is easiest.
-            // I'll update local state manually for basic fields but reloading would be safer for relationships.
-            // For this step I'll trigger a browser reload or router refresh.)
             window.location.reload()
 
         } catch (e) {
@@ -185,23 +248,32 @@ export function SizeChartManager({ initialBrands, userId }: { initialBrands: any
                         <CardHeader className="pb-3 bg-gray-50/50 border-b">
                             <div className="flex justify-between items-start">
                                 <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Badge variant="outline" className="text-[10px] uppercase font-bold bg-white">
+                                            {brand.category === 'clothes' ? 'Roupas' : 'Calçados'}
+                                        </Badge>
+                                        <Badge variant={brand.is_public ? "secondary" : "default"}>
+                                            {brand.is_public ? "Pública" : "Privada"}
+                                        </Badge>
+                                    </div>
                                     <CardTitle className="text-lg">{brand.name}</CardTitle>
                                     <CardDescription>ID: {brand.id}</CardDescription>
                                 </div>
-                                <Badge variant={brand.is_public ? "secondary" : "default"}>
-                                    {brand.is_public ? "Pública" : "Privada"}
-                                </Badge>
                             </div>
                         </CardHeader>
                         <CardContent className="pt-4">
                             <div className="space-y-2 text-sm text-gray-600">
                                 <div className="flex justify-between">
-                                    <span>Pontuação de Largura (Fôrma):</span>
+                                    <span>Pontuação de Largura:</span>
                                     <span className="font-bold">{brand.width_score}/5</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span>Tamanhos cadastrados:</span>
-                                    <span className="font-bold">{brand.size_charts?.length || 0}</span>
+                                    <span className="font-bold">
+                                        {brand.category === 'clothes'
+                                            ? (brand.size_charts_clothes?.length || 0)
+                                            : (brand.size_charts?.length || 0)}
+                                    </span>
                                 </div>
                             </div>
                         </CardContent>
@@ -215,114 +287,185 @@ export function SizeChartManager({ initialBrands, userId }: { initialBrands: any
                         </CardFooter>
                     </Card>
                 ))}
-
-                {brands.length === 0 && (
-                    <div className="col-span-full py-16 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                        <Ruler className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900">Nenhuma tabela criada</h3>
-                        <p className="text-gray-500 mb-6">Crie tabelas personalizadas para usar no seu widget.</p>
-                        <Button onClick={handleAddNew} variant="outline">Criar Tabela</Button>
-                    </div>
-                )}
             </div>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>{editingId ? 'Editar Tabela' : 'Nova Tabela de Medidas'}</DialogTitle>
-                        <DialogDescription>
-                            Configure o nome e a grade de tamanhos. Use o ID desta tabela no script do seu widget.
-                        </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-6 py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Nome da Tabela/Marca</Label>
-                                <Input
-                                    value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    placeholder="Ex: Minha Confirmação M"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Largura da Fôrma (1-5)</Label>
-                                <Input
-                                    type="number"
-                                    min={1}
-                                    max={5}
-                                    value={formData.width_score}
-                                    onChange={e => setFormData({ ...formData, width_score: parseInt(e.target.value) || 3 })} // Default 3
-                                />
-                                <span className="text-xs text-muted-foreground">1=Muito Estreita, 3=Padrão, 5=Muito Larga</span>
-                            </div>
-                        </div>
+                    {step === 0 ? (
+                        <div className="py-8 grid grid-cols-2 gap-6">
+                            <button
+                                onClick={() => selectType('shoes')}
+                                className="flex flex-col items-center justify-center p-8 border-2 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all group"
+                            >
+                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200">
+                                    <span className="text-2xl">👟</span>
+                                </div>
+                                <h3 className="font-bold text-lg text-gray-800">Calçados</h3>
+                                <p className="text-sm text-center text-gray-500 mt-2">Tabela com numeração (34-45) e medida em cm do pé.</p>
+                            </button>
 
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <Label className="text-base font-semibold">Grade de Tamanhos</Label>
-                                <Button size="sm" variant="outline" onClick={addChartRow} type="button">
-                                    <Plus size={14} className="mr-1" /> Adicionar Tamanho
+                            <button
+                                onClick={() => selectType('clothes')}
+                                className="flex flex-col items-center justify-center p-8 border-2 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all group"
+                            >
+                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200">
+                                    <span className="text-2xl">👕</span>
+                                </div>
+                                <h3 className="font-bold text-lg text-gray-800">Roupas</h3>
+                                <p className="text-sm text-center text-gray-500 mt-2">Tabela com tamanhos (P-GG), tórax e comprimento.</p>
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-6 py-4">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Button variant="ghost" size="sm" onClick={() => setStep(0)} disabled={!!editingId} className="-ml-2 text-gray-500">
+                                    ← Voltar
                                 </Button>
+                                <Badge variant="outline">{chartType === 'shoes' ? 'Calçados' : 'Roupas'}</Badge>
                             </div>
 
-                            <div className="border rounded-md overflow-hidden">
-                                <Table>
-                                    <TableHeader className="bg-gray-50">
-                                        <TableRow>
-                                            <TableHead>Tamanho (BR)</TableHead>
-                                            <TableHead>Medida (cm)</TableHead>
-                                            <TableHead className="w-[50px]"></TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {formData.charts.map((row, idx) => (
-                                            <TableRow key={idx}>
-                                                <TableCell>
-                                                    <Input
-                                                        type="number"
-                                                        className="h-8 w-24"
-                                                        value={row.size_br}
-                                                        onChange={e => updateChartRow(idx, 'size_br', e.target.value)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Input
-                                                        type="number"
-                                                        className="h-8 w-24"
-                                                        step="0.1"
-                                                        value={row.measure_cm}
-                                                        onChange={e => updateChartRow(idx, 'measure_cm', e.target.value)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                                        onClick={() => removeChartRow(idx)}
-                                                    >
-                                                        <Trash2 size={14} />
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Nome da Tabela/Marca</Label>
+                                    <Input
+                                        value={formData.name}
+                                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                        placeholder="Ex: Minha Coleção 2024"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>
+                                        {chartType === 'shoes' ? 'Largura da Fôrma (1-5)' : 'Ajuste do Caimento (1-5)'}
+                                    </Label>
+                                    <Input
+                                        type="number"
+                                        min={1}
+                                        max={5}
+                                        value={formData.width_score}
+                                        onChange={e => setFormData({ ...formData, width_score: parseInt(e.target.value) || 3 })} // Default 3
+                                    />
+                                    <span className="text-xs text-muted-foreground">
+                                        {chartType === 'shoes' ? '1=Estreita, 3=Padrão, 5=Larga' : '1=Justo/Slim, 3=Regular, 5=Oversized'}
+                                    </span>
+                                </div>
                             </div>
-                            {formData.charts.length === 0 && (
-                                <p className="text-sm text-center text-red-500">Adicione pelo menos um tamanho.</p>
-                            )}
+
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <Label className="text-base font-semibold">Grade de Tamanhos</Label>
+                                    <Button size="sm" variant="outline" onClick={chartType === 'shoes' ? addChartRow : addClothesRow} type="button">
+                                        <Plus size={14} className="mr-1" /> Adicionar Tamanho
+                                    </Button>
+                                </div>
+
+                                {/* TABLE FORM: SHOES */}
+                                {chartType === 'shoes' && (
+                                    <div className="border rounded-md overflow-hidden">
+                                        <Table>
+                                            <TableHeader className="bg-gray-50">
+                                                <TableRow>
+                                                    <TableHead>Tamanho (BR)</TableHead>
+                                                    <TableHead>Medida (cm)</TableHead>
+                                                    <TableHead className="w-[50px]"></TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {formData.charts.map((row, idx) => (
+                                                    <TableRow key={idx}>
+                                                        <TableCell>
+                                                            <Input
+                                                                type="number"
+                                                                className="h-8 w-24"
+                                                                value={row.size_br}
+                                                                onChange={e => updateChartRow(idx, 'size_br', e.target.value)}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Input
+                                                                type="number"
+                                                                className="h-8 w-24"
+                                                                step="0.1"
+                                                                value={row.measure_cm}
+                                                                onChange={e => updateChartRow(idx, 'measure_cm', e.target.value)}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500" onClick={() => removeChartRow(idx)}>
+                                                                <Trash2 size={14} />
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
+
+                                {/* TABLE FORM: CLOTHES */}
+                                {chartType === 'clothes' && (
+                                    <div className="border rounded-md overflow-hidden">
+                                        <Table>
+                                            <TableHeader className="bg-gray-50">
+                                                <TableRow>
+                                                    <TableHead className="w-[100px]">Tamanho</TableHead>
+                                                    <TableHead>Tórax Min (cm)</TableHead>
+                                                    <TableHead>Tórax Max (cm)</TableHead>
+                                                    <TableHead>Comprimento (cm)</TableHead>
+                                                    <TableHead className="w-[50px]"></TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {formData.clothes_charts.map((row, idx) => (
+                                                    <TableRow key={idx}>
+                                                        <TableCell>
+                                                            <Input
+                                                                className="h-8 w-20"
+                                                                placeholder="Ex: P"
+                                                                value={row.size_br}
+                                                                onChange={e => updateClothesRow(idx, 'size_br', e.target.value)}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Input type="number" className="h-8" step="0.5" value={row.chest_min} onChange={e => updateClothesRow(idx, 'chest_min', e.target.value)} />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Input type="number" className="h-8" step="0.5" value={row.chest_max} onChange={e => updateClothesRow(idx, 'chest_max', e.target.value)} />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Input type="number" className="h-8" step="0.5" value={row.length} onChange={e => updateClothesRow(idx, 'length', e.target.value)} />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500" onClick={() => removeClothesRow(idx)}>
+                                                                <Trash2 size={14} />
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
+
+                                {((chartType === 'shoes' && formData.charts.length === 0) || (chartType === 'clothes' && formData.clothes_charts.length === 0)) && (
+                                    <p className="text-sm text-center text-red-500">Adicione pelo menos um tamanho.</p>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                        <Button onClick={handleSave} disabled={isLoading}>
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Salvar Tabela
-                        </Button>
-                    </DialogFooter>
+                    {step === 1 && (
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
+                            <Button onClick={handleSave} disabled={isLoading}>
+                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Salvar Tabela
+                            </Button>
+                        </DialogFooter>
+                    )}
                 </DialogContent>
             </Dialog>
         </div>

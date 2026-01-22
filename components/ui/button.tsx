@@ -1,3 +1,4 @@
+"use client"
 import React from 'react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'destructive' | 'ghost' | 'link';
