@@ -33,7 +33,9 @@ export default async function LogsPage() {
     `)
         .eq("wearme_configs.owner_id", user.id)
         .order("created_at", { ascending: false })
-        .limit(100)
+        .limit(20)
+
+    console.log({ logs, error })
 
     return (
         <div className="space-y-10 p-8 max-w-7xl mx-auto">

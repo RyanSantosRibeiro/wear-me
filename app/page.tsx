@@ -86,9 +86,11 @@ export default function HomePage() {
           <img src={logo.src} alt="WearMe" className="w-auto h-8" />
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-muted-foreground">
-          <a href="#demo" className="hover:text-primary transition-colors">Como Funciona</a>
+          <a href="#demo" className="hover:text-primary transition-colors">WearMe</a>
           <a href="#integration" className="hover:text-primary transition-colors">Instalação</a>
+          <a href="#new-feature-demo" className="hover:text-primary transition-colors">WearMe - Fit</a>
           <a href="#pricing" className="hover:text-primary transition-colors">Planos</a>
+          <a href="#contact" className="hover:text-primary transition-colors">Contato</a>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/login" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors px-4 py-2">
@@ -280,7 +282,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Installation Section */}
+      {/* Installation Section - Fit */}
       <section id="instalacao" className="py-24 px-6 bg-slate-900 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[160px]" />
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">

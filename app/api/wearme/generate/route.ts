@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createAdminClient } from "@/lib/supabase/server";
+import sharp from "sharp";
 
 export async function POST(req: NextRequest) {
     try {
@@ -160,13 +161,14 @@ The final image must be a unique creative work, not a copy of either reference.
 
         const result = await model.generateContent(requestParts);
         const response = await result.response;
-
+        console.log({ result })
         console.log("--- GEMINI DEBUG START ---");
         // console.log("Full Response:", JSON.stringify(response, null, 2));
 
         const candidates = response.candidates || [];
+        const text = await response.text();
+        console.log(`Text: ${text}`);
         console.log(`Candidates found: ${candidates.length}`);
-
         // Parse the response for Generated Images (Inline Data)
         let resultImageUrl = null;
         let analysisText = "";
@@ -175,19 +177,54 @@ The final image must be a unique creative work, not a copy of either reference.
             const parts = candidates[0].content?.parts || [];
             console.log(`Parts in candidate 0: ${parts.length}`);
 
-            parts.forEach((part, index) => {
+            for (const part of parts) {
                 if (part.inlineData) {
-                    const mimeType = part.inlineData.mimeType || "image/png";
-                    const dataSize = part.inlineData.data?.length || 0;
-                    console.log(`Part ${index}: [IMAGE] (${mimeType}) - Size: ${dataSize} chars`);
-                    resultImageUrl = `data:${mimeType};base64,${part.inlineData.data}`;
+                    try {
+                        const mimeType = part.inlineData.mimeType || "image/png";
+                        const buffer = Buffer.from(part.inlineData.data, "base64");
+
+                        console.log(`Processing image with sharp: ${mimeType}`);
+                        // Convert to PNG and reduce quality/size (compress)
+                        // quality: 60 for PNG is not directly supported, but we can use compressionLevel
+                        // better: output as jpeg with quality 70 or png with compression
+                        const processedBuffer = await sharp(buffer)
+                            .resize(800) // Optional: limit size for "lighter" version
+                            .png({ compressionLevel: 9, quality: 60 })
+                            .toBuffer();
+
+                        const fileName = `${Date.now()}.png`;
+                        const folderPath = `${clientApiKey}`;
+                        const filePath = `${folderPath}/${fileName}`;
+
+                        console.log(`Uploading to storage: ${filePath}`);
+                        const { data: uploadData, error: uploadError } = await supabase.storage
+                            .from("vton-results")
+                            .upload(filePath, processedBuffer, {
+                                contentType: "image/png",
+                                cacheControl: "3600",
+                                upsert: false
+                            });
+
+                        if (uploadError) {
+                            console.error("Storage upload error:", uploadError);
+                            // Fallback to data URL but smaller
+                            resultImageUrl = `data:image/png;base64,${processedBuffer.toString("base64")}`;
+                        } else {
+                            const { data: { publicUrl } } = supabase.storage
+                                .from("vton-results")
+                                .getPublicUrl(filePath);
+                            resultImageUrl = publicUrl;
+                            console.log("Image stored successfully:", resultImageUrl);
+                        }
+                    } catch (sharpError) {
+                        console.error("Sharp processing error:", sharpError);
+                        // Final fallback to original raw data
+                        resultImageUrl = `data:${part.inlineData.mimeType || "image/png"};base64,${part.inlineData.data}`;
+                    }
                 } else if (part.text) {
-                    console.log(`Part ${index}: [TEXT] - Content: ${part.text.substring(0, 100)}${part.text.length > 100 ? '...' : ''}`);
                     analysisText += part.text;
-                } else {
-                    console.log(`Part ${index}: [UNKNOWN]`, Object.keys(part));
                 }
-            });
+            }
         }
 
         if (response.promptFeedback) {

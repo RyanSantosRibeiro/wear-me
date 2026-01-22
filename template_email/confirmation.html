@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafe; font-family: 'Outfit', 'Inter', Helvetica, Arial, sans-serif;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(37, 99, 235, 0.05);">
+        <!-- Header -->
+        <tr>
+            <td align="center" style="padding: 40px 0 20px 0; background: linear-gradient(135deg, #111827 0%, #1f2937 100%);">
+                <h1 style="color: #ffffff; font-weight: 900; letter-spacing: -1px; margin: 0; font-size: 28px;">Wear<span style="color: #2563eb;">Me</span></h1>
+                <p style="color: #9ca3af; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px;">Provador Virtual de Alta Conversão</p>
+            </td>
+        </tr>
+        
+        <!-- Content -->
+        <tr>
+            <td style="padding: 40px 40px 30px 40px;">
+                <h2 style="color: #111827; font-size: 24px; font-weight: 800; margin-bottom: 20px; line-height: 1.2;">Seja bem-vindo à revolução do e-commerce!</h2>
+                <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
+                    Sua conta na WearMe foi criada com sucesso. Estamos prontos para ajudar você a reduzir trocas e aumentar suas vendas com inteligência artificial.
+                </p>
+                <p style="color: #4b5563; font-size: 16px; font-weight: 600; margin-bottom: 10px;">Para começar, confirme seu e-mail clicando no botão abaixo:</p>
+                
+                <!-- CTA Button -->
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td align="center" style="padding: 10px 0;">
+                            <a href="{{ .ConfirmationURL }}" style="background-color: #2563eb; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 14px; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">Confirmar minha conta</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        
+        <!-- Footer -->
+        <tr>
+            <td style="padding: 30px 40px 40px 40px; border-top: 1px solid #f3f4f6;">
+                <p style="color: #9ca3af; font-size: 13px; line-height: 1.5; margin: 0;">
+                    Se o botão acima não funcionar, copie e cole o link abaixo no seu navegador:<br>
+                    <a href="{{ .ConfirmationURL }}" style="color: #2563eb; text-decoration: none; word-break: break-all;">{{ .ConfirmationURL }}</a>
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
