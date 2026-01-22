@@ -17,11 +17,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/login")
   }
 
-  const session = await supabase.auth.getSession();
-const accessToken = session?.data.session?.access_token;
-
-console.log("Token do usuário:", accessToken);
-
   // Get user profile
   const { data: profile } = await supabase.from("profiles").select("*, company_members(*)").eq("id", user.id).single()
 

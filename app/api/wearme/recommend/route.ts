@@ -65,7 +65,7 @@ export async function GET(request: Request) {
     // 4. Calculate Virtual Foot (P_virtual)
     // P_virtual = CM_ref + (Score_Source - Score_Target) * K
     const sourceScore = widthScoreParam ? parseInt(widthScoreParam) : sourceBrand.width_score;
-    const K = 0.35;
+    const K = 0.2;
     const deltaScore = sourceScore - targetBrand.width_score;
     const cmRef = sourceSize.measure_cm;
     const cmVirtual = cmRef + (deltaScore * K);

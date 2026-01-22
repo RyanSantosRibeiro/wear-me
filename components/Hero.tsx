@@ -151,7 +151,7 @@ export const HeroSection = () => {
         </div>
 
         {/* Right Column: PDP Simulation (The "Wearme" Interface) */}
-        <div className={`relative w-full max-w-lg mx-auto lg:max-w-none h-auto ${!out ? `animate-${selectedCategory}` : 'animate-out'}`}>
+        <div className={`relative w-full max-w-lg mx-auto lg:max-w-none h-auto ${!out ? `animate-${selectedCategory}` : 'animate-out'} hover:rotate-1 transition-transform duration-500`}>
           {/* 3D Floating Effect Container */}
           <div id="wearme-container" className="wearme-container relative bg-white border border-border rounded-[2.5rem] shadow-2xl shadow-primary/10 overflow-hidden min-h-[90vh] md:min-h-[55vh] flex items-center justify-center transform hover:rotate-y-1 transition-transform duration-500">
 
