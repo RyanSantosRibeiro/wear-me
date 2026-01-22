@@ -58,7 +58,7 @@
 
         /* Right Panel */
         .wearme-fms-right-panel {
-            padding: 2.5rem; display: flex; flex-direction: column; position: relative;
+            padding: 2.5rem; display: flex; flex-direction: column; position: relative;max-height: 600px; overflow-y: auto;
         }
         
         .wearme-fms-header {
@@ -421,7 +421,7 @@
                 const refCm = result.debug?.source_user_cm || 0;
 
                 container.innerHTML = `
-                    <div style="text-align:center; padding:1rem 0; animation: fadeIn 0.5s">
+                    <div style="text-align:center; padding:1rem 0; animation: fadeIn 0.5s; overflow-y: auto">
                         <p style="font-size:0.875rem; font-weight:700; text-transform:uppercase; color:#9ca3af; letter-spacing:1px; margin-bottom:0.5rem">Seu Tamanho Recomendado</p>
                         <h3 style="font-size:3.5rem; font-weight:900; color:#111; line-height:1; margin-bottom:1rem">${result.recommended_size}</h3>
                         

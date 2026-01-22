@@ -6,7 +6,7 @@ import { redirect } from "next/navigation"
 import { SubscriptionPanel } from "@/components/dashboard/settings/subscription"
 import { PageHeader } from "@/components/PageHeader"
 import { User, Shield, Zap, Settings } from "lucide-react"
-import CopyButton from "./copyButton"
+import { IntegrationSettings } from "@/components/dashboard/settings/integration-settings"
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -31,19 +31,6 @@ export default async function SettingsPage() {
 
   const plans = [];
 
-  const handleSave = async () => {
-    try {
-       const {data, error} = await supabase.from("wearme_configs").update({site_url: wearmeConfig?.site_url}).eq("owner_id", user.id).single()
-       if (error) {
-        console.log(error)
-       }
-       if (data) {
-        console.log(data)
-       }
-    } catch (error) {
-      console.log(error)
-    }
-  }
 
   if (!subscription || subscription === null) {
     const { data: plansData } = await supabase.from("plans").select("*")
@@ -114,40 +101,8 @@ export default async function SettingsPage() {
               <h3 className="text-xl font-black text-gray-900">Configurações da Integração</h3>
               <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Configure a URL do seu site e gerencie sua API Key</p>
             </div>
-            <div className="p-8 space-y-6">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">URL do Site</label>
-                <input
-                  type="url"
-                  name="site_url"
-                  defaultValue={wearmeConfig?.site_url || ""}
-                  placeholder="https://minhaloja.com"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all"
-                />
-                <p className="text-xs text-gray-500 mt-2">Esta URL será usada para validar requisições e evitar uso não autorizado da sua API Key.</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">API Key</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={wearmeConfig?.api_key || "Carregando..."}
-                    readOnly
-                    className="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 font-mono text-sm"
-                  />
-                  <CopyButton
-                    text={wearmeConfig?.api_key || ""}
-                  />
-                </div>
-                <p className="text-xs text-amber-600 mt-2 font-semibold">⚠️ Não compartilhe sua API Key publicamente. Ela dá acesso total à sua integração.</p>
-              </div>
-
-              <div className="pt-4">
-                <button onClick={() => handleSave()} className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
-                  Salvar Configurações
-                </button>
-              </div>
+            <div className="p-8">
+              <IntegrationSettings initialConfig={wearmeConfig} />
             </div>
           </div>
         </TabsContent>
