@@ -3,11 +3,22 @@ import { redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Activity, Key, Code, AlertCircle, Lock, Zap } from "lucide-react"
+import { Activity, Key, Code, AlertCircle, Lock, Zap, Ruler, ArrowRight, Lightbulb, Layers, ImageIcon, ExternalLink, User } from "lucide-react"
 import Link from "next/link"
 import crypto from "crypto"
 import { PageHeader } from "@/components/PageHeader"
 import ScriptSection from "@/components/ui/wearme-script-section"
+import { RequestsChart } from "@/components/dashboard/RequestsChart"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -26,7 +37,20 @@ export default async function DashboardPage() {
     .eq("owner_id", user.id)
     .single()
 
-  console.log({ config: config, configError })
+  // Fetch logs for the current user's configs (more for the chart)
+  const { data: logs } = await supabase
+    .from("wearme_logs")
+    .select(`*`)
+    .eq("config_id", config?.id)
+    .order("created_at", { ascending: false })
+    .limit(50)
+
+  // Fetch size charts cowunt (brands created by user)
+  const { count: sizeChartsCount } = await supabase
+    .from("brands")
+    .select("*", { count: "exact", head: true })
+    .eq("owner_id", user.id)
+
   // Auto-create from Dashboard (Application Layer)
   if (!config) {
     // Generate a secure 64-char hex key explicitly
@@ -42,7 +66,7 @@ export default async function DashboardPage() {
       ])
       .select()
       .single()
-    console.log({ newConfig })
+
     if (newConfig) {
       config = newConfig
     } else if (error) {
@@ -91,54 +115,31 @@ export default async function DashboardPage() {
           </Link>
         </div>
       )}
-      {!missingUrl && (
-        <div className="bg-gradient-to-br from-primary/5 via-white to-primary/10 border border-primary/20 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center justify-between gap-8 shadow-sm relative overflow-hidden group">
-          <div className="absolute -top-12 -right-12 p-8 opacity-[0.05] pointer-events-none rotate-12 transition-transform group-hover:scale-110">
-            <Zap size={240} className="text-primary" />
-          </div>
-          <div className="flex items-center gap-6 relative z-10">
-            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-primary/10 text-primary shrink-0">
-              <Lock size={32} />
-            </div>
-            <div>
-              <h3 className="text-2xl font-black text-gray-900">URL do seu site não configurada</h3>
-              <p className="text-gray-500 font-medium max-w-md mt-1">Configure a URL do seu site para que possamos proteger o seu widget.</p>
-            </div>
-          </div>
-          <Link href="/dashboard/settings" className="relative z-10 w-full md:w-auto">
-            <Button size="lg" className="font-bold w-full md:w-auto px-10 h-14 rounded-2xl shadow-2xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
-              Configurar URL
-            </Button>
-          </Link>
-        </div>
-      )}
 
       {/* Stats Grid */}
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-8 lg:grid-cols-4">
         {/* Subscription Card */}
         <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
           <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex items-center justify-between">
-            <h3 className="text-lg font-black text-gray-900">Plano Atual</h3>
-            <Badge variant={isPro ? "default" : "secondary"} className="rounded-full px-4 py-1 font-black tracking-widest text-[10px]">
+            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest leading-none">Plano</h3>
+            <Badge variant={isPro ? "default" : "secondary"} className="rounded-full px-4 py-1 font-black tracking-widest text-[9px]">
               {isPro ? plan?.name?.toUpperCase() || 'PREMIUM' : 'GRATUITO'}
             </Badge>
           </div>
           <div className="p-8 flex-1">
-            <div className="mb-4">
+            <div className="mb-2">
               <span className="text-2xl font-black text-gray-900 leading-none">
-                {isPro ? 'Assinatura Ativa' : 'Acesso Limitado'}
+                {isPro ? 'Ativo' : 'Limitado'}
               </span>
             </div>
-            <p className="text-sm font-medium text-gray-500 leading-relaxed mb-8">
-              {isPro
-                ? "Sua assinatura está ativa e operando normalmente com todos os recursos liberados."
-                : "Seu plano atual possui limites de requisições. O upgrade libera uso ilimitado."}
+            <p className="text-[10px] font-bold text-gray-400 leading-tight uppercase tracking-wide">
+              {isPro ? "Todos os recursos liberados" : "Limite de reqs ativo"}
             </p>
           </div>
           <div className="p-6 pt-0 mt-auto">
             <Link href="/dashboard/subscription" className="w-full">
-              <Button variant={isPro ? "outline" : "primary"} className="w-full font-black rounded-2xl h-12" size="sm">
-                {isPro ? 'Gerenciar Assinatura' : 'Fazer Upgrade Agora'}
+              <Button variant="ghost" className="w-full font-black rounded-xl h-10 text-xs border border-gray-100" size="sm">
+                Gerenciar
               </Button>
             </Link>
           </div>
@@ -147,71 +148,243 @@ export default async function DashboardPage() {
         {/* Usage Card */}
         <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
           <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex items-center justify-between">
-            <h3 className="text-lg font-black text-gray-900">Uso de API</h3>
-            <Activity size={18} className="text-primary" />
+            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest leading-none">Uso de API</h3>
+            <Activity size={14} className="text-primary" />
           </div>
           <div className="p-8 flex-1">
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-5xl font-black text-gray-900 tracking-tighter">{config?.requests_count || 0}</span>
-              <span className="text-sm font-black text-gray-400 uppercase tracking-widest">/ {config?.requests_limit || 0} reqs</span>
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-4xl font-black text-gray-900 tracking-tighter">{config?.requests_count || 0}</span>
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">/ {config?.requests_limit || 0}</span>
             </div>
+            <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ease-out ${usagePercent > 80 ? 'bg-orange-400' : 'bg-primary'}`}
+                style={{ width: `${usagePercent}%` }}
+              />
+            </div>
+          </div>
+        </div>
 
-            <div className="space-y-3">
-              <div className="h-4 w-full bg-gray-100 rounded-full overflow-hidden p-1">
-                <div
-                  className={`h-full rounded-full transition-all duration-1000 ease-out ${usagePercent > 80 ? 'bg-orange-400' : 'bg-primary'}`}
-                  style={{ width: `${usagePercent}%` }}
-                />
-              </div>
-              <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest">
-                <span className="text-gray-400">{usagePercent}% utilizado</span>
-                {usagePercent > 90 && (
-                  <span className="text-orange-500 flex items-center gap-1">
-                    <AlertCircle size={12} /> Limite próximo
-                  </span>
-                )}
-              </div>
+        {/* Size Charts Card */}
+        <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex items-center justify-between">
+            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest leading-none">Tabelas</h3>
+            <Ruler size={14} className="text-primary" />
+          </div>
+          <div className="p-8 flex-1">
+            <div className="mb-2">
+              <span className="text-4xl font-black text-gray-900 tracking-tighter">{sizeChartsCount || 0}</span>
             </div>
+            <p className="text-[10px] font-bold text-gray-400 leading-tight uppercase tracking-wide">
+              Tabelas de medidas criadas
+            </p>
+          </div>
+          <div className="p-6 pt-0 mt-auto">
+            <Link href="/dashboard/tabela-de-medidas" className="w-full">
+              <Button variant="ghost" className="w-full font-black rounded-xl h-10 text-xs border border-gray-100" size="sm">
+                Ver Tabelas
+              </Button>
+            </Link>
           </div>
         </div>
 
         {/* API Key Card */}
         <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
           <div className="p-6 border-b border-gray-50 bg-gray-50/50 flex items-center justify-between">
-            <h3 className="text-lg font-black text-gray-900">Credenciais</h3>
-            <Key size={18} className="text-primary" />
+            <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest leading-none">Integração</h3>
+            <Key size={14} className="text-primary" />
           </div>
-          <div className="p-8 flex-1 space-y-4 text-center">
-            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Sua API Key Exclusive</p>
-            <div className="flex items-center justify-center p-4 bg-gray-50 rounded-2xl border border-gray-100 text-xs font-mono break-all font-bold text-gray-600 hover:border-primary/30 transition-colors">
-              <span className="truncate w-full select-all">{config?.api_key || "..."}</span>
+          <div className="p-8 flex-1 space-y-4">
+            <div className="p-3 bg-gray-50 rounded-xl border border-gray-100 text-[10px] font-mono break-all font-bold text-gray-500 text-center">
+              {config?.api_key ? `••••${config.api_key.slice(-8)}` : "..."}
             </div>
-            <p className="text-[10px] font-bold text-gray-400 leading-tight">
-              A chave secreta deve ser mantida em sigilo absoluto para a segurança da sua integração.
+            <p className="text-[9px] font-bold text-gray-400 leading-tight text-center uppercase tracking-tight">
+              Chave de API protegida
             </p>
+          </div>
+          <div className="p-6 pt-0 mt-auto">
+            <Link href="/dashboard/settings" className="w-full">
+              <Button variant="ghost" className="w-full font-black rounded-xl h-10 text-xs border border-gray-100" size="sm">
+                Configurações
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Integration Guide */}
-      <div className="bg-white rounded-[3rem] border border-gray-100 shadow-xl overflow-hidden shadow-primary/5">
-        <div className="p-8 border-b border-gray-50 bg-gray-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary rounded-xl text-white">
-                <Code size={20} />
-              </div>
-              <h3 className="text-2xl font-black text-gray-900 tracking-tight">Snippet de Instalação</h3>
+      <div className="grid gap-8 lg:grid-cols-3">
+        {/* Timeline Chart */}
+        <div className="lg:col-span-2 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+          <div className="p-8 border-b border-gray-50 flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-black text-gray-900">Histórico de Requisições</h3>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Atividade dos últimos 7 dias</p>
             </div>
-            <p className="text-gray-500 font-semibold mt-2">Copie e cole este código antes da tag &lt;/body&gt; da sua loja.</p>
+            <Badge variant="outline" className="rounded-full px-3 py-1 border-emerald-100 text-emerald-600 bg-emerald-50/50 font-black uppercase tracking-widest text-[9px]">
+              Realtime Data
+            </Badge>
           </div>
-          <Badge variant="outline" className="w-fit h-fit rounded-full px-4 py-1.5 border-primary/20 text-primary font-black uppercase tracking-widest text-[10px]">
-            Ready to deploy
-          </Badge>
+          <div className="p-8 pr-12">
+            <RequestsChart logs={logs || []} />
+          </div>
         </div>
-        <div className="p-0">
-          <ScriptSection />
+
+        {/* Resumo e Direcionamento */}
+        <div className="bg-white rounded-[3rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col bg-linear-to-b from-white to-gray-50/50">
+          <div className="p-8 border-b border-gray-50 flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+              <Lightbulb size={20} />
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-gray-900">Próximos Passos</h3>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Insights estratégicos</p>
+            </div>
+          </div>
+          <div className="p-8 space-y-6">
+            <div className="group cursor-pointer">
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-black text-xs shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">1</div>
+                <div>
+                  <h4 className="font-black text-gray-900 text-sm mb-1">Confere suas tabelas?</h4>
+                  <p className="text-xs font-semibold text-gray-500 leading-relaxed">Você tem {sizeChartsCount || 0} tabelas criadas. Quanta mais precisão no cadastro, maior a conversão.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="group cursor-pointer">
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-xs shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">2</div>
+                <div>
+                  <h4 className="font-black text-gray-900 text-sm mb-1">Otimize suas Imagens</h4>
+                  <p className="text-xs font-semibold text-gray-500 leading-relaxed">O Provador Virtual performa melhor com fotos em fundo neutro e boa iluminação.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="group cursor-pointer">
+              <div className="flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center font-black text-xs shrink-0 group-hover:bg-orange-600 group-hover:text-white transition-colors">3</div>
+                <div>
+                  <h4 className="font-black text-gray-900 text-sm mb-1">Acompanhe seu Limite</h4>
+                  <p className="text-xs font-semibold text-gray-500 leading-relaxed">Você está com {usagePercent}% de uso. Evite pausas no serviço antecipando sua renovação.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="p-8 mt-auto">
+            <Link href="/dashboard/tabela-de-medidas">
+              <Button className="w-full gap-2 font-black rounded-2xl h-12 shadow-xl shadow-primary/10">
+                Criar Nova Tabela <ArrowRight size={16} />
+              </Button>
+            </Link>
+          </div>
         </div>
+      </div>
+
+      <div className="overflow-x-auto bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+        <div className="p-8 border-b border-gray-50 flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-black text-gray-900">Logs de Requisições</h3>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Atividade dos últimos 7 dias</p>
+          </div>
+          <Link href="/dashboard/logs">
+            <Badge variant="outline" className="rounded-full px-3 py-1 border-emerald-100 text-emerald-600 bg-emerald-50/50 font-black uppercase tracking-widest text-[9px]">
+              Ver todos
+            </Badge>
+          </Link>
+        </div>
+        <Table>
+          <TableHeader className="bg-gray-50/30">
+            <TableRow className="hover:bg-transparent border-gray-50">
+              <TableHead className="w-[180px] font-bold text-gray-400 uppercase text-[10px] tracking-widest">Data / Hora</TableHead>
+              <TableHead className="font-bold text-gray-400 uppercase text-[10px] tracking-widest">Sessão</TableHead>
+              <TableHead className="font-bold text-gray-400 uppercase text-[10px] tracking-widest">Produto</TableHead>
+              <TableHead className="font-bold text-gray-400 uppercase text-[10px] tracking-widest">Resultado</TableHead>
+              <TableHead className="font-bold text-gray-400 uppercase text-[10px] tracking-widest text-right">Modo</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {logs && logs.length > 0 ? (
+              logs.slice(0, 5).map((log) => (
+                <TableRow key={log.id} className="hover:bg-gray-50/50 transition-colors border-gray-50">
+                  <TableCell className="font-medium text-gray-600 text-sm">
+                    {format(new Date(log.created_at), "dd MMM, HH:mm", { locale: ptBR })}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                        <User size={14} />
+                      </div>
+                      <span className="text-xs font-mono text-gray-400 truncate w-24">
+                        {log.session_id || 'N/A'}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-16 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex-shrink-0 shadow-sm relative group">
+                        <img src={log.product_image_url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Product" />
+                        <a
+                          href={log.product_image_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                        >
+                          <ExternalLink size={14} className="text-white" />
+                        </a>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-tighter">Produto</span>
+                        <span className="text-[10px] text-gray-400 font-mono truncate w-20">Ref: {log.id.slice(0, 8)}</span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {log.result_image_url ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-16 rounded-lg overflow-hidden border border-emerald-100 bg-emerald-50 flex-shrink-0 shadow-sm relative group">
+                          <img src={log.result_image_url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Result" />
+                          <a
+                            href={log.result_image_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                          >
+                            <ExternalLink size={14} className="text-white" />
+                          </a>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-bold text-emerald-600 uppercase tracking-tighter">Gerado</span>
+                          <Badge className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-200 h-4 text-[9px] w-fit px-1 shadow-none">IA Active</Badge>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-gray-300">
+                        <ImageIcon size={16} />
+                        <span className="italic text-xs font-medium">Pendente</span>
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Badge variant="secondary" className="bg-gray-100 text-gray-500 hover:bg-gray-200 border-none rounded-lg font-bold text-[10px] uppercase">
+                      {log.mode || 'Front'}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} className="h-64 text-center">
+                  <div className="flex flex-col items-center justify-center text-gray-400 gap-2">
+                    <Layers size={48} className="opacity-10" />
+                    <p className="font-bold">Nenhum log encontrado</p>
+                    <p className="text-xs">As atividades dos seus usuários aparecerão aqui.</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   )
