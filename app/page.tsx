@@ -97,7 +97,7 @@ export default function HomePage() {
             Entrar
           </Link>
           <Link
-            href="//signup"
+            href="/signup"
             className="bg-primary hover:opacity-90 text-primary-foreground rounded-full px-6 py-2 text-sm font-bold shadow-xl shadow-primary/10 flex items-center justify-center transition-all active:scale-95"
           >
             Começar Agora

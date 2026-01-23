@@ -112,6 +112,10 @@ export function SizeChartManager({ initialBrands, userId }: { initialBrands: any
     const handleDelete = async (id: string) => {
         if (!confirm("Tem certeza que deseja excluir esta tabela?")) return
 
+        // Delete children first (in case there's no ON DELETE CASCADE)
+        await supabase.from('size_charts').delete().eq('brand_id', id)
+        await supabase.from('size_charts_clothes').delete().eq('brand_id', id)
+
         const { error } = await supabase.from('brands').delete().eq('id', id)
         if (error) {
             alert("Erro ao excluir")
@@ -242,51 +246,81 @@ export function SizeChartManager({ initialBrands, userId }: { initialBrands: any
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {brands.map((brand: any) => (
-                    <Card key={brand.id} className="overflow-hidden border-2 hover:border-blue-200 transition-all">
-                        <CardHeader className="pb-3 bg-gray-50/50 border-b">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Badge variant="outline" className="text-[10px] uppercase font-bold bg-white">
+            <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
+                <Table>
+                    <TableHeader className="bg-gray-50/50">
+                        <TableRow>
+                            <TableHead className="w-[80px]">ID</TableHead>
+                            <TableHead>Nome da Tabela</TableHead>
+                            <TableHead>Categoria</TableHead>
+                            <TableHead>Fôrma / Caimento</TableHead>
+                            <TableHead className="text-center">Qtd. Tamanhos</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Ações</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {brands.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={7} className="h-24 text-center text-gray-500">
+                                    Nenhuma tabela encontrada. Crie a primeira!
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            brands.map((brand: any) => (
+                                <TableRow key={brand.id} className="hover:bg-gray-50 transition-colors">
+                                    <TableCell className="font-mono text-xs text-gray-500">
+                                        #{brand.id}
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="font-semibold text-gray-900">{brand.name}</div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline" className={`
+                                            ${brand.category === 'clothes' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-blue-50 text-blue-700 border-blue-200'}
+                                        `}>
                                             {brand.category === 'clothes' ? 'Roupas' : 'Calçados'}
                                         </Badge>
-                                        <Badge variant={brand.is_public ? "secondary" : "default"}>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-medium text-gray-700">
+                                                {brand.width_score}/5
+                                            </span>
+                                            <span className="text-xs text-gray-400">
+                                                ({brand.category === 'clothes'
+                                                    ? (brand.width_score < 3 ? 'Justo' : brand.width_score > 3 ? 'Oversized' : 'Regular')
+                                                    : (brand.width_score < 3 ? 'Estreita' : brand.width_score > 3 ? 'Larga' : 'Padrão')})
+                                            </span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <span className="inline-flex items-center justify-center px-2 py-1 rounded-md bg-gray-100 text-xs font-bold text-gray-700">
+                                            {brand.category === 'clothes'
+                                                ? (brand.size_charts_clothes?.length || 0)
+                                                : (brand.size_charts?.length || 0)}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant={brand.is_public ? "secondary" : "default"} className="text-[10px]">
                                             {brand.is_public ? "Pública" : "Privada"}
                                         </Badge>
-                                    </div>
-                                    <CardTitle className="text-lg">{brand.name}</CardTitle>
-                                    <CardDescription>ID: {brand.id}</CardDescription>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="pt-4">
-                            <div className="space-y-2 text-sm text-gray-600">
-                                <div className="flex justify-between">
-                                    <span>Pontuação de Largura:</span>
-                                    <span className="font-bold">{brand.width_score}/5</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Tamanhos cadastrados:</span>
-                                    <span className="font-bold">
-                                        {brand.category === 'clothes'
-                                            ? (brand.size_charts_clothes?.length || 0)
-                                            : (brand.size_charts?.length || 0)}
-                                    </span>
-                                </div>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="bg-gray-50/50 border-t p-3 flex justify-end gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => handleEdit(brand)}>
-                                <Edit size={16} className="text-blue-600" />
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleDelete(brand.id)}>
-                                <Trash2 size={16} className="text-red-500" />
-                            </Button>
-                        </CardFooter>
-                    </Card>
-                ))}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex justify-end gap-2">
+                                            <Button variant="ghost" size="icon" onClick={() => handleEdit(brand)} className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                                                <Edit size={16} />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" onClick={() => handleDelete(brand.id)} className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50">
+                                                <Trash2 size={16} />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
             </div>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

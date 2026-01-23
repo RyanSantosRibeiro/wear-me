@@ -190,6 +190,7 @@
             brandId: null,
             categoryScore: null,
             size: null,
+            availableSizes: [],
             result: null,
             loading: false
         },
@@ -312,6 +313,34 @@
             this.render();
         },
 
+        async fetchSizes() {
+            this.state.loading = true;
+            this.render();
+
+            try {
+                const url = `/api/wearme/size-chart?apiKey=${this.config.apiKey}&brandId=${this.state.brandId}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Failed to load sizes');
+
+                const data = await res.json();
+                if (data.charts && Array.isArray(data.charts)) {
+                    this.state.availableSizes = data.charts.map(c => c.size_br).sort((a, b) => a - b);
+                } else {
+                    this.state.availableSizes = [];
+                }
+
+                this.state.step = 3;
+            } catch (e) {
+                console.error(e);
+                alert("Não foi possível carregar os tamanhos para esta marca.");
+                // Fallback or stay on step 2?
+                // For now stay on step 2 but stop loading
+            } finally {
+                this.state.loading = false;
+                this.render();
+            }
+        },
+
         async fetchRecommendation(size) {
             this.state.loading = true;
             this.state.size = size;
@@ -389,8 +418,7 @@
                             <button class="wearme-fms-list-btn" onclick="
                                 FindMySize.state.categoryScore=${c.score}; 
                                 sessionStorage.setItem('wearme_fms_category_score', ${c.score});
-                                FindMySize.state.step=3; 
-                                FindMySize.render()">
+                                FindMySize.fetchSizes()">
                                 <div>
                                     <span class="wearme-fms-list-label">${c.label}</span>
                                     <span class="wearme-fms-list-desc">${c.desc}</span>
@@ -409,11 +437,15 @@
                     <h2 class="wearme-fms-h2">Qual tamanho?</h2>
                     <p class="wearme-fms-p">Selecione o tamanho que fica confortável.</p>
                     <div class="wearme-fms-grid-4">
-                        ${Array.from({ length: 13 }, (_, i) => 34 + i).map(s => `
+                        ${(this.state.availableSizes && this.state.availableSizes.length > 0) ? this.state.availableSizes.map(s => `
                             <button class="wearme-fms-btn-tile" onclick="FindMySize.fetchRecommendation(${s})">
                                 ${s}
                             </button>
-                        `).join('')}
+                        `).join('') : `
+                            <div style="grid-column: span 4; text-align: center; color: #6b7280;">
+                                Nenhum tamanho encontrado para esta marca.
+                            </div>
+                        `}
                     </div>
                 `;
             } else if (step === 4 && result) {
