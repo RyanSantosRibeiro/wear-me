@@ -23,14 +23,21 @@ import {
   Linkedin,
   Instagram,
   Search,
-  Type
+  Type,
+  Plus
 } from "lucide-react"
+
+declare global {
+  interface Window {
+    WearmeBuy: any;
+  }
+}
 import ScriptSection from "@/components/ui/wearme-script-section"
 import { HeroSection } from "@/components/Hero"
 import { FindMySizeDemo } from "@/components/FindMySizeDemo"
 import WearmeScriptSection from "@/components/ui/wearme-script-section"
 import WearmeSizeFinderScriptSection from "@/components/ui/findmysize-script-section"
-
+import WearmeBuyTogetherScriptSection from "@/components/ui/buytogether-script-section"
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -41,8 +48,8 @@ export default function HomePage() {
 <div id="wearme-size-widget"></div>
 <div id="wearme-chart-widget"></div>
 
-<script src="https://wearme.com.br/findMySize.js"></script>
-<script src="https://wearme.com.br/sizeChart.js"></script>
+<script src="https://wearme.vercel.app/findMySize.js"></script>
+<script src="https://wearme.vercel.app/sizeChart.js"></script>
 
 <script>
   // Inicializa Recomendador
@@ -219,12 +226,12 @@ export default function HomePage() {
         {/* Decorative background element */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-50 rounded-full blur-[140px] -z-10 opacity-70" />
 
-
-
         <div id="new-feature-demo">
           <FindMySizeDemo />
         </div>
       </section>
+
+
 
       {/* Specific 3 Steps Section */}
       <section id="como-funciona" className="py-24 px-6 bg-white border-y border-gray-100">
@@ -340,6 +347,141 @@ export default function HomePage() {
               </pre>
             </div> */}
             <WearmeSizeFinderScriptSection />
+          </div>
+        </div>
+      </section>
+
+      {/* Buy Together Demo Section */}
+      <section className="py-24 px-6 bg-white border-t border-gray-100 overflow-hidden relative">
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center space-y-4 mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-full border border-primary/10">
+              <Sparkles size={14} className="text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary">Novo Recurso</span>
+            </div>
+            <h3 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight italic pr-2">Compre o Look Completo</h3>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Monte combinações personalizadas e veja como elas ficam juntas em um único modelo usando IA.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                id: "prod-001",
+                name: "Jaqueta Bomber",
+                price: "R$ 349,00",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTWIp57UgNH6oKnYK8izUKD7BDBs960RggQA&s"
+              },
+              {
+                id: "prod-002",
+                name: "Calça Leg Black",
+                price: "R$ 199,00",
+                image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop"
+              },
+              {
+                id: "prod-003",
+                name: "Sneaker Urban",
+                price: "R$ 289,00",
+                image: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=800&auto=format&fit=crop"
+              }
+            ].map((product) => (
+              <div key={product.id} className="group w-full relative bg-white border border-gray-200 rounded-[2.5rem] shadow-2xl overflow-hidden mx-auto transform transition-transform duration-500 hover:-translate-y-2">
+                {/* Mockup Header (Fixed for both) */}
+                <div className="h-16 border-b border-gray-100 flex items-center justify-between px-6 bg-white z-10 relative">
+                  <div className="w-24 h-4 bg-gray-100 rounded-full" />
+                  <div className="flex gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gray-50" />
+                  </div>
+                </div>
+                {/* Product Image Stage */}
+                <div className="relative aspect-square bg-gray-100 group">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover mix-blend-multiply"
+                  />
+                </div>
+
+                {/* Product Details & Widget */}
+                <div className="p-8 space-y-6 bg-white">
+
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-2xl font-black text-gray-900">{product.name}</h3>
+                      {/* <p className="text-gray-500 font-medium">{product.price}</p> */}
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xl font-bold text-blue-600">{product.price}</span>
+                      <p className="text-xs text-green-600 font-bold">Em estoque</p>
+                    </div>
+                  </div>
+
+                  <button
+                    className="wearme-add w-full py-4 bg-gray-50 hover:bg-primary hover:text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-sm flex items-center justify-center gap-2"
+                    data-wearme-id={product.id}
+                    data-wearme-name={product.name}
+                    data-wearme-image={product.image}
+                  >
+                    <Plus size={16} />
+                    Adicionar ao Look
+                  </button>
+
+                  <button className="w-full h-14 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-colors">
+                    Adicionar ao Carrinho
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+
+          <div className="mt-16 p-8 bg-linear-to-br from-gray-50 to-white rounded-[2.5rem] border border-gray-100 text-center">
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">Como testar?</p>
+            <h4 className="text-xl font-black text-gray-900">Selecione pelo menos 2 produtos acima para ver a mágica acontecer! ✨</h4>
+          </div>
+        </div>
+
+        <Script src="/buy-together-widget.js" strategy="afterInteractive" onLoad={() => {
+          if (window.WearmeBuy) {
+            window.WearmeBuy.init({
+              apiKey: '023ec83bdbf73177a680807fc144bfea', // Use mock key for demo
+              highLightColor: '#000',
+
+            });
+          }
+        }} />
+      </section>
+
+      {/* Installation Section - Buy Together */}
+      <section id="instalacao-buytogether" className="py-24 px-6 bg-slate-900 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-pink-500/10 rounded-full blur-[160px]" />
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div className="space-y-8 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/10 w-fit mx-auto lg:mx-0">
+              <Code size={14} className="text-pink-400" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Setup em 2 minutos</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black leading-tight">Implemente o Buy Together <br /> na sua vitrine.</h2>
+            <ul className="space-y-4 py-4">
+              {[
+                "Ative com uma única tag script",
+                "Gerencie múltiplos itens no look",
+                "Integrado com Gemini 2.5 Image",
+                "Aumente o ticket médio da sua loja"
+              ].map((item, i) => (
+                <li key={i} className="flex items-center justify-center lg:justify-start gap-3">
+                  <CheckCircle2 size={20} className="text-pink-400" />
+                  <span className="font-bold text-gray-300">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="relative group">
+            <WearmeBuyTogetherScriptSection />
           </div>
         </div>
       </section>

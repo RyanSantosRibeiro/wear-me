@@ -195,7 +195,7 @@
         }
 
         .wearme-trigger-btn:hover {
-            background: #000;
+            opacity: 0.8;
             transform: translateY(-1px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
@@ -312,8 +312,8 @@
         }
 
         .wearme-upload-zone:hover {
-            border-color: #3b82f6;
-            background: #eff6ff;
+            border-color: var(--wearme-primary);
+            background: #f3f4f6;
         }
 
         .wearme-upload-icon {
@@ -331,7 +331,7 @@
 
         .wearme-upload-zone:hover .wearme-upload-icon {
             transform: scale(1.1);
-            color: #3b82f6;
+            color: var(--wearme-primary);
         }
 
         .wearme-btn-primary {
@@ -581,7 +581,7 @@
         }
 
         .wearme-btn-success {
-            background: var(--wearme-emerald);
+            background: var(--wearme-primary);
             color: white;
             border: none;
             padding: 0.875rem;

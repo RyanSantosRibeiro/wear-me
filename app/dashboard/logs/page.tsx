@@ -85,17 +85,35 @@ export default async function LogsPage() {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
-                                                <div className="w-12 h-16 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex-shrink-0 shadow-sm relative group">
-                                                    <img src={log.product_image_url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Product" />
-                                                    <a
-                                                        href={log.product_image_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                                                    >
-                                                        <ExternalLink size={14} className="text-white" />
-                                                    </a>
-                                                </div>
+                                                {
+                                                    log.looks_image_url && log.looks_image_url.length > 0 ? log.looks_image_url.map((look:string)=>{
+                                                        return (
+                                                            <div className="w-12 h-16 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex-shrink-0 shadow-sm relative group">
+                                                                <img src={look} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Product" />
+                                                                <a
+                                                                    href={look}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                                                                >
+                                                                    <ExternalLink size={14} className="text-white" />
+                                                                </a>
+                                                            </div>
+                                                        )
+                                                    }) : (
+                                                        <div className="w-12 h-16 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 flex-shrink-0 shadow-sm relative group">
+                                                            <img src={log.product_image_url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Product" />
+                                                            <a
+                                                                href={log.product_image_url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                                                            >
+                                                                <ExternalLink size={14} className="text-white" />
+                                                            </a>
+                                                        </div>
+                                                    )
+                                                }
                                                 <div className="flex flex-col">
                                                     <span className="text-xs font-bold text-gray-500 uppercase tracking-tighter">Produto</span>
                                                     <span className="text-[10px] text-gray-400 font-mono truncate w-20">Ref: {log.id.slice(0, 8)}</span>
