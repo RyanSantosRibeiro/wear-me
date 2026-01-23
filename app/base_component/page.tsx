@@ -18,7 +18,7 @@ export default async function AppsPage() {
   }
 
   if (!profile || profile?.role !== "admin") {
-    redirect("/dashboard")
+    redirect("/dashboard5")
   }
 
   if (!company) {

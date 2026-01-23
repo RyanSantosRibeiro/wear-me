@@ -4,7 +4,7 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-export async function signUp({email, password, name, redirectTo}: {email: string, password: string, name: string, redirectTo: string}) {
+export async function signUp({ email, password, name, redirectTo }: { email: string, password: string, name: string, redirectTo: string }) {
   const supabase = await createClient()
 
   const data = {
@@ -17,7 +17,7 @@ export async function signUp({email, password, name, redirectTo}: {email: string
     email: data.email,
     password: data.password,
     options: {
-      emailRedirectTo: redirectTo || 'https://wearme.vercel.app/auth/callback', 
+      emailRedirectTo: redirectTo || 'https://wearme.vercel.app/auth/callback',
       data: {
         name: data.name,
       },
@@ -25,7 +25,7 @@ export async function signUp({email, password, name, redirectTo}: {email: string
   })
 
   if (error) {
-    console.log({error})
+    console.log({ error })
     return { error: error.message }
   }
 
@@ -33,7 +33,7 @@ export async function signUp({email, password, name, redirectTo}: {email: string
   redirect('/dashboard')
 }
 
-export async function signIn({email, password}: {email: string, password: string}) {
+export async function signIn({ email, password }: { email: string, password: string }) {
   const supabase = await createClient()
 
   const data = {
@@ -78,7 +78,7 @@ export async function signInWithDiscord() {
 }
 
 // recovery
-export async function recoveryPassword({email}: {email: string}) {
+export async function recoveryPassword({ email }: { email: string }) {
   const supabase = await createAdminClient()
 
   const data = {
@@ -98,13 +98,13 @@ export async function recoveryPassword({email}: {email: string}) {
 }
 
 // send new password
-export async function sendNewPassword({new_password}: {new_password: string}) {
+export async function sendNewPassword({ new_password }: { new_password: string }) {
   const supabase = await createAdminClient()
 
 
   const { error } = await supabase.auth.updateUser({
-  password: new_password
-})
+    password: new_password
+  })
 
   if (error) {
     return { error: error.message }

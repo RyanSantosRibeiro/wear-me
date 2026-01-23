@@ -154,20 +154,14 @@
     `;
 
     // Data Mock
-    const BRANDS = [
-        { id: 1, name: "Nike" },
-        { id: 2, name: "Adidas" },
-        { id: 3, name: "Puma" },
-        { id: 4, name: "Zara" }
-    ];
+    // Removed Brand Data
+
 
     const FITS = [
         { id: 1, label: "Slim Fit", desc: "Caimento justo ao corpo" },
         { id: 2, label: "Regular Fit", desc: "Caimento padrão" },
         { id: 3, label: "Oversized", desc: "Caimento largo e solto" }
     ];
-
-    const SIZES = ["PP", "P", "M", "G", "GG", "XG"];
 
     const FindMySizeClothing = {
         config: {
@@ -181,9 +175,12 @@
         },
         state: {
             step: 1,
-            brandId: null,
             fitId: null,
-            size: null,
+            gender: 'male', // male | female
+            height: '',
+            weight: '',
+            age: '',
+            availableSizes: [], // Complete size data from API: [{size_br, chest_min_cm, chest_max_cm, length_cm}]
             result: null,
             loading: false
         },
@@ -196,14 +193,18 @@
             this.createModal();
 
             // Load from Session Storage (Clothing specific keys)
-            const savedBrand = sessionStorage.getItem('wearme_fms_cloth_brand_id');
             const savedFit = sessionStorage.getItem('wearme_fms_cloth_fit_id');
-            const savedSize = sessionStorage.getItem('wearme_fms_cloth_size');
+            const savedGender = sessionStorage.getItem('wearme_fms_cloth_gender');
+            const savedHeight = sessionStorage.getItem('wearme_fms_cloth_height');
+            const savedWeight = sessionStorage.getItem('wearme_fms_cloth_weight');
 
-            if (savedBrand && savedFit && savedSize) {
-                this.state.brandId = parseInt(savedBrand);
+            if (savedFit && savedHeight && savedWeight) {
                 this.state.fitId = parseInt(savedFit);
-                this.state.size = savedSize;
+                this.state.gender = savedGender || 'male';
+                this.state.height = savedHeight;
+                this.state.weight = savedWeight;
+                // Optional: Trigger calculation immediately if all data is present? 
+                // For now, let's just restore state and let user click 'Calculate'
             }
         },
 
@@ -270,14 +271,11 @@
         },
 
         open() {
-            if (this.state.brandId && this.state.fitId && this.state.size && !this.state.result) {
-                this.elements.overlay.classList.add('open');
-                this.mockRecommendation(this.state.size);
-            } else if (!this.state.result) {
-                if (!this.state.brandId) this.reset();
+            if (this.state.result) {
                 this.elements.overlay.classList.add('open');
                 this.render();
             } else {
+                if (!this.state.fitId) this.reset();
                 this.elements.overlay.classList.add('open');
                 this.render();
             }
@@ -288,41 +286,140 @@
         },
 
         reset() {
-            this.state = { step: 1, brandId: null, fitId: null, size: null, result: null, loading: false };
+            this.state = { step: 1, fitId: null, gender: 'male', height: '', weight: '', age: '', result: null, loading: false };
         },
 
         fullReset() {
             this.reset();
-            sessionStorage.removeItem('wearme_fms_cloth_brand_id');
             sessionStorage.removeItem('wearme_fms_cloth_fit_id');
-            sessionStorage.removeItem('wearme_fms_cloth_size');
+            sessionStorage.removeItem('wearme_fms_cloth_gender');
+            sessionStorage.removeItem('wearme_fms_cloth_height');
+            sessionStorage.removeItem('wearme_fms_cloth_weight');
             this.render();
         },
 
-        async mockRecommendation(size) {
+        async fetchSizes() {
             this.state.loading = true;
-            this.state.size = size;
-            sessionStorage.setItem('wearme_fms_cloth_size', size);
             this.render();
 
-            // MOCK DELAY
+            try {
+                // Fetch sizes from the target brand (clothing brand)
+                const url = `/api/wearme/size-chart?apiKey=${this.config.apiKey}&brandId=${this.config.targetBrandId}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Failed to load sizes');
+
+                const data = await res.json();
+
+                // Check if it's clothing category and has charts
+                if (data.category === 'clothes' && data.charts && Array.isArray(data.charts)) {
+                    // Store complete size data (not just size names)
+                    this.state.availableSizes = data.charts;
+                } else {
+                    console.warn('No clothing sizes found or wrong category. Response:', data);
+                    alert(`Esta marca não possui tamanhos de roupas cadastrados. Categoria encontrada: ${data.category || 'desconhecida'}`);
+                    this.state.availableSizes = [];
+                    this.state.step = 1; // Go back to fit selection
+                    this.state.loading = false;
+                    this.render();
+                    return;
+                }
+
+                this.state.step = 2; // Move to body metrics step
+            } catch (e) {
+                console.error(e);
+                alert("Não foi possível carregar os tamanhos para esta marca.");
+                // Stay on step 1
+            } finally {
+                this.state.loading = false;
+                this.render();
+            }
+        },
+
+        async calculateSize() {
+            const { height, weight, age, gender } = this.state;
+            if (!height || !weight || !age) {
+                alert("Por favor, preencha todos os campos.");
+                return;
+            }
+
+            this.state.loading = true;
+            this.render();
+
+            sessionStorage.setItem('wearme_fms_cloth_height', height);
+            sessionStorage.setItem('wearme_fms_cloth_weight', weight);
+            sessionStorage.setItem('wearme_fms_cloth_gender', gender);
+
+            // SIMULATE API/ALGORITHM
             setTimeout(() => {
-                // Mock Logic: If select M, suggest G (oversized) or M (regular). Let's suggest one size up for "comfort".
-                // Simple map for demo
-                const sizeMap = { "PP": "P", "P": "M", "M": "G", "G": "GG", "GG": "XG", "XG": "XXG" };
-                const recommended = sizeMap[size] || size;
+                // Simple BMI/Height heuristic
+                const h = parseInt(height);
+                const w = parseInt(weight);
+                let recommended = "M";
+
+                // Very basic logic for demo purposes
+                // Adjust base on gender
+                if (gender === 'male') {
+                    if (h < 170 && w < 65) recommended = "P";
+                    else if (h < 175 && w < 75) recommended = "M";
+                    else if (h < 185 && w < 90) recommended = "G";
+                    else recommended = "GG";
+                } else {
+                    if (h < 160 && w < 55) recommended = "P";
+                    else if (h < 170 && w < 65) recommended = "M";
+                    else if (h < 175 && w < 75) recommended = "G";
+                    else recommended = "GG";
+                }
+
+                // Adjust for Fit Preference
+                // 1=Slim, 2=Regular, 3=Oversized
+                // If Oversized preference, maybe suggest same size but explain it will be loose?
+                // Or if user wants "Oversized" look, and the shirt IS oversized, we recommend their normal size?
+                // Let's assume the user selects how they WANT it to fit.
+                // If they want tight (Slim), and they measure M, maybe suggest P? 
+                // Or just say "M (Slim Fit)".
+
+                // Let's keep it simple: Map to standard sizes.
+
+                // Use available sizes from API to build comparison
+                const sizesList = this.state.availableSizes;
+
+                // Find the index of recommended size
+                const recIndex = sizesList.findIndex(s => s.size_br === recommended);
+
+                // Build comparison with real data (show 2-3 sizes around the recommended)
+                let comparison = [];
+                if (recIndex !== -1) {
+                    const startIdx = Math.max(0, recIndex - 1);
+                    const endIdx = Math.min(sizesList.length - 1, recIndex + 2);
+
+                    comparison = sizesList.slice(startIdx, endIdx + 1).map(sizeData => ({
+                        size: sizeData.size_br,
+                        chest_min_cm: sizeData.chest_min_cm,
+                        chest_max_cm: sizeData.chest_max_cm,
+                        length_cm: sizeData.length_cm,
+                        is_recommended: sizeData.size_br === recommended,
+                        status: sizeData.size_br === recommended ? 'ok' :
+                            (sizesList.indexOf(sizeData) < recIndex ? 'tight' : 'loose')
+                    }));
+                } else {
+                    // Fallback if recommended size not found in list
+                    comparison = sizesList.slice(0, 4).map(sizeData => ({
+                        size: sizeData.size_br,
+                        chest_min_cm: sizeData.chest_min_cm,
+                        chest_max_cm: sizeData.chest_max_cm,
+                        length_cm: sizeData.length_cm,
+                        is_recommended: sizeData.size_br === recommended,
+                        status: 'ok'
+                    }));
+                }
 
                 this.state.result = {
                     recommended_size: recommended,
                     confidence_level: "high",
-                    reasoning: "Baseado no caimento Regular Fit da Nike, este tamanho oferece o conforto ideal para você.",
-                    comparison: [
-                        { size: size, measure_cm: 50, status: 'tight', is_recommended: false },
-                        { size: recommended, measure_cm: 52, status: 'ok', is_recommended: true },
-                        { size: sizeMap[recommended] || "XXG", measure_cm: 54, status: 'loose', is_recommended: false }
-                    ]
+                    reasoning: `Baseado em seu peso (${w}kg) e altura (${h}cm), o tamanho ${recommended} é o ideal para o caimento que você escolheu.`,
+                    comparison: comparison
                 };
-                this.state.step = 4;
+                this.state.step = 3; // Result step
                 this.state.loading = false;
                 this.render();
             }, 1500);
@@ -344,37 +441,16 @@
             }
 
             if (step === 1) {
-                indicator.textContent = "Passo 1 de 3";
+                indicator.textContent = "Passo 1 de 2";
                 container.innerHTML = `
-                    <h2 class="wearme-fms-clothing-h2">Qual marca você usa?</h2>
-                    <p class="wearme-fms-clothing-p">Selecione uma marca de suas camisetas favoritas.</p>
-                    <div class="wearme-fms-clothing-grid-2">
-                        ${BRANDS.map(b => `
-                            <button class="wearme-fms-clothing-btn-tile" onclick="
-                                FindMySizeClothing.state.brandId=${b.id}; 
-                                sessionStorage.setItem('wearme_fms_cloth_brand_id', ${b.id});
-                                FindMySizeClothing.state.step=2; 
-                                FindMySizeClothing.render()">
-                                ${b.name}
-                            </button>
-                        `).join('')}
-                    </div>
-                `;
-            } else if (step === 2) {
-                indicator.textContent = "Passo 2 de 3";
-                container.innerHTML = `
-                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem">
-                        <button onclick="FindMySizeClothing.state.step=1; FindMySizeClothing.render()" style="background:none; border:none; cursor:pointer; font-weight:700; color:#6b7280">< Voltar</button>
-                    </div>
                     <h2 class="wearme-fms-clothing-h2">Qual o caimento?</h2>
-                    <p class="wearme-fms-clothing-p">Como você gosta que a camiseta fique?</p>
+                    <p class="wearme-fms-clothing-p">Como você gosta que a peça fique no corpo?</p>
                     <div style="display:grid; grid-template-columns: 1fr; gap:0.5rem">
                         ${FITS.map(c => `
                             <button class="wearme-fms-clothing-list-btn" onclick="
                                 FindMySizeClothing.state.fitId=${c.id}; 
                                 sessionStorage.setItem('wearme_fms_cloth_fit_id', ${c.id});
-                                FindMySizeClothing.state.step=3; 
-                                FindMySizeClothing.render()">
+                                FindMySizeClothing.fetchSizes()">
                                 <div>
                                     <span class="wearme-fms-clothing-list-label">${c.label}</span>
                                     <span class="wearme-fms-clothing-list-desc">${c.desc}</span>
@@ -384,23 +460,60 @@
                         `).join('')}
                     </div>
                 `;
-            } else if (step === 3) {
-                indicator.textContent = "Passo 3 de 3";
+            } else if (step === 2) {
+                indicator.textContent = "Passo 2 de 2";
+                const { gender, height, weight, age } = this.state;
+
                 container.innerHTML = `
                     <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem">
-                        <button onclick="FindMySizeClothing.state.step=2; FindMySizeClothing.render()" style="background:none; border:none; cursor:pointer; font-weight:700; color:#6b7280">< Voltar</button>
+                        <button onclick="FindMySizeClothing.state.step=1; FindMySizeClothing.render()" style="background:none; border:none; cursor:pointer; font-weight:700; color:#6b7280">< Voltar</button>
                     </div>
-                    <h2 class="wearme-fms-clothing-h2">Qual tamanho?</h2>
-                    <p class="wearme-fms-clothing-p">Selecione o tamanho que você costuma usar.</p>
-                    <div class="wearme-fms-clothing-grid-2">
-                        ${SIZES.map(s => `
-                            <button class="wearme-fms-clothing-btn-tile" onclick="FindMySizeClothing.mockRecommendation('${s}')">
-                                ${s}
-                            </button>
-                        `).join('')}
+                    <h2 class="wearme-fms-clothing-h2">Suas Medidas</h2>
+                    <p class="wearme-fms-clothing-p">Preencha os dados abaixo para calcularmos o melhor tamanho.</p>
+
+                    <div style="margin-bottom: 1.5rem; display:flex; gap: 1rem; background:#f9fafb; padding:0.25rem; border-radius:1rem; width:fit-content">
+                        <button 
+                            onclick="FindMySizeClothing.state.gender='male'; FindMySizeClothing.render()"
+                            style="padding:0.5rem 1.5rem; border-radius:0.75rem; border:none; cursor:pointer; font-weight:700; transition:all 0.2s; ${gender === 'male' ? 'background:white; shadow:sm; color:black' : 'background:transparent; color:#6b7280'}">
+                            Masculino
+                        </button>
+                        <button 
+                            onclick="FindMySizeClothing.state.gender='female'; FindMySizeClothing.render()"
+                            style="padding:0.5rem 1.5rem; border-radius:0.75rem; border:none; cursor:pointer; font-weight:700; transition:all 0.2s; ${gender === 'female' ? 'background:white; shadow:sm; color:black' : 'background:transparent; color:#6b7280'}">
+                            Feminino
+                        </button>
                     </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1.5rem">
+                         <div>
+                            <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; margin-bottom:0.5rem; color:#374151">Altura (cm)</label>
+                            <input type="number" placeholder="ex: 175" value="${height}" 
+                                oninput="FindMySizeClothing.state.height=this.value"
+                                style="width:100%; padding:0.75rem; border:2px solid #e5e7eb; border-radius:0.75rem; font-weight:600; font-size:1rem; outline:none;"
+                            />
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; margin-bottom:0.5rem; color:#374151">Peso (kg)</label>
+                            <input type="number" placeholder="ex: 70" value="${weight}" 
+                                oninput="FindMySizeClothing.state.weight=this.value"
+                                style="width:100%; padding:0.75rem; border:2px solid #e5e7eb; border-radius:0.75rem; font-weight:600; font-size:1rem; outline:none;"
+                            />
+                        </div>
+                         <div>
+                            <label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; margin-bottom:0.5rem; color:#374151">Idade</label>
+                            <input type="number" placeholder="ex: 25" value="${age}" 
+                                oninput="FindMySizeClothing.state.age=this.value"
+                                style="width:100%; padding:0.75rem; border:2px solid #e5e7eb; border-radius:0.75rem; font-weight:600; font-size:1rem; outline:none;"
+                            />
+                        </div>
+                    </div>
+
+                    <button onclick="FindMySizeClothing.calculateSize()" 
+                        style="width:100%; padding:1rem; background:var(--wm-fms-clothing-primary); color:white; border:none; border-radius:1rem; font-weight:700; cursor:pointer; font-size:1.125rem; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2)">
+                        Calcular Tamanho
+                    </button>
                 `;
-            } else if (step === 4 && result) {
+            } else if (step === 3 && result) {
                 indicator.textContent = "Resultado";
                 const refCm = 50; // Mock base cm
 
@@ -415,7 +528,7 @@
                                 <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:#4b5563">Confiança ${result.confidence_level === 'high' ? 'Alta' : 'Média'}</span>
                              </div>
                              <p style="color:#4b5563; font-weight:500; font-size:0.875rem; margin:0">"${result.reasoning}"</p>
-                        </div>
+                         </div>
 
                         <div class="wearme-fms-clothing-comparison">
                             <p style="font-size:0.75rem; font-weight:700; color:#9ca3af; text-transform:uppercase; margin-bottom:0.25rem">Comparativo</p>

@@ -94,7 +94,7 @@ export const FindMySizeDemo = () => {
                     window.FindMySizeClothing.init({
                         buttonSelector: "#find-my-size-clothing-container",
                         apiKey: "023ec83bdbf73177a680807fc144bfea",
-                        targetBrandId: 2, // Nike (Mocked Target)
+                        targetBrandId: 14, // Marca de roupas (category='clothes')
                         // Using the NIKE image from the USER EDIT
                         productImage: "https://imgcentauro-a.akamaihd.net/800x800/9974HJ31A6.jpg",
                         productName: "Camiseta Nike Sportswear",
