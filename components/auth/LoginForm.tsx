@@ -27,10 +27,18 @@ export const LoginForm: React.FC<any> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
     const data = await onLogin(formData)
     console.log({ data })
-    if(data.code === 'email_not_confirmed') {
-      setError('Email não confirmado! Verifique sua caixa de emails.')
+
+    if (data?.error) {
+      if (data.code === 'email_not_confirmed') {
+        setError('Email não confirmado! Verifique sua caixa de emails.')
+      } else if (data.error === 'Invalid login credentials') {
+        setError('Email ou senha incorretos.')
+      } else {
+        setError(data.error)
+      }
     }
   }
 
@@ -46,8 +54,8 @@ export const LoginForm: React.FC<any> = ({
 
       const supabase = await createClient();
       const { data: session, error } = await supabase.auth.exchangeCodeForSession(code!);
-      console.log({code})
-      console.log({session, error})
+      console.log({ code })
+      console.log({ session, error })
 
       if (session?.user) {
         return redirect('/dashboard');

@@ -37,11 +37,23 @@ export function SecuritySettings() {
     const supabase = createClient()
 
     try {
-      const { error } = await supabase.auth.updateUser({
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user?.email) throw new Error("Usuário não identificado")
+
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      })
+
+      if (signInError) {
+        throw new Error("Senha atual incorreta")
+      }
+
+      const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       })
 
-      if (error) throw error
+      if (updateError) throw updateError
 
       toast({
         title: "Sucesso",
