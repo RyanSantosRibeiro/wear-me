@@ -70,16 +70,16 @@ export async function POST(req: NextRequest) {
         // Security Check: Site URL verification
         console.log("Verification:")
         // Comentado para teste local
-        // if (config.site_url) {
-        //     const origin = req.headers.get("origin") || req.headers.get("referer");
-        //     console.log("Origin:", origin);
-        //     console.log("Site URL:", config.site_url);
-        //     // Simple inclusion check to handle protocol variations (http/https)
-        //     if (origin !== "http://localhost:3000" && (!origin || !origin.includes(config.site_url))) {
-        //         console.warn(`Blocked request from unauthorized origin: ${origin} (Expected: ${config.site_url})`);
-        //         return NextResponse.json({ error: "Unauthorized Domain" }, { status: 403 });
-        //     }
-        // }
+        if (config.site_url) {
+            const origin = req.headers.get("origin") || req.headers.get("referer");
+            console.log("Origin:", origin);
+            console.log("Site URL:", config.site_url);
+            // Simple inclusion check to handle protocol variations (http/https)
+            if (origin !== "http://localhost:3000" && (!origin || !origin.includes(config.site_url))) {
+                console.warn(`Blocked request from unauthorized origin: ${origin} (Expected: ${config.site_url})`);
+                return NextResponse.json({ error: "Unauthorized Domain" }, { status: 403 });
+            }
+        }
 
         // 2. Cache Recovery (If no new image is provided, just get the latest)
         if (!userImage && sessionId) {

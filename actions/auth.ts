@@ -86,7 +86,7 @@ export async function recoveryPassword({ email }: { email: string }) {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-    redirectTo: 'http://localhost:3000/auth/reset_password',
+    redirectTo: 'https://wearme.vercel.app/auth/reset_password',
   })
 
   if (error) {
