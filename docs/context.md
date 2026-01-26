@@ -28,7 +28,7 @@ O "produto" entregue é um script JS que a loja instala. Ele é responsável por
 
 ```html
 <!-- 1. Adicione o script do Wearme no seu site -->
-<script src="https://api.wearme.com/widget.js"></script>
+<script src="https://api.wearme.com/WearMe.js"></script>
 
 <!-- 2. Configure o provador virtual -->
 <script>

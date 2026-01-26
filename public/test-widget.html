@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,15 +20,17 @@
             justify-content: center;
             min-height: 100vh;
         }
+
         .product-card {
             background: white;
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             max-width: 400px;
             width: 90%;
             text-align: center;
         }
+
         .product-image {
             width: 100%;
             aspect-ratio: 3/4;
@@ -35,28 +38,39 @@
             border-radius: 12px;
             margin-bottom: 20px;
         }
-        h1 { margin: 0 0 10px 0; font-size: 24px; font-weight: 800; }
-        p { color: #666; margin-bottom: 30px; }
-        
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
         #wearme-btn {
             width: 100%;
         }
     </style>
 </head>
+
 <body>
 
     <div class="product-card">
-        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop" class="product-image" alt="Produto">
+        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop"
+            class="product-image" alt="Produto">
         <h1>Conjunto Sportswear</h1>
         <p>Premium athletic wear for your daily performance.</p>
-        
+
         <!-- 3. Elemento Alvo -->
         <div id="wearme-btn"></div>
     </div>
 
     <!-- 1. Importa o Widget -->
-    <script src="/widget.js"></script>
-    
+    <script src="/WearMe.js"></script>
+
     <!-- 2. Configura -->
     <script>
         Wearme.init({
@@ -66,4 +80,5 @@
         });
     </script>
 </body>
+
 </html>

@@ -27,8 +27,8 @@ export default function SizeFinderPage() {
 <div id="wearme-size-widget"></div>
 <div id="wearme-chart-widget"></div>
 
-<script src="https://wearme.vercel.app/findMySize.js"></script>
-<script src="https://wearme.vercel.app/sizeChart.js"></script>
+<script src="https://wearme.vercel.app/WearMeFindMySize.js"></script>
+<script src="https://wearme.vercel.app/WearMeSizeChart.js"></script>
 
 <script>
   // Inicializa Recomendador

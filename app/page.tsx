@@ -48,8 +48,8 @@ export default function HomePage() {
 <div id="wearme-size-widget"></div>
 <div id="wearme-chart-widget"></div>
 
-<script src="https://wearme.vercel.app/findMySize.js"></script>
-<script src="https://wearme.vercel.app/sizeChart.js"></script>
+<script src="https://wearme.vercel.app/WearMeFindMySize.js"></script>
+<script src="https://wearme.vercel.app/WearMeSizeChart.js"></script>
 
 <script>
   // Inicializa Recomendador
@@ -94,8 +94,8 @@ export default function HomePage() {
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-muted-foreground">
           <a href="#demo" className="hover:text-primary transition-colors">WearMe</a>
-          <a href="#integration" className="hover:text-primary transition-colors">Instalação</a>
-          <a href="#new-feature-demo" className="hover:text-primary transition-colors">WearMe - Fit</a>
+          <a href="#new-feature-demo" className="hover:text-primary transition-colors">FindMySize</a>
+          <a href="#looks-creator" className="hover:text-primary transition-colors">Looks Creator</a>
           <a href="#pricing" className="hover:text-primary transition-colors">Planos</a>
           <a href="#contact" className="hover:text-primary transition-colors">Contato</a>
         </div>
@@ -221,6 +221,13 @@ export default function HomePage() {
         </div>
       </section >
 
+
+
+
+
+
+
+
       {/* New Feature: Find My Size & Size Chart */}
       <section className="bg-[#fcfdff] pt-24 border-t border-gray-100 relative overflow-hidden">
         {/* Decorative background element */}
@@ -230,8 +237,6 @@ export default function HomePage() {
           <FindMySizeDemo />
         </div>
       </section>
-
-
 
       {/* Specific 3 Steps Section */}
       <section id="como-funciona" className="py-24 px-6 bg-white border-y border-gray-100">
@@ -351,8 +356,20 @@ export default function HomePage() {
         </div>
       </section>
 
+
+
+
+
+
+
+
+
+
+
+
+
       {/* Buy Together Demo Section */}
-      <section className="py-24 px-6 bg-white border-t border-gray-100 overflow-hidden relative">
+      <section id="looks-creator" className="py-24 px-6 bg-white border-t border-gray-100 overflow-hidden relative">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
 
         <div className="max-w-7xl mx-auto relative z-10">
@@ -444,7 +461,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <Script src="/buy-together-widget.js" strategy="afterInteractive" onLoad={() => {
+        <Script src="/WearMeBuyTogether.js" strategy="afterInteractive" onLoad={() => {
           if (window.WearmeBuy) {
             window.WearmeBuy.init({
               apiKey: '023ec83bdbf73177a680807fc144bfea', // Use mock key for demo

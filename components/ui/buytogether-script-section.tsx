@@ -5,7 +5,7 @@ import { Check, Copy } from "lucide-react"
 export default function WearmeBuyTogetherScriptSection() {
     const [copied, setCopied] = useState(false)
     const installScript = `<!-- Wearme Buy Together Widget -->
-<script src="https://wearme.vercel.app/buy-together-widget.js"></script>
+<script src="https://wearme.vercel.app/WearMeBuyTogether.js"></script>
 
 <script>
   window.WearmeBuy.init({
@@ -45,7 +45,7 @@ export default function WearmeBuyTogetherScriptSection() {
                     <pre className="text-sm font-mono leading-relaxed">
                         <code className="text-blue-300">
                             {`<!-- Wearme Buy Together Widget -->
-<script src="https://wearme.vercel.app/buy-together-widget.js"></script>
+<script src="https://wearme.vercel.app/WearMeBuyTogether.js"></script>
 
 <script>`}
                         </code>

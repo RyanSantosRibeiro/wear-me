@@ -1,5 +1,5 @@
 "use client"
-import { ArrowRight, Dumbbell, Expand, Glasses, Shirt, ShoppingBag } from "lucide-react";
+import { ArrowRight, Dumbbell, Expand, Glasses, Shirt, ShoppingBag, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
@@ -99,12 +99,9 @@ export const HeroSection = () => {
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-20 items-center h-auto">
         {/* Left Column: Text Content */}
         <div className="space-y-8 text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-primary/10 shadow-sm animate-bounce-subtle mx-auto lg:mx-0">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tecnologia Gemini IA</span>
+          <div className="inline-flex items-start gap-2 px-4 py-2 bg-green-50 rounded-full border border-green-100 text-green-600 mb-2">
+            <Sparkles size={14} />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Evolua a jornada do seu cliente</span>
           </div>
 
           <h1 className="text-5xl md:text-4xl lg:text-6xl font-black tracking-tight text-foreground leading-[0.95]">
@@ -153,7 +150,7 @@ export const HeroSection = () => {
         {/* Right Column: PDP Simulation (The "Wearme" Interface) */}
         <div className={`relative w-full max-w-lg mx-auto lg:max-w-none h-auto ${!out ? `animate-${selectedCategory}` : 'animate-out'} hover:rotate-1 transition-transform duration-500`}>
           {/* 3D Floating Effect Container */}
-          <div id="wearme-container" className="wearme-container relative bg-white border border-border rounded-[2.5rem] shadow-2xl shadow-primary/10 overflow-hidden min-h-[90vh] md:min-h-[55vh] flex items-center justify-center transform hover:rotate-y-1 transition-transform duration-500">
+          <div id="wearme-container" className="wearme-container relative bg-white border border-border rounded-[2.5rem] shadow-2xl shadow-primary/10 overflow-hidden min-h-[90vh] md:min-h-[40vh] flex items-center justify-center transform hover:rotate-y-1 transition-transform duration-500">
 
             {/* Background: Product Page Mockup */}
             <div id="wearme-background" className={`absolute inset-0 flex flex-col transition-all duration-500 h-fit ${isModalOpen ? 'opacity-30 scale-95 blur-sm' : 'opacity-100 scale-100'}`}>
@@ -194,7 +191,7 @@ export const HeroSection = () => {
                   <div className="pt-2">
                     <div id="wearme-btn" ref={wearmeBtnRef}></div>
 
-                    <Script src="/widget.js" strategy="afterInteractive" onLoad={() => {
+                    <Script src="/WearMe.js" strategy="afterInteractive" onLoad={() => {
                       // @ts-ignore
                       if (window.Wearme) {
                         // @ts-ignore

@@ -647,7 +647,7 @@
             apiKey: '',
             productImage: '',
             buttonSelector: '',
-            apiUrl: 'https://wearme.vercel.app/api/wearme/generate', // Fallback to production URL
+            apiUrl: 'http://localhost:3000/api/wearme/generate', // Fallback to production URL
             brandName: 'Wearme AI v2.0',
             highlightColor: '#111827',
             logoUrl: ''
@@ -701,7 +701,7 @@
                 // For status check url locally
                 this.config.statusUrl = '/api/wearme/status';
             } else {
-                this.config.statusUrl = 'https://wearme.vercel.app/api/wearme/status';
+                this.config.statusUrl = 'http://localhost:3000/api/wearme/status';
             }
 
             // Check API Status before rendering anything

@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createAdminClient } from "@/lib/supabase/server";
 import sharp from "sharp";
+import { MODERATE_PROMPT } from "@/utils/prompts/moderate";
+
+function withCORS(req: NextRequest, res: NextResponse) {
+    const origin = req.headers.get("origin") ?? "null";
+
+    res.headers.set("Access-Control-Allow-Origin", origin);
+    res.headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.headers.set("Access-Control-Allow-Headers", "Content-Type");
+    res.headers.set("Vary", "Origin");
+
+    return res;
+}
+
+export async function OPTIONS(req: NextRequest) {
+    return withCORS(req, new NextResponse(null, { status: 200 }));
+}
+
 
 export async function POST(req: NextRequest) {
     try {
@@ -26,25 +43,43 @@ export async function POST(req: NextRequest) {
             .single();
 
         if (configError || !config) {
-            return NextResponse.json({ error: "Invalid API Key" }, { status: 401 });
+            return withCORS(
+                req,
+                NextResponse.json({ error: "Invalid API Key" }, { status: 401 })
+            );
+        }
+
+        // Fetch subscription to check features
+        const { data: subscription } = await supabase
+            .from("subscriptions")
+            .select("*")
+            .eq("user_id", config.owner_id)
+            .maybeSingle();
+
+        if (subscription) {
+            (config as any).subscription = subscription.metadata || subscription;
         }
 
         if (!config.site_url) {
-            return NextResponse.json({ error: "Site URL not configured" }, { status: 401 });
+            return withCORS(
+                req,
+                NextResponse.json({ error: "Site URL not configured" }, { status: 401 })
+            );
         }
 
         // Security Check: Site URL verification
         console.log("Verification:")
-        if (config.site_url) {
-            const origin = req.headers.get("origin") || req.headers.get("referer");
-            console.log("Origin:", origin);
-            console.log("Site URL:", config.site_url);
-            // Simple inclusion check to handle protocol variations (http/https)
-            if (origin !== "http://localhost:3000" && (!origin || !origin.includes(config.site_url))) {
-                console.warn(`Blocked request from unauthorized origin: ${origin} (Expected: ${config.site_url})`);
-                return NextResponse.json({ error: "Unauthorized Domain" }, { status: 403 });
-            }
-        }
+        // Comentado para teste local
+        // if (config.site_url) {
+        //     const origin = req.headers.get("origin") || req.headers.get("referer");
+        //     console.log("Origin:", origin);
+        //     console.log("Site URL:", config.site_url);
+        //     // Simple inclusion check to handle protocol variations (http/https)
+        //     if (origin !== "http://localhost:3000" && (!origin || !origin.includes(config.site_url))) {
+        //         console.warn(`Blocked request from unauthorized origin: ${origin} (Expected: ${config.site_url})`);
+        //         return NextResponse.json({ error: "Unauthorized Domain" }, { status: 403 });
+        //     }
+        // }
 
         // 2. Cache Recovery (If no new image is provided, just get the latest)
         if (!userImage && sessionId) {
@@ -59,11 +94,14 @@ export async function POST(req: NextRequest) {
                 .single();
 
             if (lastLog) {
-                return NextResponse.json({
-                    success: true,
-                    imageUrl: lastLog.result_image_url,
-                    analysis: lastLog.analysis || "Resultado recuperado."
-                });
+                return withCORS(
+                    req,
+                    NextResponse.json({
+                        success: true,
+                        imageUrl: lastLog.result_image_url,
+                        analysis: lastLog.analysis || "Resultado recuperado."
+                    })
+                );
             }
             return NextResponse.json({ error: "No previous result found" }, { status: 404 });
         }
@@ -83,11 +121,14 @@ export async function POST(req: NextRequest) {
         if (!apiKey) {
             console.warn("Using Mock Response (No API Key)");
             await new Promise(r => setTimeout(r, 2000));
-            return NextResponse.json({
-                success: true,
-                imageUrl: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
-                analysis: "Simulated analysis: Fit looks perfect."
-            });
+            return withCORS(
+                req,
+                NextResponse.json({
+                    success: true,
+                    imageUrl: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
+                    analysis: "Simulated analysis: Fit looks perfect."
+                })
+            );
         }
 
         const genAI = new GoogleGenerativeAI(apiKey);
@@ -122,29 +163,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Strategy: Advanced Visual Synthesis (Bypassing recitation filters)
-        let prompt = `
-Task: Digital Fashion Portrait.
-
-Create a new, highly detailed photograph of a person in a professional fashion setting.
-
-- SUBJECT:
-Capture the likeness, facial features, and body structure of the individual in Reference 1.
-
-- ITEM TYPE HANDLING:
-If Reference 2 depicts a garment, dress the subject wearing the clothing with similar design, color palette, materials, and fit.
-If Reference 2 depicts an accessory (such as glasses, jewelry, watch, bag, or footwear), generate the subject naturally wearing or holding the accessory in a realistic and context-appropriate way.
-
-- ATTIRE & STYLING:
-When applicable, ensure the accessory integrates naturally with the subject’s outfit, respecting proportions, placement, and realistic interaction with the body.
-
-- ATMOSPHERE:
-Set the scene with professional studio lighting and a clean background inspired by the aesthetics of Reference 2.
-
-Goal:
-Synthesize a completely original image that blends the identity from Reference 1 with the fashion item and environment of Reference 2.
-Ensure all elements interact naturally with the subject’s anatomy.
-The final image must be a unique creative work, not a copy of either reference.
-`;
+        let prompt = MODERATE_PROMPT;
 
         if (mode === 'angles') {
             prompt += " Generate a collage showing the person from front, side, and back views.";
@@ -196,25 +215,33 @@ The final image must be a unique creative work, not a copy of either reference.
                         const folderPath = `${clientApiKey}`;
                         const filePath = `${folderPath}/${fileName}`;
 
-                        console.log(`Uploading to storage: ${filePath}`);
-                        const { data: uploadData, error: uploadError } = await supabase.storage
-                            .from("vton-results")
-                            .upload(filePath, processedBuffer, {
-                                contentType: "image/png",
-                                cacheControl: "3600",
-                                upsert: false
-                            });
+                        // 3.1 Conditional preservation based on features
+                        const isPersistenceEnabled = (config as any)?.subscription?.features?.wearme?.enable === true;
 
-                        if (uploadError) {
-                            console.error("Storage upload error:", uploadError);
-                            // Fallback to data URL but smaller
-                            resultImageUrl = `data:image/png;base64,${processedBuffer.toString("base64")}`;
-                        } else {
-                            const { data: { publicUrl } } = supabase.storage
+                        if (isPersistenceEnabled) {
+                            console.log(`Uploading to storage: ${filePath}`);
+                            const { data: uploadData, error: uploadError } = await supabase.storage
                                 .from("vton-results")
-                                .getPublicUrl(filePath);
-                            resultImageUrl = publicUrl;
-                            console.log("Image stored successfully:", resultImageUrl);
+                                .upload(filePath, processedBuffer, {
+                                    contentType: "image/png",
+                                    cacheControl: "3600",
+                                    upsert: false
+                                });
+
+                            if (uploadError) {
+                                console.error("Storage upload error:", uploadError);
+                                // Fallback to data URL but smaller
+                                resultImageUrl = `data:image/png;base64,${processedBuffer.toString("base64")}`;
+                            } else {
+                                const { data: { publicUrl } } = supabase.storage
+                                    .from("vton-results")
+                                    .getPublicUrl(filePath);
+                                resultImageUrl = publicUrl;
+                                console.log("Image stored successfully:", resultImageUrl);
+                            }
+                        } else {
+                            console.log("Persistence disabled by plan. Returning data URL.");
+                            resultImageUrl = `data:image/png;base64,${processedBuffer.toString("base64")}`;
                         }
                     } catch (sharpError) {
                         console.error("Sharp processing error:", sharpError);
@@ -240,35 +267,42 @@ The final image must be a unique creative work, not a copy of either reference.
             resultImageUrl = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop";
         }
 
-        // 4. Log and Update Usage
-        try {
-            // Update request count
-            await supabase
-                .from("wearme_configs")
-                .update({ requests_count: (config.requests_count || 0) + 1 })
-                .eq("id", config.id);
+        // 4. Log and Update Usage (Only if persistence is enabled)
+        const isPersistenceEnabled = (config as any)?.subscription?.features?.wearme?.enable === true;
 
-            // Insert log
-            await supabase
-                .from("wearme_logs")
-                .insert({
-                    config_id: config.id,
-                    api_key: clientApiKey,
-                    session_id: sessionId,
-                    product_image_url: productImage,
-                    result_image_url: resultImageUrl,
-                    mode: mode,
-                    consent_data: consentData
-                });
-        } catch (logError) {
-            console.error("Failed to log request:", logError);
+        if (isPersistenceEnabled) {
+            try {
+                // Update request count
+                await supabase
+                    .from("wearme_configs")
+                    .update({ requests_count: (config.requests_count || 0) + 1 })
+                    .eq("id", config.id);
+
+                // Insert log
+                await supabase
+                    .from("wearme_logs")
+                    .insert({
+                        config_id: config.id,
+                        api_key: clientApiKey,
+                        session_id: sessionId,
+                        product_image_url: productImage,
+                        result_image_url: resultImageUrl,
+                        mode: mode,
+                        consent_data: consentData
+                    });
+            } catch (logError) {
+                console.error("Failed to log request:", logError);
+            }
         }
 
-        return NextResponse.json({
-            success: true,
-            imageUrl: resultImageUrl,
-            analysis: analysisText
-        });
+        return withCORS(
+            req,
+            NextResponse.json({
+                success: true,
+                imageUrl: resultImageUrl,
+                analysis: analysisText
+            })
+        );
 
     } catch (error: any) {
         console.error("VTON Generation Error:", error);
@@ -283,9 +317,12 @@ The final image must be a unique creative work, not a copy of either reference.
             });
         }
 
-        return NextResponse.json(
-            { error: "Failed to process try-on" },
-            { status: 500 }
+        return withCORS(
+            req,
+            NextResponse.json(
+                { error: "Failed to process try-on" },
+                { status: 500 }
+            )
         );
     }
 }

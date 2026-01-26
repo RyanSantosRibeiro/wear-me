@@ -18,11 +18,11 @@ export const FindMySizeDemo = () => {
                             <div className="text-start space-y-4">
                                 <div className="inline-flex items-start gap-2 px-4 py-2 bg-blue-50 rounded-full border border-blue-100 text-blue-600 mb-2">
                                     <Sparkles size={14} />
-                                    <span className="text-xs font-bold uppercase tracking-widest">Lançamento</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Diminua devoluções</span>
                                 </div>
                                 <h2 className="text-4xl md:text-4xl font-black text-gray-900 leading-tight">
                                     Evite devoluções e reembolsos <br />
-                                    <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-cyan-500 italic pr-2">com a WearMe Fit.</span>
+                                    <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-cyan-500 italic pr-2">com a FindMySize.</span>
                                 </h2>
                                 <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
                                     Integramos duas novas ferramentas para garantir que seu cliente compre o tamanho certo na primeira tentativa.
@@ -54,7 +54,7 @@ export const FindMySizeDemo = () => {
             </div>
 
             <Script
-                src="/findMySize.js"
+                src="/WearMeFindMySize.js"
                 strategy="afterInteractive"
                 onLoad={() => {
                     // @ts-ignore
@@ -70,7 +70,7 @@ export const FindMySizeDemo = () => {
                 }}
             />
             <Script
-                src="/sizeChart.js"
+                src="/WearMeSizeChart.js"
                 strategy="afterInteractive"
                 onLoad={() => {
                     // @ts-ignore

@@ -26,15 +26,33 @@ export async function GET(req: NextRequest) {
         // Check if limits are reached
         const isLimitReached = (config.requests_count || 0) >= (config.requests_limit || 0);
         const canGenerate = !isLimitReached;
-
+        console.log("Can Generate:", canGenerate);
         return NextResponse.json({
             active: true, // Key exists and is valid
             canGenerate: canGenerate,
             remaining: Math.max(0, (config.requests_limit || 0) - (config.requests_count || 0)),
             plan: config.subscription_status
+        }, {
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            },
         });
 
     } catch (error) {
+        console.error("Error checking status:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    },
+  })
 }

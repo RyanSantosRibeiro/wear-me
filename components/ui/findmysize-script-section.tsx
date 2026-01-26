@@ -4,8 +4,8 @@ const RAW_SCRIPT = `<!-- Wearme Size Finder & Chart -->
 <div id="wearme-size-widget"></div>
 <div id="wearme-chart-widget"></div>
 
-<script src="https://wearme.vercel.app/findMySize.js"></script>
-<script src="https://wearme.vercel.app/sizeChart.js"></script>
+<script src="https://wearme.vercel.app/WearMeFindMySize.js"></script>
+<script src="https://wearme.vercel.app/WearMeSizeChart.js"></script>
 
 <script>
   // Inicializa Recomendador
@@ -79,7 +79,7 @@ const WearmeSizeFinderScriptSection = () => {
             <span className="text-purple-400">&lt;script</span>{" "}
             <span className="text-blue-400">src</span>=
             <span className="text-green-400">
-              "https://wearme.vercel.app/findMySize.js"
+              "https://wearme.vercel.app/WearMeFindMySize.js"
             </span>
             <span className="text-purple-400">&gt;&lt;/script&gt;</span>
           </div>
@@ -88,7 +88,7 @@ const WearmeSizeFinderScriptSection = () => {
             <span className="text-purple-400">&lt;script</span>{" "}
             <span className="text-blue-400">src</span>=
             <span className="text-green-400">
-              "https://wearme.vercel.app/sizeChart.js"
+              "https://wearme.vercel.app/WearMeSizeChart.js"
             </span>
             <span className="text-purple-400">&gt;&lt;/script&gt;</span>
           </div>
