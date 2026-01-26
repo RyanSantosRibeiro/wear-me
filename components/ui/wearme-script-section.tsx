@@ -6,7 +6,7 @@ const WearmeScriptSection = () => {
   // copy wearmeSnippet
   const [copied, setCopied] = useState(false)
   const copyCode = async () => {
-    const raw = wearmeSnippet
+    const raw = wearmeSnippet //@ts-ignore
       .filter((l: any) => l.type !== "spacer")
       .map((l: any) => l.raw || l.text || "")
       .join("\n")
