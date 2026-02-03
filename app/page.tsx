@@ -1,6 +1,5 @@
 "use client"
 import { useEffect, useState } from "react"
-import { WearmeWidget } from "@/components/wearme-widget"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Script from "next/script"

@@ -21,9 +21,10 @@ export async function OPTIONS(req: NextRequest) {
 
 
 export async function POST(req: NextRequest) {
+    let productImage = "";
     try {
         const formData = await req.formData();
-        const productImage = formData.get("productImage") as string;
+        productImage = formData.get("productImage") as string;
         const userImageRaw = formData.get("userImage");
         // Only treat as File if it has size and name (common File properties)
         const userImage = (userImageRaw instanceof File && userImageRaw.size > 0) ? userImageRaw : null;
@@ -178,6 +179,8 @@ export async function POST(req: NextRequest) {
             productImagePart
         ].filter(v => v !== null);
 
+        console.log({ requestParts })
+
         const result = await model.generateContent(requestParts);
         const response = await result.response;
         console.log({ result })
@@ -185,9 +188,19 @@ export async function POST(req: NextRequest) {
         // console.log("Full Response:", JSON.stringify(response, null, 2));
 
         const candidates = response.candidates || [];
-        const text = await response.text();
-        console.log(`Text: ${text}`);
+        if (candidates.length > 0) {
+            console.log("Candidate 0 Finish Reason:", candidates[0].finishReason);
+            if (candidates[0].safetyRatings) {
+                console.log("Candidate 0 Safety Ratings:", JSON.stringify(candidates[0].safetyRatings, null, 2));
+            }
+        }
+
+        let text = "";
+        try { text = await response.text(); } catch (e) { console.warn("Could not extract text from response"); }
+
+        console.log(`Text extracted: ${text}`);
         console.log(`Candidates found: ${candidates.length}`);
+
         // Parse the response for Generated Images (Inline Data)
         let resultImageUrl = null;
         let analysisText = "";
@@ -199,50 +212,17 @@ export async function POST(req: NextRequest) {
             for (const part of parts) {
                 if (part.inlineData) {
                     try {
-                        const mimeType = part.inlineData.mimeType || "image/png";
                         const buffer = Buffer.from(part.inlineData.data, "base64");
 
-                        console.log(`Processing image with sharp: ${mimeType}`);
+                        console.log(`Processing image with sharp for client-side storage`);
                         // Convert to PNG and reduce quality/size (compress)
-                        // quality: 60 for PNG is not directly supported, but we can use compressionLevel
-                        // better: output as jpeg with quality 70 or png with compression
                         const processedBuffer = await sharp(buffer)
-                            .resize(800) // Optional: limit size for "lighter" version
+                            .resize(800) // limit size for "lighter" version
                             .png({ compressionLevel: 9, quality: 60 })
                             .toBuffer();
 
-                        const fileName = `${Date.now()}.png`;
-                        const folderPath = `${clientApiKey}`;
-                        const filePath = `${folderPath}/${fileName}`;
-
-                        // 3.1 Conditional preservation based on features
-                        const isPersistenceEnabled = (config as any)?.subscription?.features?.wearme?.enable === true;
-
-                        if (isPersistenceEnabled) {
-                            console.log(`Uploading to storage: ${filePath}`);
-                            const { data: uploadData, error: uploadError } = await supabase.storage
-                                .from("vton-results")
-                                .upload(filePath, processedBuffer, {
-                                    contentType: "image/png",
-                                    cacheControl: "3600",
-                                    upsert: false
-                                });
-
-                            if (uploadError) {
-                                console.error("Storage upload error:", uploadError);
-                                // Fallback to data URL but smaller
-                                resultImageUrl = `data:image/png;base64,${processedBuffer.toString("base64")}`;
-                            } else {
-                                const { data: { publicUrl } } = supabase.storage
-                                    .from("vton-results")
-                                    .getPublicUrl(filePath);
-                                resultImageUrl = publicUrl;
-                                console.log("Image stored successfully:", resultImageUrl);
-                            }
-                        } else {
-                            console.log("Persistence disabled by plan. Returning data URL.");
-                            resultImageUrl = `data:image/png;base64,${processedBuffer.toString("base64")}`;
-                        }
+                        resultImageUrl = `data:image/png;base64,${processedBuffer.toString("base64")}`;
+                        console.log("Image processed successfully as Data URL");
                     } catch (sharpError) {
                         console.error("Sharp processing error:", sharpError);
                         // Final fallback to original raw data
@@ -255,44 +235,54 @@ export async function POST(req: NextRequest) {
         }
 
         if (response.promptFeedback) {
-            console.log("Prompt Feedback:", response.promptFeedback);
+            console.log("Prompt Feedback:", JSON.stringify(response.promptFeedback, null, 2));
         }
 
         console.log("--- GEMINI DEBUG END ---");
 
         // Safety Fallback if model returns only text (or refuses request)
         if (!resultImageUrl) {
-            console.warn("No image generated by Gemini. Returning fallback mock.");
-            console.log("Final Analysis Text:", analysisText);
-            resultImageUrl = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop";
+            console.warn("No image generated by Gemini. Returning fallback product image.");
+            resultImageUrl = productImage;
+
+            if (!analysisText) {
+                // Determine reason from feedback or candidate
+                const blockReason = response.promptFeedback?.blockReason;
+                const finishReason = candidates.length > 0 ? candidates[0].finishReason : null;
+
+                if (blockReason) {
+                    analysisText = `Não foi possível gerar a prévia: A IA identificou uma restrição no prompt (${blockReason}). Tente usar termos mais simples.`;
+                } else if (finishReason && finishReason !== "STOP") {
+                    analysisText = `Não foi possível prosseguir com a geração (Motivo: ${finishReason}). Isso geralmente ocorre por políticas de segurança ou imagem inadequada.`;
+                } else if (text && text.length > 5) {
+                    analysisText = text;
+                } else {
+                    analysisText = "Não conseguimos processar essa combinação de imagens no momento. Mostrando o produto original.";
+                }
+            }
         }
 
-        // 4. Log and Update Usage (Only if persistence is enabled)
-        const isPersistenceEnabled = (config as any)?.subscription?.features?.wearme?.enable === true;
+        // 4. Log and Update Usage
+        try {
+            // Update request count
+            await supabase
+                .from("wearme_configs")
+                .update({ requests_count: (config.requests_count || 0) + 1 })
+                .eq("id", config.id);
 
-        if (isPersistenceEnabled) {
-            try {
-                // Update request count
-                await supabase
-                    .from("wearme_configs")
-                    .update({ requests_count: (config.requests_count || 0) + 1 })
-                    .eq("id", config.id);
-
-                // Insert log
-                await supabase
-                    .from("wearme_logs")
-                    .insert({
-                        config_id: config.id,
-                        api_key: clientApiKey,
-                        session_id: sessionId,
-                        product_image_url: productImage,
-                        result_image_url: resultImageUrl,
-                        mode: mode,
-                        consent_data: consentData
-                    });
-            } catch (logError) {
-                console.error("Failed to log request:", logError);
-            }
+            // Insert log (without heavy image result)
+            await supabase
+                .from("wearme_logs")
+                .insert({
+                    config_id: config.id,
+                    api_key: clientApiKey,
+                    session_id: sessionId,
+                    product_image_url: productImage,
+                    mode: mode,
+                    consent_data: consentData
+                });
+        } catch (logError) {
+            console.error("Failed to log request:", logError);
         }
 
         return withCORS(
@@ -312,8 +302,8 @@ export async function POST(req: NextRequest) {
             console.warn("Quota limit reached. Returning mock result.");
             return NextResponse.json({
                 success: true,
-                imageUrl: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
-                analysis: "Simulated analysis (Quota Limit Reached): The fit looks excellent, with a natural drape."
+                imageUrl: productImage,
+                analysis: "O limite de uso diário foi atingido. Mostrando o produto original como referência; tente novamente mais tarde para ver a prévia com IA."
             });
         }
 

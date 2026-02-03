@@ -12,9 +12,11 @@ import {
     RotateCcw,
     ChevronRight,
     ChevronLeft,
-    ImageIcon
+    ImageIcon,
+    Download
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { saveToCache, getFromCache } from "@/lib/wearme-storage"
 
 import { createPortal } from "react-dom"
 
@@ -40,6 +42,18 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
     useEffect(() => {
         onOpenChange?.(isOpen)
     }, [isOpen, onOpenChange])
+
+    // Load from cache on mount
+    useEffect(() => {
+        const checkCache = async () => {
+            const cached = await getFromCache(productImage)
+            if (cached) {
+                setResultImage(cached)
+                setStatus('completed')
+            }
+        }
+        checkCache()
+    }, [productImage])
 
     const [activeTab, setActiveTab] = useState<'upload' | 'camera'>('upload')
     const [userImages, setUserImages] = useState<File[]>([])
@@ -111,6 +125,8 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
             if (data.success && data.imageUrl) {
                 setResultImage(data.imageUrl)
                 setStatus('completed')
+                // Save to client-side cache
+                await saveToCache(productImage, data.imageUrl)
             } else {
                 console.error("API Error", data.error)
                 // Optional: Show error toast here
@@ -128,6 +144,16 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
         setPreviewUrls([])
         setResultImage(null)
         setProcessingStep(0)
+    }
+
+    const downloadImage = () => {
+        if (!resultImage) return
+        const link = document.createElement('a')
+        link.href = resultImage
+        link.download = `wearme-${productTitle.replace(/\s+/g, '-').toLowerCase()}.png`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
     }
 
     // Prevent scrolling when modal is open
@@ -348,12 +374,16 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
                                     )}
 
                                     <div className="grid grid-cols-2 gap-3">
-                                        <Button variant="outline" onClick={reset} className="w-full gap-2">
+                                        <Button variant="outline" onClick={reset} className="w-full gap-2 transition-all hover:bg-gray-50 active:scale-95">
                                             <RotateCcw size={16} />
                                             Tentar De Novo
                                         </Button>
-                                        <Button className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20">
-                                            <Shirt size={16} />
+                                        <Button variant="outline" onClick={downloadImage} className="w-full gap-2 border-emerald-100 text-emerald-700 hover:bg-emerald-50 transition-all active:scale-95">
+                                            <Download size={16} />
+                                            Baixar Look
+                                        </Button>
+                                        <Button className="w-full gap-2 bg-gray-900 hover:bg-black text-white shadow-lg shadow-gray-200 col-span-2 mt-2 py-6 text-lg transition-all active:scale-[0.98]">
+                                            <Shirt size={20} />
                                             Comprar Agora
                                         </Button>
                                     </div>

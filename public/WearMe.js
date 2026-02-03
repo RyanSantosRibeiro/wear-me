@@ -7,7 +7,51 @@
         rotateCcw: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`,
         checkCircle: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>`,
         loader2: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`,
-        imageIcon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`
+        imageIcon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`,
+        download: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
+    };
+
+    const DB_NAME = 'WearMeCache';
+    const STORE_NAME = 'generations';
+    const WearMeDB = {
+        async open() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+                request.onupgradeneeded = () => {
+                    const db = request.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'productUrl' });
+                    }
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        },
+        async save(productUrl, resultUrl) {
+            try {
+                const db = await this.open();
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                transaction.objectStore(STORE_NAME).put({ productUrl, resultUrl, timestamp: Date.now() });
+            } catch (e) { console.warn('WearMe: DB save error', e); }
+        },
+        async delete(productUrl) {
+            try {
+                const db = await this.open();
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                transaction.objectStore(STORE_NAME).delete(productUrl);
+            } catch (e) { }
+        },
+        async get(productUrl) {
+            try {
+                const db = await this.open();
+                return new Promise((resolve) => {
+                    const transaction = db.transaction(STORE_NAME, 'readonly');
+                    const request = transaction.objectStore(STORE_NAME).get(productUrl);
+                    request.onsuccess = () => resolve(request.result?.resultUrl || null);
+                    request.onerror = () => resolve(null);
+                });
+            } catch (e) { return null; }
+        }
     };
 
     function downloadBase64AsPng(base64, fileName = "image.png") {
@@ -73,7 +117,6 @@
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
             z-index: 999999;
             display: flex;
             align-items: center;
@@ -682,14 +725,12 @@
             }
 
             // --- CLIENT-SIDE CACHE CHECK ---
-            const cacheKey = `wearme_res_${this.config.productImage}`;
-            const cachedResult = sessionStorage.getItem(cacheKey);
+            const cacheKey = this.config.productImage;
+            const cachedResult = await WearMeDB.get(cacheKey);
             console.log("Init - Cached result:", cachedResult);
 
             if (cachedResult) {
-                // downloadBase64AsPng(cachedResult, "wearme-result.png")
-
-                console.log("Found cached result in sessionStorage for this product.");
+                console.log("Found cached result in IndexedDB for this product.");
                 this.state.resultImage = cachedResult;
                 this.state.status = 'completed';
             }
@@ -1052,12 +1093,16 @@
                     `}
 
                     <div class="wearme-completed-actions">
-                        <button id="wearme-reset-btn" class="wearme-btn-outline">
+                        <button id="wearme-reset-btn" class="wearme-btn-outline" style="grid-column: span 1;">
                             ${SVG_ICONS.rotateCcw.replace('width="24" height="24"', 'width="16" height="16"')}
                             Tentar De Novo
                         </button>
-                        <button id="wearme-buy-btn" class="wearme-btn-success">
-                            ${SVG_ICONS.shirt.replace('width="24" height="24"', 'width="16" height="16"')}
+                        <button id="wearme-download-btn" class="wearme-btn-outline" style="grid-column: span 1; border-color: #10b981; color: #10b981;">
+                            ${SVG_ICONS.download.replace('width="24" height="24"', 'width="16" height="16"')}
+                            Baixar Look
+                        </button>
+                        <button id="wearme-buy-btn" class="wearme-btn-success" style="grid-column: span 2; margin-top: 0.5rem; padding: 1.25rem;">
+                            ${SVG_ICONS.shirt.replace('width="24" height="24"', 'width="20" height="20"')}
                             Comprar Agora
                         </button>
                     </div>
@@ -1068,7 +1113,7 @@
 
             this.elements.content.querySelector('#wearme-reset-btn').onclick = () => {
                 // Remove cached result so it doesn't auto-load next time
-                sessionStorage.removeItem(`wearme_res_${this.config.productImage}`);
+                WearMeDB.delete(this.config.productImage);
 
                 this.setState({
                     status: 'idle',
@@ -1077,6 +1122,10 @@
                     resultImage: null,
                     processingStep: 0
                 });
+            };
+
+            this.elements.content.querySelector('#wearme-download-btn').onclick = () => {
+                downloadBase64AsPng(this.state.resultImage, `look-wearme-${Date.now()}.png`);
             };
         },
 
@@ -1124,8 +1173,8 @@
                 const data = await response.json();
 
                 if (data.success && data.imageUrl) {
-                    // Update the local cache
-                    sessionStorage.setItem(`wearme_res_${this.config.productImage}`, data.imageUrl);
+                    // Update the local cache with IndexedDB
+                    WearMeDB.save(this.config.productImage, data.imageUrl);
 
                     this.setState({ status: 'completed', resultImage: data.imageUrl });
                 } else {
