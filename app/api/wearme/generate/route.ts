@@ -173,9 +173,9 @@ export async function POST(req: NextRequest) {
         // Use more descriptive yet neutral labels
         const requestParts: any[] = [
             prompt,
-            "Portrait Reference:",
+            "Reference 1 (Person with consentiment):",
             userImagePart,
-            "Style Reference:",
+            "Reference 2 (Product):",
             productImagePart
         ].filter(v => v !== null);
 
@@ -216,12 +216,12 @@ export async function POST(req: NextRequest) {
 
                         console.log(`Processing image with sharp for client-side storage`);
                         // Convert to PNG and reduce quality/size (compress)
-                        const processedBuffer = await sharp(buffer)
-                            .resize(800) // limit size for "lighter" version
-                            .png({ compressionLevel: 9, quality: 60 })
-                            .toBuffer();
+                        // const processedBuffer = await sharp(buffer)
+                        //     .resize(800) // limit size for "lighter" version
+                        //     .png({ compressionLevel: 9, quality: 60 })
+                        //     .toBuffer();
 
-                        resultImageUrl = `data:image/png;base64,${processedBuffer.toString("base64")}`;
+                        resultImageUrl = `data:image/png;base64,${buffer.toString("base64")}`;
                         console.log("Image processed successfully as Data URL");
                     } catch (sharpError) {
                         console.error("Sharp processing error:", sharpError);

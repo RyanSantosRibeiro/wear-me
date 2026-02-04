@@ -201,15 +201,6 @@ export const HeroSection = () => {
                           // productImage: 'https://www.zenoficial.com.br/cdn/shop/files/11573_002_AnaPaula1.jpg?v=1760753084&width=823',
                           productImage: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop',
                           buttonSelector: '#wearme-btn'
-                        }, {
-                          resultImage: null,
-                          status: "idle",
-                          userImage: null,
-                          previewUrl: null,
-                          processingStep: 0,
-                          generationMode: 'front',
-                          imageTest: selectedCategory === "sport" ? null : selectedCategory === "casual" ? imgCasual.src : imgAcessories.src,
-                          testMode: false
                         });
                       }
                     }} />
