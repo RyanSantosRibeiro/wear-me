@@ -10,6 +10,19 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: 'WearMe',
   description: 'WearMe - Provador virtual pra quem quer converter',
+  openGraph: {
+    // opengraph
+    title: "WearMe",
+    description: "WearMe - Provador virtual pra quem quer converter",
+    images: [
+      {
+        url: "/favicon.png",
+        width: 1200,
+        height: 630,
+        alt: "WearMe",
+      },
+    ],
+  },
   generator: 'WearMe',
   icons: {
     icon: [

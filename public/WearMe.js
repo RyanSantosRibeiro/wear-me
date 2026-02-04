@@ -938,14 +938,14 @@
 
                     <input type="file" id="wearme-file-input" accept="image/*" class="wearme-hidden">
 
-                    <div class="wearme-mode-selector">
+                    <!--<div class="wearme-mode-selector">
                         <button class="wearme-mode-btn ${this.state.generationMode === 'front' ? 'active' : ''}" data-mode="front">
                             ${SVG_ICONS.shirt.replace('width="24" height="24"', 'width="14" height="14"')} Vista Frente
                         </button>
                         <button class="wearme-mode-btn ${this.state.generationMode === 'angles' ? 'active' : ''}" data-mode="angles">
                             ${SVG_ICONS.sparkles.replace('width="24" height="24"', 'width="14" height="14"')} 3 Ângulos
                         </button>
-                    </div>
+                    </div>-->
 
                     <!--<div class="wearme-tip-box">
                         <div class="wearme-tip-icon">${SVG_ICONS.imageIcon.replace('width="24" height="24"', 'width="14" height="14"')}</div>

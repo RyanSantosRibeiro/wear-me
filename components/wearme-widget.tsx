@@ -273,7 +273,7 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
                                     />
 
                                     {/* Generation Mode Selector */}
-                                    <div className="bg-gray-50 p-1.5 rounded-xl grid grid-cols-2 gap-1">
+                                    {/* <div className="bg-gray-50 p-1.5 rounded-xl grid grid-cols-2 gap-1">
                                         <button
                                             onClick={() => setGenerationMode('front')}
                                             className={`py-2.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${generationMode === 'front'
@@ -294,7 +294,7 @@ export function WearmeWidget({ productImage, productTitle = "Este Produto", onOp
                                             <Sparkles size={14} />
                                             3 Ângulos
                                         </button>
-                                    </div>
+                                    </div> */}
 
                                     {/* Instructions */}
                                     <div className="bg-blue-50/50 rounded-xl p-4 flex gap-3 items-start border border-blue-100/50">
