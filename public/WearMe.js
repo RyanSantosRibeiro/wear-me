@@ -135,7 +135,7 @@
         .wearme-modal {
             background: var(--wearme-bg);
             width: 100%;
-            max-width: 500px;
+            max-width: 520px;
             max-height: 90vh;
             border-radius: 1.5rem;
             box-shadow: var(--wearme-shadow);
@@ -145,6 +145,10 @@
             transform: scale(0.95);
             transition: transform 0.3s ease;
             position: relative;
+
+            @media (max-width: 1400px) {
+                max-width: 420px;
+            }
         }
 
         .wearme-modal-overlay.open .wearme-modal {
@@ -157,6 +161,10 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+
+            @media (max-width: 1400px) {
+                padding: 0.5rem .75rem;
+            }
         }
 
         .wearme-logo-group {
@@ -213,6 +221,10 @@
             padding: 1.5rem;
             border-top: 1px solid #f3f4f6;
             background: #f9fafb;
+
+            @media (max-width: 1400px) {
+                padding: 0.5rem;
+            }
         }
 
         /* Trigger Button Styles (Host side) */
@@ -555,6 +567,10 @@
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
+
+            @media screen and (max-width: 1400px) {
+                gap: .75rem;
+            }
         }
 
         .wearme-result-grid {
@@ -569,6 +585,10 @@
             border-radius: 1rem;
             overflow: hidden;
             position: relative;
+            
+            @media screen and (max-width: 1400px) {
+                max-height: 60vh;
+            }
         }
 
         .wearme-result-main img {
@@ -600,6 +620,17 @@
         .wearme-completed-actions {
             display: grid;
             grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .wearme-button-actions {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            display: flex;
+            justify-content: center;
             gap: 1rem;
         }
 
@@ -1086,26 +1117,26 @@
                     ` : `
                         <div class="wearme-result-main">
                             <img src="${this.state.resultImage}" alt="Result">
-                            <div style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem; background: rgba(255,255,255,0.9); padding: 0.75rem; border-radius: 0.75rem; text-align: center; font-size: 0.75rem; font-weight: 700;">
-                                ✨ Look gerado com IA
+                            <div style="position: absolute; top: 1rem; left: 1rem; right: 1rem; background: rgba(255,255,255,0.9); padding: 0.75rem .5rem; border-radius: 0.75rem; text-align: center; font-size: 0.75rem; font-weight: 700;width: fit-content;">
+                                ✨ IA
+                            </div>
+                            <div class="wearme-button-actions">
+                                <div class="wearme-completed-actions">
+                                <button id="wearme-reset-btn" class="wearme-btn-outline" style="grid-column: span 1;">
+                                    ${SVG_ICONS.rotateCcw.replace('width="24" height="24"', 'width="16" height="16"')}
+                                    Tentar De Novo
+                                </button>
+                                <button id="wearme-download-btn" class="wearme-btn-outline" style="grid-column: span 1; border-color: #10b981; color: #10b981;">
+                                    ${SVG_ICONS.download.replace('width="24" height="24"', 'width="16" height="16"')}
+                                    Baixar Look
+                                </button>
+                                <button id="wearme-buy-btn" class="wearme-btn-success" style="grid-column: span 2; padding: 1.25rem;">
+                                    ${SVG_ICONS.shirt.replace('width="24" height="24"', 'width="20" height="20"')}
+                                    Comprar Agora
+                                </button>
                             </div>
                         </div>
                     `}
-
-                    <div class="wearme-completed-actions">
-                        <button id="wearme-reset-btn" class="wearme-btn-outline" style="grid-column: span 1;">
-                            ${SVG_ICONS.rotateCcw.replace('width="24" height="24"', 'width="16" height="16"')}
-                            Tentar De Novo
-                        </button>
-                        <button id="wearme-download-btn" class="wearme-btn-outline" style="grid-column: span 1; border-color: #10b981; color: #10b981;">
-                            ${SVG_ICONS.download.replace('width="24" height="24"', 'width="16" height="16"')}
-                            Baixar Look
-                        </button>
-                        <button id="wearme-buy-btn" class="wearme-btn-success" style="grid-column: span 2; margin-top: 0.5rem; padding: 1.25rem;">
-                            ${SVG_ICONS.shirt.replace('width="24" height="24"', 'width="20" height="20"')}
-                            Comprar Agora
-                        </button>
-                    </div>
                 </div>
             `;
 
@@ -1168,22 +1199,20 @@
 
                 console.log("response", { response });
 
-                if (!response.ok) throw new Error('API Error');
-
                 const data = await response.json();
 
-                if (data.success && data.imageUrl) {
+                if (response.ok && data.success && data.imageUrl) {
                     // Update the local cache with IndexedDB
                     WearMeDB.save(this.config.productImage, data.imageUrl);
-
                     this.setState({ status: 'completed', resultImage: data.imageUrl });
                 } else {
-                    this.showError('Erro ao processar imagem. Tente novamente.');
+                    const errorMsg = data.error || 'Não foi possível gerar sua prévia. Tente uma foto diferente.';
+                    this.showError(errorMsg);
                     this.setState({ status: 'idle' });
                 }
             } catch (err) {
                 console.error(err);
-                this.showError('Ocorreu um erro técnico. Tente novamente mais tarde.');
+                this.showError('Ops! Algo deu errado. Tente novamente em instantes.');
                 this.setState({ status: 'idle' });
             }
         }

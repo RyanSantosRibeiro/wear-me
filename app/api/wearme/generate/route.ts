@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createAdminClient } from "@/lib/supabase/server";
-import sharp from "sharp";
 import { MODERATE_PROMPT } from "@/utils/prompts/moderate";
 
 function withCORS(req: NextRequest, res: NextResponse) {
@@ -19,23 +18,30 @@ export async function OPTIONS(req: NextRequest) {
     return withCORS(req, new NextResponse(null, { status: 200 }));
 }
 
-
 export async function POST(req: NextRequest) {
-    let productImage = "";
+    console.log("--- VTON Generation Started ---");
     try {
         const formData = await req.formData();
-        productImage = formData.get("productImage") as string;
+        const productImage = formData.get("productImage") as string;
         const userImageRaw = formData.get("userImage");
-        // Only treat as File if it has size and name (common File properties)
         const userImage = (userImageRaw instanceof File && userImageRaw.size > 0) ? userImageRaw : null;
-
         const mode = formData.get("mode") as string;
         const clientApiKey = formData.get("apiKey") as string;
-        const sessionId = formData.get("sessionId") as string;
-        const consentDataRaw = formData.get("consentData") as string;
-        const consentData = consentDataRaw ? JSON.parse(consentDataRaw) : null;
+
+        console.log("Request Data:", {
+            mode,
+            apiKey: clientApiKey ? `${clientApiKey.substring(0, 5)}...` : "missing",
+            productImage: productImage ? `${productImage.substring(0, 50)}...` : "missing",
+            userImage: userImage ? { name: userImage.name, size: userImage.size, type: userImage.type } : "missing"
+        });
+
+        if (!productImage || !userImage) {
+            console.warn("Validation Failed: Product or User image missing");
+            return withCORS(req, NextResponse.json({ error: "Product and User images are required" }, { status: 400 }));
+        }
 
         // 1. Validate API Key
+        console.log("Validating API Key...");
         const supabase = await createAdminClient();
         const { data: config, error: configError } = await supabase
             .from("wearme_configs")
@@ -44,98 +50,47 @@ export async function POST(req: NextRequest) {
             .single();
 
         if (configError || !config) {
-            return withCORS(
-                req,
-                NextResponse.json({ error: "Invalid API Key" }, { status: 401 })
-            );
+            console.error("API Key Validation Error:", configError || "Key not found");
+            return withCORS(req, NextResponse.json({ error: "Invalid API Key" }, { status: 401 }));
         }
-
-        // Fetch subscription to check features
-        const { data: subscription } = await supabase
-            .from("subscriptions")
-            .select("*")
-            .eq("user_id", config.owner_id)
-            .maybeSingle();
-
-        if (subscription) {
-            (config as any).subscription = subscription.metadata || subscription;
-        }
+        console.log("Config Found:", { id: config.id, owner_id: config.owner_id, site_url: config.site_url });
 
         if (!config.site_url) {
-            return withCORS(
-                req,
-                NextResponse.json({ error: "Site URL not configured" }, { status: 401 })
-            );
+            console.warn("Config Error: Site URL not configured");
+            return withCORS(req, NextResponse.json({ error: "Site URL not configured" }, { status: 401 }));
         }
 
         // Security Check: Site URL verification
-        console.log("Verification:")
-        // Comentado para teste local
-        if (config.site_url) {
-            const origin = req.headers.get("origin") || req.headers.get("referer");
-            console.log("Origin:", origin);
-            console.log("Site URL:", config.site_url);
-            // Simple inclusion check to handle protocol variations (http/https)
-            if (origin !== "http://localhost:3000" && (!origin || !origin.includes(config.site_url))) {
-                console.warn(`Blocked request from unauthorized origin: ${origin} (Expected: ${config.site_url})`);
-                return NextResponse.json({ error: "Unauthorized Domain" }, { status: 403 });
-            }
+        const origin = req.headers.get("origin") || req.headers.get("referer");
+        console.log("Security Check:", { origin, expected: config.site_url });
+        if (origin !== "http://localhost:3000" && (!origin || !origin.includes(config.site_url))) {
+            console.warn(`Blocked request from unauthorized origin: ${origin} (Expected: ${config.site_url})`);
+            return withCORS(req, NextResponse.json({ error: "Unauthorized Domain" }, { status: 403 }));
         }
 
-        // 2. Cache Recovery (If no new image is provided, just get the latest)
-        if (!userImage && sessionId) {
-            const { data: lastLog } = await supabase
-                .from("wearme_logs")
-                .select("result_image_url, analysis")
-                .eq("api_key", clientApiKey)
-                .eq("product_image_url", productImage)
-                .eq("session_id", sessionId)
-                .order("created_at", { ascending: false })
-                .limit(1)
-                .single();
-
-            if (lastLog) {
-                return withCORS(
-                    req,
-                    NextResponse.json({
-                        success: true,
-                        imageUrl: lastLog.result_image_url,
-                        analysis: lastLog.analysis || "Resultado recuperado."
-                    })
-                );
-            }
-            return NextResponse.json({ error: "No previous result found" }, { status: 404 });
-        }
-
-        if (!userImage) {
-            return NextResponse.json({ error: "User image is required for new generation" }, { status: 400 });
-        }
-
-        // 3. New Generation (Check limits first)
+        // 2. Generation (Check limits)
+        console.log("Checking limits:", { count: config.requests_count, limit: config.requests_limit });
         if ((config.requests_count || 0) >= (config.requests_limit || 0)) {
-            return NextResponse.json({ error: "Request limit reached" }, { status: 402 });
+            console.warn("Limit Reached");
+            return withCORS(req, NextResponse.json({ error: "Request limit reached" }, { status: 402 }));
         }
 
         const apiKey = process.env.GEMINI_API_KEY;
-
-        // Fallback if no API key
         if (!apiKey) {
-            console.warn("Using Mock Response (No API Key)");
-            await new Promise(r => setTimeout(r, 2000));
-            return withCORS(
-                req,
-                NextResponse.json({
-                    success: true,
-                    imageUrl: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
-                    analysis: "Simulated analysis: Fit looks perfect."
-                })
-            );
+            console.warn("Using Mock Response (No GEMINI_API_KEY)");
+            return withCORS(req, NextResponse.json({
+                success: true,
+                imageUrl: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
+                analysis: "Simulated analysis: Fit looks perfect."
+            }));
         }
 
         const genAI = new GoogleGenerativeAI(apiKey);
-        // Using the Image Generation enabled model
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-image" });
+        const modelName = "gemini-3-pro-image-preview";
+        console.log(`Using model: ${modelName}`);
+        const model = genAI.getGenerativeModel({ model: modelName });
 
+        console.log("Preparing User Image Part...");
         const userImageBuffer = await userImage.arrayBuffer();
         const userImagePart = {
             inlineData: {
@@ -144,7 +99,7 @@ export async function POST(req: NextRequest) {
             },
         };
 
-        // Fetch Product Image to send as Part 2
+        console.log("Fetching Product Image Part...");
         let productImagePart = null;
         try {
             const productRes = await fetch(productImage);
@@ -157,162 +112,113 @@ export async function POST(req: NextRequest) {
                         mimeType: contentType,
                     },
                 };
-                console.log("Product image fetched successfully");
+                console.log("Product Image fetched successfully", { type: contentType, size: productBuffer.byteLength });
+            } else {
+                console.warn(`Failed to fetch product image: ${productRes.status} ${productRes.statusText}`);
             }
         } catch (e) {
-            console.error("Failed to fetch product image:", e);
+            console.error("Error fetching product image:", e);
         }
 
-        // Strategy: Advanced Visual Synthesis (Bypassing recitation filters)
-        let prompt = MODERATE_PROMPT;
-
+        let prompt = MODERATE_PROMPT[0];
         if (mode === 'angles') {
             prompt += " Generate a collage showing the person from front, side, and back views.";
         }
+        console.log("Final Prompt:", prompt);
 
-        // Use more descriptive yet neutral labels
         const requestParts: any[] = [
             prompt,
-            "Reference 1 (Person with consentiment):",
+            "Reference 1 (Person):",
             userImagePart,
             "Reference 2 (Product):",
             productImagePart
         ].filter(v => v !== null);
 
-        console.log({ requestParts })
-
+        console.log("Calling Gemini API...");
+        const startTime = Date.now();
         const result = await model.generateContent(requestParts);
         const response = await result.response;
-        console.log({ result })
-        console.log("--- GEMINI DEBUG START ---");
-        // console.log("Full Response:", JSON.stringify(response, null, 2));
+        console.log(`Gemini API Response Received in ${Date.now() - startTime}ms`);
 
         const candidates = response.candidates || [];
+        console.log(`Candidates: ${candidates.length}`);
+
         if (candidates.length > 0) {
-            console.log("Candidate 0 Finish Reason:", candidates[0].finishReason);
-            if (candidates[0].safetyRatings) {
-                console.log("Candidate 0 Safety Ratings:", JSON.stringify(candidates[0].safetyRatings, null, 2));
-            }
+            console.log("Candidate 0 Status:", {
+                finishReason: candidates[0].finishReason,
+                safetyRatings: candidates[0].safetyRatings
+            });
         }
 
-        let text = "";
-        try { text = await response.text(); } catch (e) { console.warn("Could not extract text from response"); }
+        if (response.promptFeedback) {
+            console.log("Prompt Feedback:", response.promptFeedback);
+        }
 
-        console.log(`Text extracted: ${text}`);
-        console.log(`Candidates found: ${candidates.length}`);
-
-        // Parse the response for Generated Images (Inline Data)
         let resultImageUrl = null;
         let analysisText = "";
 
         if (candidates.length > 0) {
             const parts = candidates[0].content?.parts || [];
             console.log(`Parts in candidate 0: ${parts.length}`);
-
             for (const part of parts) {
                 if (part.inlineData) {
-                    try {
-                        const buffer = Buffer.from(part.inlineData.data, "base64");
-
-                        console.log(`Processing image with sharp for client-side storage`);
-                        // Convert to PNG and reduce quality/size (compress)
-                        // const processedBuffer = await sharp(buffer)
-                        //     .resize(800) // limit size for "lighter" version
-                        //     .png({ compressionLevel: 9, quality: 60 })
-                        //     .toBuffer();
-
-                        resultImageUrl = `data:image/png;base64,${buffer.toString("base64")}`;
-                        console.log("Image processed successfully as Data URL");
-                    } catch (sharpError) {
-                        console.error("Sharp processing error:", sharpError);
-                        // Final fallback to original raw data
-                        resultImageUrl = `data:${part.inlineData.mimeType || "image/png"};base64,${part.inlineData.data}`;
-                    }
+                    console.log("Image found in part. Content length:", part.inlineData.data.length);
+                    resultImageUrl = `data:${part.inlineData.mimeType || "image/png"};base64,${part.inlineData.data}`;
                 } else if (part.text) {
+                    console.log("Text found in part:", part.text.substring(0, 100) + "...");
                     analysisText += part.text;
                 }
             }
         }
 
-        if (response.promptFeedback) {
-            console.log("Prompt Feedback:", JSON.stringify(response.promptFeedback, null, 2));
-        }
-
-        console.log("--- GEMINI DEBUG END ---");
-
-        // Safety Fallback if model returns only text (or refuses request)
+        // Fail if no image was generated
         if (!resultImageUrl) {
-            console.warn("No image generated by Gemini. Returning fallback product image.");
-            resultImageUrl = productImage;
+            console.warn("No result image generated by Gemini.");
+            const blockReason = response.promptFeedback?.blockReason;
+            const finishReason = candidates.length > 0 ? candidates[0].finishReason : null;
 
-            if (!analysisText) {
-                // Determine reason from feedback or candidate
-                const blockReason = response.promptFeedback?.blockReason;
-                const finishReason = candidates.length > 0 ? candidates[0].finishReason : null;
-
-                if (blockReason) {
-                    analysisText = `Não foi possível gerar a prévia: A IA identificou uma restrição no prompt (${blockReason}). Tente usar termos mais simples.`;
-                } else if (finishReason && finishReason !== "STOP") {
-                    analysisText = `Não foi possível prosseguir com a geração (Motivo: ${finishReason}). Isso geralmente ocorre por políticas de segurança ou imagem inadequada.`;
-                } else if (text && text.length > 5) {
-                    analysisText = text;
-                } else {
-                    analysisText = "Não conseguimos processar essa combinação de imagens no momento. Mostrando o produto original.";
-                }
+            let errorMessage = "Não foi possível processar essa combinação de imagens no momento.";
+            if (blockReason) {
+                errorMessage = `Restrição de conteúdo detectada (${blockReason}).`;
+            } else if (finishReason && finishReason !== "STOP") {
+                errorMessage = `A geração foi interrompida (${finishReason}).`;
             }
+
+            return withCORS(req, NextResponse.json({
+                success: false,
+                error: errorMessage
+            }, { status: 422 })); // Unprocessable Entity
         }
 
-        // 4. Log and Update Usage
-        try {
-            // Update request count
-            await supabase
-                .from("wearme_configs")
-                .update({ requests_count: (config.requests_count || 0) + 1 })
-                .eq("id", config.id);
-
-            // Insert log (without heavy image result)
-            await supabase
-                .from("wearme_logs")
-                .insert({
-                    config_id: config.id,
-                    api_key: clientApiKey,
-                    session_id: sessionId,
-                    product_image_url: productImage,
-                    mode: mode,
-                    consent_data: consentData
-                });
-        } catch (logError) {
-            console.error("Failed to log request:", logError);
-        }
-
-        return withCORS(
-            req,
-            NextResponse.json({
-                success: true,
-                imageUrl: resultImageUrl,
-                analysis: analysisText
-            })
-        );
+        console.log("--- VTON Generation Completed Successfully ---");
+        return withCORS(req, NextResponse.json({
+            success: true,
+            imageUrl: resultImageUrl,
+            analysis: analysisText
+        }));
 
     } catch (error: any) {
-        console.error("VTON Generation Error:", error);
+        console.error("--- VTON Generation ERROR ---");
+        console.error("Error Details:", {
+            message: error.message,
+            status: error.status,
+            stack: error.stack
+        });
 
-        // Handle Quota Limit (429) gracefully by returning mock
         if (error.status === 429 || error.message?.includes('429')) {
-            console.warn("Quota limit reached. Returning mock result.");
-            return NextResponse.json({
+            console.warn("Quota limit reached (429)");
+            return withCORS(req, NextResponse.json({
                 success: true,
-                imageUrl: productImage,
-                analysis: "O limite de uso diário foi atingido. Mostrando o produto original como referência; tente novamente mais tarde para ver a prévia com IA."
-            });
+                imageUrl: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
+                analysis: "O limite de uso diário foi atingido. Mostrando o produto original como referência."
+            }));
         }
 
-        return withCORS(
-            req,
-            NextResponse.json(
-                { error: "Failed to process try-on" },
-                { status: 500 }
-            )
-        );
+        return withCORS(req, NextResponse.json(
+            { error: "Failed to process try-on" },
+            { status: 500 }
+        ));
     }
 }
+
+
