@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
         const productImage = formData.get("productImage") as string;
         const userImageRaw = formData.get("userImage");
         const userImage = (userImageRaw instanceof File && userImageRaw.size > 0) ? userImageRaw : null;
-        const mode = formData.get("mode") as string;
+        const mode = formData.get("mode-old") as string;
         const clientApiKey = formData.get("apiKey") as string;
 
         console.log("Request Data:", {

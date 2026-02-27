@@ -86,8 +86,8 @@
         body {
             --wearme-primary: #111827;
             --wearme-secondary: #6b7280;
-            --wearme-accent: #3b82f6;
-            --wearme-emerald: #10b981;
+            --wearme-accent: var(--wearme-primary);
+            --wearme-emerald: var(--wearme-primary);
             --wearme-bg: #ffffff;
             --wearme-radius: 1rem;
             --wearme-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -444,8 +444,8 @@
         }
 
         .wearme-tip-box {
-            background: #eff6ff;
-            border: 1px solid #dbeafe;
+            background: rgba(var(--wearme-primary-rgb, 17, 24, 39), 0.05);
+            border: 1px solid rgba(var(--wearme-primary-rgb, 17, 24, 39), 0.1);
             padding: 1rem;
             border-radius: 0.75rem;
             display: flex;
@@ -454,15 +454,15 @@
         }
 
         .wearme-tip-icon {
-            background: #dbeafe;
+            background: rgba(var(--wearme-primary-rgb, 17, 24, 39), 0.1);
             padding: 0.25rem;
             border-radius: 999px;
-            color: #3b82f6;
+            color: var(--wearme-primary);
             display: flex;
         }
         
-        .wearme-tip-text h4 { margin: 0; font-size: 0.75rem; color: #1e40af; }
-        .wearme-tip-text p { margin: 0; font-size: 0.68rem; color: #3b82f6; }
+        .wearme-tip-text h4 { margin: 0; font-size: 0.75rem; color: var(--wearme-primary); }
+        .wearme-tip-text p { margin: 0; font-size: 0.68rem; color: var(--wearme-primary); opacity: 0.8; }
 
         /* Processing State */
         .wearme-processing {
@@ -557,9 +557,9 @@
         }
 
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+            0% { box-shadow: 0 0 0 0 rgba(var(--wearme-primary-rgb, 17, 24, 39), 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(var(--wearme-primary-rgb, 17, 24, 39), 0); }
+            100% { box-shadow: 0 0 0 0 rgba(var(--wearme-primary-rgb, 17, 24, 39), 0); }
         }
 
         /* Completed State */
@@ -667,7 +667,7 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(var(--wearme-primary-rgb, 17, 24, 39), 0.2);
         }
 
         .wearme-hidden { display: none !important; }
@@ -831,6 +831,15 @@
 
             if (this.config.highlightColor) {
                 document.body.style.setProperty('--wearme-primary', this.config.highlightColor);
+
+                // Convert hex to RGB for rgba() usage
+                const hex = this.config.highlightColor.replace('#', '');
+                const r = parseInt(hex.substring(0, 2), 16);
+                const g = parseInt(hex.substring(2, 4), 16);
+                const b = parseInt(hex.substring(4, 6), 16);
+                if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+                    document.body.style.setProperty('--wearme-primary-rgb', `${r}, ${g}, ${b}`);
+                }
             }
         },
 
@@ -1126,7 +1135,7 @@
                                     ${SVG_ICONS.rotateCcw.replace('width="24" height="24"', 'width="16" height="16"')}
                                     Tentar De Novo
                                 </button>
-                                <button id="wearme-download-btn" class="wearme-btn-outline" style="grid-column: span 1; border-color: #10b981; color: #10b981;">
+                                <button id="wearme-download-btn" class="wearme-btn-outline" style="grid-column: span 1; border-color: var(--wearme-primary); color: var(--wearme-primary);">
                                     ${SVG_ICONS.download.replace('width="24" height="24"', 'width="16" height="16"')}
                                     Baixar Look
                                 </button>
