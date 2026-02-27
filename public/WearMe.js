@@ -55,6 +55,7 @@
     };
 
     function downloadBase64AsPng(base64, fileName = "image.png") {
+        if (!base64) return;
         // Garante que o base64 esteja limpo
         const base64Data = base64.startsWith("data:image")
             ? base64.split(",")[1]
@@ -722,7 +723,7 @@
             productImage: '',
             buttonSelector: '',
             apiUrl: 'https://wearme.vercel.app/api/wearme/generate', // Fallback to production URL
-            brandName: 'Wearme AI v2.0',
+            brandName: 'Wearme AI v2.0.1',
             highlightColor: '#111827',
             logoUrl: ''
         },
