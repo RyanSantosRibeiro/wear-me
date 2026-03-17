@@ -5,7 +5,7 @@
         plus: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
         trash: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
         bag: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
-        loader: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`,
+        loader: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="wm-animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`,
         camera: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`
     };
 
@@ -200,7 +200,7 @@
             padding: 2rem;
         }
 
-        .animate-spin { animation: wm-spin 1s linear infinite; }
+        .wm-animate-spin { animation: wm-spin 1s linear infinite; }
         @keyframes wm-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* Button Add Look State */
@@ -431,14 +431,14 @@
             console.log({items: this.items});
             this.itemsList.innerHTML = this.items.map(item => `
                 <div class="wm-item-card">
-                    <a href="${item.link}" target="_blank" style="width: 100%; display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit;">
-                        <img src="${item.image}" class="wm-item-img">
+                    <a href="${item?.link}" target="_blank" style="width: 100%; display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit;">
+                        <img src="${item?.image}" class="wm-item-img">
                         <div class="wm-item-info">
-                            ${item.category && item.category !== 'outro' ? `<span class="wm-category-badge">${item.category}</span>` : ''}
-                            <div class="wm-item-name">${item.name}</div>
+                            ${item?.category && item?.category !== 'outro' ? `<span class="wm-category-badge">${item?.category}</span>` : ''}
+                            <div class="wm-item-name">${item?.name}</div>
                         </div>
                     </a>
-                    <button class="wm-remove-btn" onclick="window.WearmeBuy.toggleItem({id:'${item.id}'})">
+                    <button class="wm-remove-btn" onclick="window.WearmeBuy.toggleItem({id:'${item?.id}'})">
                         ${SVG_ICONS.trash}
                     </button>
                 </div>
