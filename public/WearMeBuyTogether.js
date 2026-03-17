@@ -256,6 +256,13 @@
         },
 
         renderUI() {
+            // Prevent duplicate elements if initialized multiple times
+            const existingFloatingBtn = document.querySelector('.wm-buy-floating');
+            if (existingFloatingBtn) existingFloatingBtn.remove();
+
+            const existingOverlay = document.querySelector('.wm-modal-overlay');
+            if (existingOverlay) existingOverlay.remove();
+
             // Floating Button
             this.floatingBtn = document.createElement('button');
             this.floatingBtn.className = 'wm-buy-floating';
