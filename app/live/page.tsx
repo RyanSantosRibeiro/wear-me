@@ -13,7 +13,7 @@ const CATEGORIES = [
 const PRODUCTS = {
   vestido: [
     { id: 'v1', name: 'Vestido Vermelho', image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=800', category: 'vestido' },
-    { id: 'v2', name: 'Vestido Floral', image: 'https://images.unsplash.com/photo-1515347619362-e7845fec58fb?auto=format&fit=crop&q=80&w=800', category: 'vestido' },
+    { id: 'v2', name: 'Vestido Floral', image: 'https://images.unsplash.com/photo-1563178406-4cdc2923acbc?q=80&w=696&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', category: 'vestido' },
     { id: 'v3', name: 'Vestido Preto', image: 'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&q=80&w=800', category: 'vestido' },
   ],
   casual: [
@@ -22,17 +22,17 @@ const PRODUCTS = {
     { id: 'c3', name: 'Moletom Cinza', image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&q=80&w=800', category: 'casual' },
   ],
   fitness: [
-    { id: 'f1', name: 'Top Esportivo Preto', image: 'https://images.unsplash.com/photo-1622316526132-72750da57f6b?auto=format&fit=crop&q=80&w=800', category: 'fitness' },
+    { id: 'f1', name: 'Top Esportivo Preto', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_958555-MLB104790840823_012026-F.webp', category: 'fitness' },
     { id: 'f2', name: 'Legging Azul', image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?auto=format&fit=crop&q=80&w=800', category: 'fitness' },
-    { id: 'f3', name: 'Conjunto Yoga', image: 'https://images.unsplash.com/photo-1510006734135-e64e52f5fd48?auto=format&fit=crop&q=80&w=800', category: 'fitness' },
+    { id: 'f3', name: 'Conjunto Fitness', image: 'https://adaptive-images.uooucdn.com.br/ik-seo/tr:w-1100,h-1594,c-at_max,pr-true,q-90/a22432-ogxytnpxyz0/pv/58/bb/b5/5642253e690f5bf1298f905d0d/conjunto-feminino-fitness-legging-e-top-marrom-large-1.jpg', category: 'fitness' },
   ],
   terno: [
-    { id: 't1', name: 'Terno Slim Fit Preto', image: 'https://images.unsplash.com/photo-1594938298598-7c8add021f15?auto=format&fit=crop&q=80&w=800', category: 'terno' },
+    { id: 't1', name: 'Terno Slim Fit Preto', image: 'https://http2.mlstatic.com/D_NQ_NP_2X_845152-MLB92646676507_092025-F-ternos-italiano-slim-promoco-imperdivel-todas-as-cores.webp', category: 'terno' },
     { id: 't2', name: 'Blazer Azul Marinho', image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=800', category: 'terno' },
   ],
   elegante: [
-    { id: 'e1', name: 'Camisa Social Branca', image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ce3?auto=format&fit=crop&q=80&w=800', category: 'elegante' },
-    { id: 'e2', name: 'Calça Alfaiataria', image: 'https://images.unsplash.com/photo-1549062572-544a64fb0c56?auto=format&fit=crop&q=80&w=800', category: 'elegante' },
+    { id: 'e1', name: 'Camisa Social Branca', image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8X-VL-GuqrFWDDrCjNvcKn18FOicj19ckow&s', category: 'elegante' },
+    { id: 'e2', name: 'Calça Alfaiataria', image: 'https://lojaviego.com.br/cdn/shop/files/Calca-Alfaiataria-Masculino-Social-Preto-Viego_4_1340x.jpg?v=1742737830', category: 'elegante' },
   ],
 };
 
