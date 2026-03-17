@@ -315,14 +315,14 @@ export default function LiveTryOnPage() {
         </div>
 
         {/* Main Action Button (Shoot / Generate) */}
-        <div className="px-6 flex justify-between items-center mt-2">
-          <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-white/20 backdrop-blur text-white rounded-full h-auto">
+        <div className="px-6 grid grid-cols-[1fr_4fr_1fr] gap-4 mt-2 items-center">
+          <button onClick={() => fileInputRef.current?.click()} className="w-fit h-fit p-3 bg-white/20 backdrop-blur text-white rounded-full">
             <Upload size={20} />
           </button>
           {!capturedImage ? (
             <button
               onClick={capturePhoto}
-              className="w-20 h-20 rounded-full bg-white/20 backdrop-blur border-4 border-white flex items-center justify-center relative hover:bg-white/30 transition-all active:scale-95 group"
+              className="mx-auto w-20 h-20 rounded-full bg-white/20 backdrop-blur border-4 border-white flex items-center justify-center relative hover:bg-white/30 transition-all active:scale-95 group"
             >
               <div className="w-14 h-14 bg-white rounded-full group-hover:scale-90 transition-all shadow-[0_0_30px_rgba(255,255,255,0.6)]" />
             </button>
@@ -330,13 +330,13 @@ export default function LiveTryOnPage() {
             <button
               onClick={generateLook}
               disabled={!selectedProduct}
-              className={`w-full max-w-md py-5 rounded-full font-black text-lg uppercase tracking-widest shadow-2xl transition-all ${!selectedProduct ? 'bg-white/20 text-white/50 cursor-not-allowed' : 'bg-gradient-to-r from-pink-500 to-primary text-white hover:opacity-90 active:scale-95 shadow-pink-500/30'}`}
+              className={`mx-auto w-full max-w-md py-5 rounded-full font-black text-lg uppercase tracking-widest shadow-2xl transition-all ${!selectedProduct ? 'bg-white/20 text-white/50 cursor-not-allowed' : 'bg-gradient-to-r from-pink-500 to-primary text-white hover:opacity-90 active:scale-95 shadow-pink-500/30'}`}
             >
-              {!selectedProduct ? 'Selecione uma peça' : 'Provar Roupa com IA'}
+              {!selectedProduct ? 'Selecione uma peça' : 'Experimentar'}
             </button>
           )}
           {!capturedImage && (
-            <button onClick={toggleCamera} className="p-3 bg-white/20 backdrop-blur text-white rounded-full">
+            <button onClick={toggleCamera} className="ml-auto w-fit h-fit p-3 bg-white/20 backdrop-blur text-white rounded-full">
               <RefreshCcw size={20} />
             </button>
           )}
