@@ -5,7 +5,8 @@
         plus: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
         trash: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
         bag: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>`,
-        loader: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`
+        loader: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`,
+        camera: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`
     };
 
     const STYLES = `
@@ -55,49 +56,73 @@
             padding: 0 6px;
         }
 
-        .wm-drawer-overlay {
+        .wm-modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(4px);
+            background: rgba(0, 0, 0, 0.4);
             z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
         }
 
-        .wm-drawer-overlay.open { opacity: 1; visibility: visible; }
-
-        .wm-drawer {
-            position: fixed;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: 100%;
-            max-width: 400px;
-            background: white;
-            z-index: 1000000;
-            transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+        .wm-modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
         }
 
-        .wm-drawer-overlay.open .wm-drawer { transform: translateX(0); }
+        .wm-modal {
+            background: var(--wm-bg, #ffffff);
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            border-radius: 1.5rem;
+            box-shadow: var(--wm-shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
 
-        .wm-drawer-header {
-            padding: 1.5rem;
+        @media (max-width: 1400px) {
+            .wm-modal { max-width: 420px; }
+        }
+
+        .wm-modal-overlay.open .wm-modal { transform: scale(1); }
+
+        .wm-modal-header {
+            padding: 1rem 1.5rem;
             border-bottom: 1px solid #f3f4f6;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        .wm-drawer-content {
-            flex: 1;
-            overflow-y: auto;
+        @media (max-width: 1400px) {
+            .wm-modal-header { padding: 0.5rem .75rem; }
+        }
+
+        .wm-modal-content {
             padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        @media (max-width: 480px) {
+            .wm-modal {
+                max-height: 100vh;
+                border-radius: 0;
+                margin: 0;
+            }
+            .wm-modal-overlay {
+                padding: 0;
+            }
         }
 
         .wm-item-card {
@@ -183,6 +208,16 @@
             background: var(--wm-primary) !important;
             color: white !important;
         }
+
+        .wm-upload-section { padding: 1rem 0; border-bottom: 1px solid #f3f4f6; margin-bottom: 0.75rem; }
+        .wm-upload-zone { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 2px dashed #e5e7eb; border-radius: 1rem; background: #f9fafb; cursor: pointer; transition: all 0.2s; }
+        .wm-upload-zone:hover { border-color: var(--wm-primary); background: #f3f4f6; }
+        .wm-upload-icon { width: 2.5rem; height: 2.5rem; border-radius: 999px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; color: #9ca3af; }
+        .wm-upload-text { flex: 1; }
+        .wm-upload-text p { margin: 0; }
+        .wm-upload-preview { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f9fafb; border-radius: 1rem; border: 1px solid #f3f4f6; }
+        .wm-preview-img { width: 60px; height: 60px; border-radius: 0.5rem; object-fit: cover; }
+        .wm-category-badge { display: inline-block; padding: 0.15rem 0.4rem; background: #e5e7eb; border-radius: 0.25rem; font-size: 0.65rem; font-weight: 600; color: #4b5563; text-transform: uppercase; margin-bottom: 0.25rem; }
     `;
 
     const BuyTogetherWidget = {
@@ -190,6 +225,11 @@
             apiKey: '',
             apiUrl: '/api/wearme/generate-look',
             highlightColor: '#ff92b5',
+            categories: []
+        },
+        state: {
+            userImage: null,
+            previewUrl: null
         },
         items: [],
 
@@ -226,20 +266,21 @@
             `;
             document.body.appendChild(this.floatingBtn);
 
-            // Drawer
+            // Modal
             this.overlay = document.createElement('div');
-            this.overlay.className = 'wm-drawer-overlay';
+            this.overlay.className = 'wm-modal-overlay';
             this.overlay.innerHTML = `
-                <div class="wm-drawer">
-                    <div class="wm-drawer-header">
+                <div class="wm-modal">
+                    <div class="wm-modal-header">
                         <h3 style="margin:0; font-weight:800;">Monte seu Look ✨</h3>
-                        <button class="wm-close-drawer" style="background:none; border:none; cursor:pointer; color:#9ca3af;">${SVG_ICONS.x}</button>
+                        <button class="wm-close-modal" style="background:none; border:none; cursor:pointer; color:#9ca3af; border-radius: 999px; transition: all 0.2s; padding: 0.5rem;" onmouseover="this.style.color='#4b5563'; this.style.background='#f3f4f6';" onmouseout="this.style.color='#9ca3af'; this.style.background='transparent';">${SVG_ICONS.x}</button>
                     </div>
-                    <div class="wm-drawer-content">
+                    <div class="wm-modal-content">
+                        <div id="wm-upload-container"></div>
                         <div id="wm-items-list"></div>
                         <div id="wm-result-area"></div>
                     </div>
-                    <div style="padding:1.5rem; border-top:1px solid #f3f4f6;">
+                    <div style="padding:1.5rem; border-top:1px solid #f3f4f6; background: #f9fafb;">
                         <button id="wm-generate-look" class="wm-generate-btn">
                             ${SVG_ICONS.sparkles} Gerar Look com IA
                         </button>
@@ -248,6 +289,7 @@
             `;
             document.body.appendChild(this.overlay);
 
+            this.uploadContainer = document.getElementById('wm-upload-container');
             this.itemsList = document.getElementById('wm-items-list');
             this.resultArea = document.getElementById('wm-result-area');
             this.generateBtn = document.getElementById('wm-generate-look');
@@ -255,10 +297,10 @@
 
         setupListeners() {
             // Click outside or close button
-            this.floatingBtn.onclick = () => this.toggleDrawer(true);
+            this.floatingBtn.onclick = () => this.toggleModal(true);
             this.overlay.onclick = (e) => {
-                if (e.target === this.overlay || e.target.closest('.wm-close-drawer')) {
-                    this.toggleDrawer(false);
+                if (e.target === this.overlay || e.target.closest('.wm-close-modal')) {
+                    this.toggleModal(false);
                 }
             };
 
@@ -269,7 +311,9 @@
                     const item = {
                         id: btn.dataset.wearmeId,
                         image: btn.dataset.wearmeImage,
-                        name: btn.dataset.wearmeName || 'Produto'
+                        name: btn.dataset.wearmeName || 'Produto',
+                        category: btn.dataset.wearmeCategory || 'outro',
+                        link: btn.dataset.wearmeLink || '#'
                     };
                     this.toggleItem(item);
                 }
@@ -283,6 +327,20 @@
             if (index > -1) {
                 this.items.splice(index, 1);
             } else {
+                if (this.config.categories && this.config.categories.length > 0) {
+                    if (!this.config.categories.includes(item.category)) {
+                        return alert(`A categoria '${item.category}' não é permitida ou não está configurada para este look.`);
+                    }
+                }
+                
+                // Garantir apenas 1 item por categoria configurada, substituindo se já existir
+                if (item.category && item.category !== 'outro') {
+                    const existingCatIndex = this.items.findIndex(i => i.category === item.category);
+                    if (existingCatIndex > -1) {
+                        this.items.splice(existingCatIndex, 1);
+                    }
+                }
+
                 if (this.items.length >= 6) return alert('Máximo de 6 itens para o look.');
                 this.items.push(item);
             }
@@ -306,18 +364,80 @@
                 }
             });
 
+            this.renderUpload();
             this.renderItems();
-            this.generateBtn.disabled = this.items.length < 2;
+            this.generateBtn.disabled = this.items.length < 1;
+        },
+
+        renderUpload() {
+            if (!this.uploadContainer) return;
+
+            if (this.state.previewUrl) {
+                this.uploadContainer.innerHTML = `
+                    <div class="wm-upload-section">
+                        <div class="wm-upload-preview">
+                            <img src="${this.state.previewUrl}" class="wm-preview-img">
+                            <div style="flex:1;">
+                                <div style="font-size: 0.875rem; font-weight: 700; color: #111827;">Sua Foto</div>
+                                <div style="font-size: 0.75rem; color: #6b7280;">O look será montado nela.</div>
+                            </div>
+                            <button class="wm-remove-btn wm-remove-photo">
+                                ${SVG_ICONS.trash}
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                this.uploadContainer.querySelector('.wm-remove-photo').onclick = () => {
+                    this.state.userImage = null;
+                    this.state.previewUrl = null;
+                    this.updateState();
+                };
+            } else {
+                this.uploadContainer.innerHTML = `
+                    <div class="wm-upload-section">
+                        <div class="wm-upload-zone" id="wm-upload-trigger">
+                            <div class="wm-upload-icon">${SVG_ICONS.camera}</div>
+                            <div class="wm-upload-text">
+                                <p style="font-size: 0.875rem; font-weight: 700; color: #111827;">Upload da sua foto</p>
+                                <p style="font-size: 0.75rem; color: #6b7280;">Para ver o look em você (opcional)</p>
+                            </div>
+                        </div>
+                        <input type="file" id="wm-file-input" accept="image/*" style="display:none;">
+                    </div>
+                `;
+
+                const uploadTrigger = this.uploadContainer.querySelector('#wm-upload-trigger');
+                const fileInput = this.uploadContainer.querySelector('#wm-file-input');
+
+                if (uploadTrigger) uploadTrigger.onclick = () => fileInput.click();
+                if (fileInput) fileInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (re) => {
+                            this.state.userImage = file;
+                            this.state.previewUrl = re.target.result;
+                            this.updateState();
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+            }
         },
 
         renderItems() {
             if (!this.itemsList) return;
+            console.log({items: this.items});
             this.itemsList.innerHTML = this.items.map(item => `
                 <div class="wm-item-card">
-                    <img src="${item.image}" class="wm-item-img">
-                    <div class="wm-item-info">
-                        <div class="wm-item-name">${item.name}</div>
-                    </div>
+                    <a href="${item.link}" target="_blank" style="width: 100%; display: flex; align-items: center; gap: 1rem; text-decoration: none; color: inherit;">
+                        <img src="${item.image}" class="wm-item-img">
+                        <div class="wm-item-info">
+                            ${item.category && item.category !== 'outro' ? `<span class="wm-category-badge">${item.category}</span>` : ''}
+                            <div class="wm-item-name">${item.name}</div>
+                        </div>
+                    </a>
                     <button class="wm-remove-btn" onclick="window.WearmeBuy.toggleItem({id:'${item.id}'})">
                         ${SVG_ICONS.trash}
                     </button>
@@ -325,7 +445,7 @@
             `).join('');
         },
 
-        toggleDrawer(open) {
+        toggleModal(open) {
             this.overlay.classList.toggle('open', open);
         },
 
@@ -341,14 +461,27 @@
             `;
 
             try {
-                const response = await fetch(this.config.apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
+                let body, headers = {};
+                if (this.state.userImage) {
+                    const formData = new FormData();
+                    formData.append('apiKey', this.config.apiKey);
+                    formData.append('sessionId', 'sess_' + Date.now());
+                    formData.append('items', JSON.stringify(this.items));
+                    formData.append('userImage', this.state.userImage);
+                    body = formData;
+                } else {
+                    headers['Content-Type'] = 'application/json';
+                    body = JSON.stringify({
                         apiKey: this.config.apiKey,
                         items: this.items,
                         sessionId: 'sess_' + Date.now()
-                    })
+                    });
+                }
+
+                const response = await fetch(this.config.apiUrl, {
+                    method: 'POST',
+                    headers,
+                    body
                 });
 
                 const data = await response.json();

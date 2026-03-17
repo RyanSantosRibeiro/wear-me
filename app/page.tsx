@@ -388,6 +388,7 @@ export default function HomePage() {
               {
                 id: "prod-001",
                 name: "Jaqueta Bomber",
+                link: "https://www.google.com",
                 price: "R$ 349,00",
                 image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTWIp57UgNH6oKnYK8izUKD7BDBs960RggQA&s"
               },
@@ -395,12 +396,14 @@ export default function HomePage() {
                 id: "prod-002",
                 name: "Calça Leg Black",
                 price: "R$ 199,00",
+                link: "https://www.google.com",
                 image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop"
               },
               {
                 id: "prod-003",
-                name: "Sneaker Urban",
+                name: "Sneaker Urban", 
                 price: "R$ 289,00",
+                link: "https://www.google.com",
                 image: "https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=800&auto=format&fit=crop"
               }
             ].map((product) => (
@@ -439,6 +442,7 @@ export default function HomePage() {
                     className="wearme-add w-full py-4 bg-gray-50 hover:bg-primary hover:text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-sm flex items-center justify-center gap-2"
                     data-wearme-id={product.id}
                     data-wearme-name={product.name}
+                    data-wearme-link={product.link}
                     data-wearme-image={product.image}
                   >
                     <Plus size={16} />

@@ -3,13 +3,48 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createAdminClient } from "@/lib/supabase/server";
 import sharp from "sharp";
 
+function withCORS(req: NextRequest, res: NextResponse) {
+    const origin = req.headers.get("origin") ?? "null";
+
+    res.headers.set("Access-Control-Allow-Origin", origin);
+    res.headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.headers.set("Access-Control-Allow-Headers", "Content-Type");
+    res.headers.set("Vary", "Origin");
+
+    return res;
+}
+
+export async function OPTIONS(req: NextRequest) {
+    return withCORS(req, new NextResponse(null, { status: 200 }));
+}
+
 export async function POST(req: NextRequest) {
     try {
-        const body = await req.json();
+        // Agora verificamos se o body eh JSON ou FormData
+        const contentType = req.headers.get("content-type") || "";
+        let body: any = {};
+        let userImageRaw: Blob | null = null;
+        
+        if (contentType.includes("multipart/form-data")) {
+            const formData = await req.formData();
+            body.apiKey = formData.get("apiKey");
+            body.sessionId = formData.get("sessionId");
+            const itemsStr = formData.get("items");
+            if (typeof itemsStr === 'string') {
+                try { body.items = JSON.parse(itemsStr); } catch(e){}
+            }
+            const imgRaw = formData.get("userImage");
+            if (imgRaw instanceof File && imgRaw.size > 0) {
+                userImageRaw = imgRaw;
+            }
+        } else {
+            body = await req.json();
+        }
+
         const { apiKey: clientApiKey, sessionId, items } = body;
 
         if (!items || !Array.isArray(items) || items.length === 0) {
-            return NextResponse.json({ error: "Items are required" }, { status: 400 });
+            return withCORS(req, NextResponse.json({ error: "Items are required" }, { status: 400 }));
         }
 
         // 1. Validate API Key
@@ -21,16 +56,16 @@ export async function POST(req: NextRequest) {
             .single();
 
         if (configError || !config) {
-            return NextResponse.json({ error: "Invalid API Key" }, { status: 401 });
+            return withCORS(req, NextResponse.json({ error: "Invalid API Key" }, { status: 401 }));
         }
 
         // 2. Check limits
         if ((config.requests_count || 0) >= (config.requests_limit || 0)) {
-            return NextResponse.json({ error: "Request limit reached" }, { status: 402 });
+            return withCORS(req, NextResponse.json({ error: "Request limit reached" }, { status: 402 }));
         }
 
         if (!config.site_url) {
-            return NextResponse.json({ error: "Site URL not configured" }, { status: 401 });
+            return withCORS(req, NextResponse.json({ error: "Site URL not configured" }, { status: 401 }));
         }
 
         // Security Check: Site URL verification
@@ -40,9 +75,9 @@ export async function POST(req: NextRequest) {
             console.log("Origin:", origin);
             console.log("Site URL:", config.site_url);
             // Simple inclusion check to handle protocol variations (http/https)
-            if (origin !== "http://localhost:3000" && (!origin || !origin.includes(config.site_url))) {
+            if (origin !== "http://localhost:3000" && !origin?.includes("myvtex") && (!origin || !origin.includes(config.site_url))) {
                 console.warn(`Blocked request from unauthorized origin: ${origin} (Expected: ${config.site_url})`);
-                return NextResponse.json({ error: "Unauthorized Domain" }, { status: 403 });
+                return withCORS(req, NextResponse.json({ error: "Unauthorized Domain" }, { status: 403 }));
             }
         }
 
@@ -52,16 +87,16 @@ export async function POST(req: NextRequest) {
         if (!apiKey) {
             console.warn("Using Mock Response (No API Key)");
             await new Promise(r => setTimeout(r, 2000));
-            return NextResponse.json({
+            return withCORS(req, NextResponse.json({
                 success: true,
                 lookImage: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
-                itemsUsed: items.map(i => i.id)
-            });
+                itemsUsed: items.map((i: any) => i.id)
+            }));
         }
 
         const genAI = new GoogleGenerativeAI(apiKey);
         // Using same model as in generate route
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-image" }); // Defaulting to stable 1.5-flash or 2.0 if available. The other code said 2.5 which might be a typo for 1.5 or 2.0.
+        const model = genAI.getGenerativeModel({ model: "gemini-3-pro-image-preview" }); // Defaulting to stable 1.5-flash or 2.0 if available. The other code said 2.5 which might be a typo for 1.5 or 2.0.
         console.log("Model:", model);
         // Fetch all item images and convert to Parts
         const itemParts = await Promise.all(items.map(async (item, index) => {
@@ -86,7 +121,7 @@ export async function POST(req: NextRequest) {
         const validParts = itemParts.filter(p => p !== null);
 
         if (validParts.length === 0) {
-            return NextResponse.json({ error: "Failed to fetch any item images" }, { status: 400 });
+            return withCORS(req, NextResponse.json({ error: "Failed to fetch any item images" }, { status: 400 }));
         }
 
         // Prompt for Look Generation
@@ -104,12 +139,32 @@ Ensure the colors, textures, and styles of the items complement each other in th
 The final image should look like a real fashion photoshoot. 
 Maintain a consistent style, professional studio lighting, and a clean or fashionable background.
 The items should fit the model naturally, respecting realistic proportions and fabric behavior.
+${userImageRaw ? "- USER REFERENCE: A user photo has been provided as Reference 1. The model in the final image MUST be the person from Reference 1, wearing the items." : ""}
 
 - OUTPUT:
 Generate one main image showing the final look.
 `;
 
-        const requestParts = [prompt, ...validParts.map((p, i) => `Reference ${i + 1}:`), ...validParts];
+        const requestParts: any = [prompt];
+        if (userImageRaw) {
+            const userImageBuffer = await userImageRaw.arrayBuffer();
+            requestParts.push("Reference 1 (Person):");
+            requestParts.push({
+                inlineData: {
+                    data: Buffer.from(userImageBuffer).toString("base64"),
+                    mimeType: userImageRaw.type || "image/jpeg",
+                },
+            });
+            validParts.forEach((p, i) => {
+                requestParts.push(`Reference ${i + 2}:`);
+                requestParts.push(p);
+            });
+        } else {
+            validParts.forEach((p, i) => {
+                requestParts.push(`Reference ${i + 1}:`);
+                requestParts.push(p);
+            });
+        }
 
         // Note: For actual image generation in Gemini, you might need a specific model or output format.
         // In the project's 'generate' route, they appear to use it for visual synthesis.
@@ -200,17 +255,17 @@ Generate one main image showing the final look.
             console.error("Failed to log request:", logError);
         }
 
-        return NextResponse.json({
+        return withCORS(req, NextResponse.json({
             success: true,
             lookImage: resultImageUrl,
-            itemsUsed: items.map(i => i.id)
-        });
+            itemsUsed: items.map((i: any) => i.id)
+        }));
 
     } catch (error: any) {
         console.error("Look Generation Error:", error);
-        return NextResponse.json(
+        return withCORS(req, NextResponse.json(
             { error: "Failed to generate look" },
             { status: 500 }
-        );
+        ));
     }
 }

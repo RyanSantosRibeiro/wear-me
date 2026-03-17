@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WearMe Shopper — Teste SDK</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f7;
+      color: #333;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: white;
+      border-bottom: 1px solid #eee;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ff6ec7, #7873f5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ===== BUSCA ===== */
+    .search-bar {
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-bar input {
+      width: 280px;
+      padding: 10px 16px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+    }
+    .search-bar input:focus { border-color: #7873f5; }
+
+    .search-bar button {
+      padding: 10px 20px;
+      background: #111;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .cart-icon {
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    /* ===== GRID ===== */
+    .page-title {
+      max-width: 1200px;
+      margin: 32px auto 16px;
+      padding: 0 24px;
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .page-subtitle {
+      max-width: 1200px;
+      margin: 0 auto 24px;
+      padding: 0 24px;
+      color: #999;
+      font-size: 14px;
+    }
+
+    .grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    /* ===== CARD ===== */
+    .product-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #eee;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .product-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .product-image {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: #f0f0f0;
+    }
+
+    .product-info {
+      padding: 16px;
+    }
+
+    .product-brand {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #999;
+      margin-bottom: 4px;
+    }
+
+    .product-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .product-category {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 12px;
+    }
+
+    .product-price {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .price-current {
+      font-size: 20px;
+      font-weight: 800;
+      color: #111;
+    }
+
+    .price-old {
+      font-size: 14px;
+      color: #ccc;
+      text-decoration: line-through;
+    }
+
+    .btn-add-cart {
+      width: 100%;
+      padding: 12px;
+      background: #111;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn-add-cart:hover { background: #333; }
+    .btn-add-cart:active { transform: scale(0.97); }
+
+    /* ===== DEBUG PANEL ===== */
+    .debug-panel {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      background: #1e1e1e;
+      color: #ccc;
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      max-width: 360px;
+      max-height: 320px;
+      overflow-y: auto;
+      z-index: 99998;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      border: 1px solid #333;
+    }
+
+    .debug-panel h4 {
+      font-size: 12px;
+      color: #ff6ec7;
+      margin-bottom: 8px;
+      font-family: sans-serif;
+    }
+
+    .debug-panel pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #7fdbca;
+      line-height: 1.5;
+    }
+
+    .debug-btn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      background: #1e1e1e;
+      color: #ff6ec7;
+      border: 1px solid #333;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 99997;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">FakeStore</div>
+    <!-- data-search-form para o SDK detectar -->
+    <form class="search-bar" data-search-form onsubmit="event.preventDefault()">
+      <input type="text" placeholder="Buscar produtos..." name="q" />
+      <button type="submit">🔍 Buscar</button>
+    </form>
+    <span class="cart-icon">🛒</span>
+  </header>
+
+  <!-- CONTENT -->
+  <h1 class="page-title">Loja de Teste — WearMe Shopper SDK</h1>
+  <p class="page-subtitle">
+    📍 <strong>Teste do Fluxo 1:</strong> Clique em 5 cards de corrida feminino — na 5ª visita a gente indica!
+    Abra o console (F12) para ver <code>categoryClicks</code> a cada clique.
+  </p>
+
+  <div class="grid">
+
+    <!-- PRODUTO 1 — Feminino, Corrida -->
+    <div class="product-card"
+      data-product-id="nike-pegasus-w"
+      data-category="corrida feminino"
+      data-brand="Nike"
+      data-price="699.90"
+    >
+      <img class="product-image" src="https://imgcentauro-a.akamaihd.net/660x660/99052912A3.jpg" alt="Nike Pegasus" />
+      <div class="product-info">
+        <div class="product-brand">Nike</div>
+        <div class="product-name">Pegasus 41 Feminino</div>
+        <div class="product-category">Corrida · Feminino</div>
+        <div class="product-price">
+          <span class="price-current">R$ 699,90</span>
+          <span class="price-old">R$ 899,90</span>
+        </div>
+        <button class="btn-add-cart" data-add-to-cart>Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+    <!-- PRODUTO 2 — Masculino, Casual -->
+    <div class="product-card"
+      data-product-id="adidas-ultraboost-m"
+      data-category="casual masculino"
+      data-brand="Adidas"
+      data-price="999.90"
+    >
+      <img class="product-image" src="https://imgcentauro-a.akamaihd.net/768x768/97531405.jpg" alt="Adidas Ultraboost" />
+      <div class="product-info">
+        <div class="product-brand">Adidas</div>
+        <div class="product-name">Ultraboost Light</div>
+        <div class="product-category">Casual · Masculino</div>
+        <div class="product-price">
+          <span class="price-current">R$ 999,90</span>
+        </div>
+        <button class="btn-add-cart" data-add-to-cart>Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+    <!-- PRODUTO 3 — Feminino, Vestido -->
+    <div class="product-card"
+      data-product-id="zen-vestido-midi"
+      data-category="vestido feminino"
+      data-brand="Zen"
+      data-price="189.90"
+    >
+      <img class="product-image" src="https://www.zenoficial.com.br/cdn/shop/files/11573_002_AnaPaula1.jpg?v=1760753084&width=823" alt="Vestido Zen" />
+      <div class="product-info">
+        <div class="product-brand">Zen</div>
+        <div class="product-name">Vestido Midi Floral</div>
+        <div class="product-category">Vestido · Feminino</div>
+        <div class="product-price">
+          <span class="price-current">R$ 189,90</span>
+          <span class="price-old">R$ 259,90</span>
+        </div>
+        <button class="btn-add-cart" data-add-to-cart>Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+    <!-- PRODUTO 4 — Masculino, Sport -->
+    <div class="product-card"
+      data-product-id="nike-camiseta-dri"
+      data-category="camiseta masculino sport"
+      data-brand="Nike"
+      data-price="149.90"
+    >
+      <img class="product-image" src="https://imgcentauro-a.akamaihd.net/800x800/9974HJ31A6.jpg" alt="Camiseta Nike" />
+      <div class="product-info">
+        <div class="product-brand">Nike</div>
+        <div class="product-name">Camiseta Dri-FIT</div>
+        <div class="product-category">Sport · Masculino</div>
+        <div class="product-price">
+          <span class="price-current">R$ 149,90</span>
+        </div>
+        <button class="btn-add-cart" data-add-to-cart>Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+    <!-- PRODUTO 5 — Feminino, Casual -->
+    <div class="product-card"
+      data-product-id="asics-nimbus-w"
+      data-category="corrida feminino"
+      data-brand="Asics"
+      data-price="899.90"
+    >
+      <img class="product-image" src="https://imgcentauro-a.akamaihd.net/768x768/99181012.jpg" alt="Asics Nimbus" />
+      <div class="product-info">
+        <div class="product-brand">Asics</div>
+        <div class="product-name">Gel Nimbus 26</div>
+        <div class="product-category">Corrida · Feminino</div>
+        <div class="product-price">
+          <span class="price-current">R$ 899,90</span>
+          <span class="price-old">R$ 1.199,90</span>
+        </div>
+        <button class="btn-add-cart" data-add-to-cart>Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+    <!-- PRODUTO 6 — Unissex, Acessório -->
+    <div class="product-card"
+      data-product-id="oakley-sunglasses"
+      data-category="acessorios"
+      data-brand="Oakley"
+      data-price="459.90"
+    >
+      <img class="product-image" src="https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=880&auto=format&fit=crop" alt="Oakley" />
+      <div class="product-info">
+        <div class="product-brand">Oakley</div>
+        <div class="product-name">Holbrook Prizm</div>
+        <div class="product-category">Acessórios</div>
+        <div class="product-price">
+          <span class="price-current">R$ 459,90</span>
+        </div>
+        <button class="btn-add-cart" data-add-to-cart>Adicionar ao Carrinho</button>
+      </div>
+    </div>
+    <!-- PRODUTO 7 — corrida feminino (para teste do threshold) -->
+    <div class="product-card"
+      data-product-id="new-balance-fresh-w"
+      data-category="corrida feminino"
+      data-brand="New Balance"
+      data-price="599.90"
+    >
+      <img class="product-image" src="https://imgcentauro-a.akamaihd.net/768x768/943MFCWB1.jpg" alt="New Balance" />
+      <div class="product-info">
+        <div class="product-brand">New Balance</div>
+        <div class="product-name">Fresh Foam X 1080</div>
+        <div class="product-category">Corrida · Feminino</div>
+        <div class="product-price">
+          <span class="price-current">R$ 599,90</span>
+          <span class="price-old">R$ 799,90</span>
+        </div>
+        <button class="btn-add-cart" data-add-to-cart>Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+    <!-- PRODUTO 8 — corrida feminino -->
+    <div class="product-card"
+      data-product-id="hoka-clifton-w"
+      data-category="corrida feminino"
+      data-brand="Hoka"
+      data-price="849.90"
+    >
+      <img class="product-image" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700&auto=format&fit=crop" alt="Hoka Clifton" />
+      <div class="product-info">
+        <div class="product-brand">Hoka</div>
+        <div class="product-name">Clifton 9 Feminino</div>
+        <div class="product-category">Corrida · Feminino</div>
+        <div class="product-price">
+          <span class="price-current">R$ 849,90</span>
+        </div>
+        <button class="btn-add-cart" data-add-to-cart>Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+    <!-- PRODUTO 9 — corrida feminino -->
+    <div class="product-card"
+      data-product-id="puma-velocity-w"
+      data-category="corrida feminino"
+      data-brand="Puma"
+      data-price="449.90"
+    >
+      <img class="product-image" src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=700&auto=format&fit=crop" alt="Puma Velocity" />
+      <div class="product-info">
+        <div class="product-brand">Puma</div>
+        <div class="product-name">Velocity Nitro 3 W</div>
+        <div class="product-category">Corrida · Feminino</div>
+        <div class="product-price">
+          <span class="price-current">R$ 449,90</span>
+          <span class="price-old">R$ 549,90</span>
+        </div>
+        <button class="btn-add-cart" data-add-to-cart>Adicionar ao Carrinho</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DEBUG / RESET -->
+  <div style="position:fixed; bottom:24px; left:24px; display:flex; gap:8px; z-index:99997">
+    <button class="debug-btn" style="position:static" onclick="toggleDebug()">🧪 Debug Persona</button>
+    <button class="debug-btn" style="position:static; color:#4fc3f7" onclick="resetPersona()">🔄 Reset</button>
+  </div>
+
+  <script>
+    var debugOpen = false;
+    function toggleDebug() {
+      debugOpen = !debugOpen;
+      var panel = document.getElementById("wearme-debug");
+      if (!panel && debugOpen) {
+        panel = document.createElement("div");
+        panel.id = "wearme-debug";
+        panel.className = "debug-panel";
+        document.body.appendChild(panel);
+      }
+      if (panel) {
+        panel.style.display = debugOpen ? "block" : "none";
+      }
+      if (debugOpen) updateDebug();
+    }
+
+    function resetPersona() {
+      WearMeShopper.resetPersona();
+      var panel = document.getElementById("wearme-debug");
+      if (panel) panel.innerHTML = '<h4>🧪 Persona resetada!</h4>';
+    }
+
+    function updateDebug() {
+      var panel = document.getElementById("wearme-debug");
+      if (!panel) return;
+
+      var raw = localStorage.getItem("wearme_persona");
+      var persona = raw ? JSON.parse(raw) : {};
+
+      // Destaca os campos mais relevantes
+      var summary = '';
+      if (persona.categoryClicks) {
+        summary += '<span style="color:#ff6ec7">categoryClicks:</span> ';
+        for (var cat in persona.categoryClicks) {
+          var count = persona.categoryClicks[cat];
+          var bar = count >= 5 ? ' ✅' : ' (' + count + '/5)';
+          summary += '<br>  ' + cat + bar;
+        }
+        summary += '<br><br>';
+      }
+      if (persona.viewedProducts && persona.viewedProducts.length) {
+        summary += '<span style="color:#7873f5">viewedProducts (' + persona.viewedProducts.length + '):</span><br>';
+        summary += '  ' + persona.viewedProducts.join(', ') + '<br><br>';
+      }
+
+      panel.innerHTML =
+        '<h4>🧪 Persona (localStorage)</h4>' +
+        '<pre>' + summary + JSON.stringify(persona, null, 2) + '</pre>';
+    }
+
+    // Atualiza debug a cada 1s
+    setInterval(function () {
+      if (debugOpen) updateDebug();
+    }, 1000);
+  </script>
+
+  <!-- WEARME SHOPPER SDK -->
+  <script src="/WearMeShopper.js"></script>
+  <script>
+    // Usa "custom" (data-attributes) para a página de teste
+    // Em loja VTEX real: WearMeShopper.init({ platform: "vtex" });
+    WearMeShopper.init({ platform: "custom" });
+  </script>
+
+</body>
+</html>
