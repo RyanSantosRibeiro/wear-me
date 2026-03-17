@@ -142,7 +142,7 @@ export default function LiveTryOnPage() {
     try {
       const file = dataURLtoFile(capturedImage, 'user-photo.jpg');
       const formData = new FormData();
-      formData.append('apiKey', 'demo-live'); // mock
+      formData.append('apiKey', '023ec83bdbf73177a680807fc144bfea'); // mock
       formData.append('sessionId', 'live_' + Date.now());
       formData.append('items', JSON.stringify([selectedProduct]));
       formData.append('userImage', file);
@@ -228,12 +228,6 @@ export default function LiveTryOnPage() {
         <h1 className="text-white font-black text-2xl drop-shadow-md italic">Wear<span className="text-pink-400">Me</span></h1>
 
         <div className="flex gap-4">
-          <button
-            onClick={() => startCamera()}
-            className="px-6 py-4 bg-white text-black font-bold rounded-full"
-          >
-            Usar câmera
-          </button>
           {!capturedImage && (
             <button onClick={toggleCamera} className="p-3 bg-white/20 backdrop-blur text-white rounded-full">
               <RefreshCcw size={20} />
