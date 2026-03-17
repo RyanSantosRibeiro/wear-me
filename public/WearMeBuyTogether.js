@@ -245,9 +245,12 @@
         },
 
         injectStyles() {
-            const style = document.createElement('style');
-            style.textContent = STYLES;
-            document.head.appendChild(style);
+            if (!document.getElementById('wm-styles')) {
+                const style = document.createElement('style');
+                style.id = 'wm-styles';
+                style.textContent = STYLES;
+                document.head.appendChild(style);
+            }
 
             if (this.config.highlightColor) {
                 console.log('highlightColor', this.config.highlightColor);
@@ -312,19 +315,22 @@
             };
 
             // Listen for data-attributes clicks
-            document.addEventListener('click', (e) => {
-                const btn = e.target.closest('.wearme-add');
-                if (btn) {
-                    const item = {
-                        id: btn.dataset.wearmeId,
-                        image: btn.dataset.wearmeImage,
-                        name: btn.dataset.wearmeName || 'Produto',
-                        category: btn.dataset.wearmeCategory || 'outro',
-                        link: btn.dataset.wearmeLink || '#'
-                    };
-                    this.toggleItem(item);
-                }
-            });
+            if (!window._wmBuyClickListenerAdded) {
+                document.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.wearme-add');
+                    if (btn) {
+                        const item = {
+                            id: btn.dataset.wearmeId,
+                            image: btn.dataset.wearmeImage,
+                            name: btn.dataset.wearmeName || 'Produto',
+                            category: btn.dataset.wearmeCategory || 'outro',
+                            link: btn.dataset.wearmeLink || '#'
+                        };
+                        window.WearmeBuy.toggleItem(item);
+                    }
+                });
+                window._wmBuyClickListenerAdded = true;
+            }
 
             this.generateBtn.onclick = () => this.generateLook();
         },

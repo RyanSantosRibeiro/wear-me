@@ -826,9 +826,12 @@
         },
 
         injectStyles() {
-            const style = document.createElement('style');
-            style.textContent = STYLES;
-            document.head.appendChild(style);
+            if (!document.getElementById('wearme-styles')) {
+                const style = document.createElement('style');
+                style.id = 'wearme-styles';
+                style.textContent = STYLES;
+                document.head.appendChild(style);
+            }
 
             if (this.config.highlightColor) {
                 document.body.style.setProperty('--wearme-primary', this.config.highlightColor);
@@ -874,6 +877,10 @@
         },
 
         createModal() {
+            // Prevent duplicate modals if initialized multiple times
+            const existingOverlay = document.querySelector('.wearme-modal-overlay');
+            if (existingOverlay) existingOverlay.remove();
+            
             const overlay = document.createElement('div');
             overlay.className = 'wearme-modal-overlay';
             overlay.onclick = (e) => {
