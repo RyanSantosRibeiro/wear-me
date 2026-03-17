@@ -60,6 +60,7 @@ export default function LiveTryOnPage() {
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
+  const [showConsent, setShowConsent] = useState<boolean>(true);
 
   const startCamera = async (mode = facingMode) => {
   try {
@@ -89,6 +90,11 @@ export default function LiveTryOnPage() {
 };
 
   useEffect(() => {
+    const consent = localStorage.getItem('wearme_live_consent');
+    if (consent) {
+      setShowConsent(false);
+      startCamera();
+    }
   return () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
@@ -96,6 +102,12 @@ export default function LiveTryOnPage() {
     }
   };
 }, []);
+
+  const handleConsent = () => {
+    localStorage.setItem('wearme_live_consent', 'true');
+    setShowConsent(false);
+    startCamera();
+  };
 
   const toggleCamera = () => {
     const newMode = facingMode === "user" ? "environment" : "user";
@@ -203,6 +215,26 @@ export default function LiveTryOnPage() {
 
   return (
     <div className="fixed inset-0 bg-black overflow-hidden font-sans">
+      {showConsent && (
+        <div className="absolute inset-0 z-[60] bg-black/95 flex flex-col items-center justify-center p-6 text-center">
+            <div className="bg-white/5 border border-white/10 p-8 rounded-[2rem] max-w-sm w-full backdrop-blur-xl">
+                <div className="w-20 h-20 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Camera size={36} className="text-pink-400" />
+                </div>
+                <h2 className="text-2xl font-black text-white mb-4">Uso de Imagem</h2>
+                <p className="text-white/70 mb-8 text-sm leading-relaxed">
+                    Para usar o provador virtual, precisamos acessar a sua câmera ou galeria. <br/><br/>
+                    Fique tranquilo: <strong>suas fotos e imagens geradas não são guardadas</strong> em nossos servidores e serão descartadas após o uso.
+                </p>
+                <button 
+                   onClick={handleConsent}
+                   className="w-full py-4 bg-gradient-to-r from-pink-500 to-primary text-white font-black uppercase tracking-wider rounded-2xl shadow-xl shadow-pink-500/20 active:scale-95 transition-all"
+                >
+                   Eu concordo
+                </button>
+            </div>
+        </div>
+      )}
       <canvas ref={canvasRef} className="hidden" />
       <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={handleFileUpload} />
 
@@ -228,19 +260,13 @@ export default function LiveTryOnPage() {
         <h1 className="text-white font-black text-2xl drop-shadow-md italic">Wear<span className="text-pink-400">Me</span></h1>
 
         <div className="flex gap-4">
-          {!capturedImage && (
-            <button onClick={toggleCamera} className="p-3 bg-white/20 backdrop-blur text-white rounded-full">
-              <RefreshCcw size={20} />
-            </button>
-          )}
+          
           {capturedImage && (
             <button onClick={resetFlow} className="p-3 bg-white/20 backdrop-blur text-white rounded-full">
               <X size={20} />
             </button>
           )}
-          <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-white/20 backdrop-blur text-white rounded-full">
-            <Upload size={20} />
-          </button>
+          
         </div>
       </div>
 
@@ -289,7 +315,10 @@ export default function LiveTryOnPage() {
         </div>
 
         {/* Main Action Button (Shoot / Generate) */}
-        <div className="px-6 flex justify-center mt-2">
+        <div className="px-6 flex justify-between items-center mt-2">
+          <button onClick={() => fileInputRef.current?.click()} className="p-3 bg-white/20 backdrop-blur text-white rounded-full h-auto">
+            <Upload size={20} />
+          </button>
           {!capturedImage ? (
             <button
               onClick={capturePhoto}
@@ -304,6 +333,11 @@ export default function LiveTryOnPage() {
               className={`w-full max-w-md py-5 rounded-full font-black text-lg uppercase tracking-widest shadow-2xl transition-all ${!selectedProduct ? 'bg-white/20 text-white/50 cursor-not-allowed' : 'bg-gradient-to-r from-pink-500 to-primary text-white hover:opacity-90 active:scale-95 shadow-pink-500/30'}`}
             >
               {!selectedProduct ? 'Selecione uma peça' : 'Provar Roupa com IA'}
+            </button>
+          )}
+          {!capturedImage && (
+            <button onClick={toggleCamera} className="p-3 bg-white/20 backdrop-blur text-white rounded-full">
+              <RefreshCcw size={20} />
             </button>
           )}
         </div>
