@@ -62,7 +62,6 @@ export default async function LogsPage() {
                                 <TableHead className="w-[180px] font-bold text-gray-400 uppercase text-[10px] tracking-widest">Data / Hora</TableHead>
                                 <TableHead className="font-bold text-gray-400 uppercase text-[10px] tracking-widest">Sessão</TableHead>
                                 <TableHead className="font-bold text-gray-400 uppercase text-[10px] tracking-widest">Produto</TableHead>
-                                <TableHead className="font-bold text-gray-400 uppercase text-[10px] tracking-widest">Resultado</TableHead>
                                 <TableHead className="font-bold text-gray-400 uppercase text-[10px] tracking-widest text-right">Modo</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -119,32 +118,6 @@ export default async function LogsPage() {
                                                     <span className="text-[10px] text-gray-400 font-mono truncate w-20">Ref: {log.id.slice(0, 8)}</span>
                                                 </div>
                                             </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            {log.result_image_url ? (
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-12 h-16 rounded-lg overflow-hidden border border-emerald-100 bg-emerald-50 flex-shrink-0 shadow-sm relative group">
-                                                        <img src={log.result_image_url} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="Result" />
-                                                        <a
-                                                            href={log.result_image_url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                                                        >
-                                                            <ExternalLink size={14} className="text-white" />
-                                                        </a>
-                                                    </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-xs font-bold text-emerald-600 uppercase tracking-tighter">Gerado</span>
-                                                        <Badge className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-200 h-4 text-[9px] w-fit px-1 shadow-none">IA Active</Badge>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center gap-2 text-gray-300">
-                                                    <ImageIcon size={16} />
-                                                    <span className="italic text-xs font-medium">Pendente</span>
-                                                </div>
-                                            )}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Badge variant="secondary" className="bg-gray-100 text-gray-500 hover:bg-gray-200 border-none rounded-lg font-bold text-[10px] uppercase">

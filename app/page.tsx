@@ -41,7 +41,7 @@ import WearmeBuyTogetherScriptSection from "@/components/ui/buytogether-script-s
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isAnnual, setIsAnnual] = useState(false)
-  const [plans, setPlans] = useState([])
+
   const [copied, setCopied] = useState(false)
   const installScript = `<!-- Wearme Size Finder & Chart -->
 <div id="wearme-size-widget"></div>
@@ -74,15 +74,7 @@ export default function HomePage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  useEffect(() => {
-    const fechtPlans = async () => {
-      const response = await fetch("/api/plans");
-      const data = await response.json();
-      console.log(data);
-      setPlans(data)
-    };
-    fechtPlans();
-  }, []);
+
 
   return (
     <div className="h-auto min-h-screen bg-[#fafafa] selection:bg-primary/20">
@@ -550,50 +542,81 @@ export default function HomePage() {
 
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
-            {/* Basic Plan */}
-            {
-              plans?.map((plan: any) => {
-                if (!plan?.id) return null;
-                const highlight = plan.slug === 'wearme-business';
+            {/* Starter Plan */}
+            <div className="bg-white rounded-3xl border-2 border-gray-200 p-8 shadow-lg hover:shadow-xl transition-all">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-black text-gray-900">Starter</h3>
+                <div className="bg-gray-100 px-3 py-1 text-gray-700 text-xs font-bold rounded-full">
+                  Para Começar
+                </div>
+              </div>
 
-                return (
-                  <div key={plan.id} className={`${highlight ? 'bg-gradient-to-r from-primary to-pink-400' : 'bg-white'} rounded-3xl border-2 border-gray-200 p-8 shadow-lg hover:shadow-xl transition-all ${highlight ? 'border-emerald-200' : ''}`}>
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className={`text-2xl font-black ${highlight ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
-                      <div className={`${highlight ? 'bg-white' : 'bg-gray-100'} px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full`}>
-                        Para Começar
-                      </div>
-                    </div>
+              <div className="mb-2">
+                <span className="text-4xl font-black text-gray-900">A consultar</span>
+              </div>
+              <p className="text-sm text-gray-500 mb-6">Ideal para lojas que querem começar a experimentar IA</p>
 
-                    <div className="mb-6">
-                      <div className="flex items-baseline gap-2">
-                        <span className={`text-5xl font-black ${highlight ? 'text-white' : 'text-gray-90'}`}>
-                          R$ {plan.price}
-                        </span>
-                        <span className={`text-gray-500 font-semibold ${highlight ? 'text-white' : 'text-gray-90'}`}>/mês</span>
-                      </div>
-                      <p className={`text-sm ${highlight ? 'text-white' : 'text-gray-500'} mt-2`}>Leve essa experiência para seus clientes</p>
-                    </div>
+              <ul className="space-y-3 mb-8">
+                {[
+                  "Provador Virtual (WearMe)",
+                  "FindMySize — Recomendador de Tamanho",
+                  "Tabela de Medidas Inteligente",
+                  "API Key dedicada",
+                  "Relatório básico de uso",
+                  "Suporte por Email"
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-3 text-gray-700">
+                    <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />
+                    <span className="text-md font-medium">{feature}</span>
+                  </li>
+                ))}
+              </ul>
 
-                    <ul className="space-y-3 mb-8">
-                      {plan.metadata.features.map((feature: string, i: number) => (
-                        <li key={i} className={`flex items-center gap-3 ${highlight ? 'text-white' : 'text-gray-700'}`}>
-                          <CheckCircle2 size={20} className={`text-emerald-500 shrink-0 ${highlight ? 'text-white' : 'text-gray-700'}`} />
-                          <span className={`text-md font-medium ${highlight ? 'text-white' : 'text-gray-700'}`}>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
+              <a
+                href="#contact"
+                className="block w-full py-4 bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold rounded-xl text-center transition-colors"
+              >
+                Entrar em Contato
+              </a>
+            </div>
 
-                    <Link
-                      href="/signup"
-                      className={`block w-full py-4 ${highlight ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-200 text-gray-900 font-bold rounded-xl text-center transition-colors`}
-                    >
-                      Começar Grátis
-                    </Link>
-                  </div>
-                )
-              })
-            }
+            {/* Business Plan */}
+            <div className="bg-gradient-to-r from-primary to-pink-400 rounded-3xl border-2 border-emerald-200 p-8 shadow-lg hover:shadow-xl transition-all">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-black text-white">Business</h3>
+                <div className="bg-white px-3 py-1 text-gray-700 text-xs font-bold rounded-full">
+                  Mais Popular
+                </div>
+              </div>
+
+              <div className="mb-2">
+                <span className="text-4xl font-black text-white">A consultar</span>
+              </div>
+              <p className="text-sm text-white/80 mb-6">Para operações que precisam de escala e personalização</p>
+
+              <ul className="space-y-3 mb-8">
+                {[
+                  "Tudo do plano Starter",
+                  "Buy Together — Compre o Look",
+                  "White-label (sua marca)",
+                  "Relatório avançado de imagens",
+                  "Suporte prioritário",
+                  "SLA de disponibilidade"
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-3 text-white">
+                    <CheckCircle2 size={20} className="text-white shrink-0" />
+                    <span className="text-md font-medium text-white">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href="#contact"
+                className="block w-full py-4 bg-white hover:bg-gray-200 text-gray-900 font-bold rounded-xl text-center transition-colors"
+              >
+                Entrar em Contato
+              </a>
+            </div>
           </div>
 
           {/* Coupon Section */}
