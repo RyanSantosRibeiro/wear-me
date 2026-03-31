@@ -230,10 +230,10 @@
         }
 
         .wearme-logo-wedigi {
-            width: 100px;
+            width: 80px;
             height: auto;
             pointer-events: none;
-            opacity: 0.6;
+            opacity: 0.8;
         }
 
         /* Trigger Button Styles (Host side) */
@@ -911,7 +911,7 @@
                     </div>
                     <div class="wearme-content"></div>
                     <div class="wearme-footer"></div>
-                    <img class="wearme-logo-wedigi" src="https://wearme.vercel.app/wedigi.webp" alt="WeDigital" style="position: absolute; top: 101%; right: 0; pointer-events: none;" />
+                    <img class="wearme-logo-wedigi" src="https://wearme.vercel.app/wedigi.webp" alt="WeDigital" style="position: absolute; top: 101%; right: 10px; pointer-events: none;" />
                 </div>
             `;
 
