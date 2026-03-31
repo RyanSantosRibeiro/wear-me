@@ -708,7 +708,7 @@
         @media (max-width: 480px) {
             .wearme-modal {
                 max-height: 100vh;
-                border-radius: 0;
+                border-radius: 1rem;
                 margin: 0;
             }
             .wearme-modal-overlay {
@@ -903,6 +903,7 @@
                     </div>
                     <div class="wearme-content"></div>
                     <div class="wearme-footer"></div>
+                    <img src="https://wearme.vercel.app/wedigi.webp" alt="WeDigital" style="" />
                 </div>
             `;
 
