@@ -121,9 +121,9 @@ export async function POST(req: NextRequest) {
         }
 
         let prompt = MODERATE_PROMPT[0];
-        if (mode === 'angles') {
-            prompt += " Generate a collage showing the person from front, side, and back views.";
-        }
+        // if (mode === 'angles') {
+        //     prompt += " Generate a collage showing the person from front, side, and back views.";
+        // }
         console.log("Final Prompt:", prompt);
 
         const requestParts: any[] = [

@@ -140,7 +140,7 @@
             max-height: 90vh;
             border-radius: 1.5rem;
             box-shadow: var(--wearme-shadow);
-            overflow: hidden;
+            // overflow: hidden;
             display: flex;
             flex-direction: column;
             transform: scale(0.95);
@@ -222,10 +222,18 @@
             padding: 1.5rem;
             border-top: 1px solid #f3f4f6;
             background: #f9fafb;
+            border-radius: 0 0 1.5rem 1.5rem;
 
             @media (max-width: 1400px) {
                 padding: 0.5rem;
             }
+        }
+
+        .wearme-logo-wedigi {
+            width: 100px;
+            height: auto;
+            pointer-events: none;
+            opacity: 0.6;
         }
 
         /* Trigger Button Styles (Host side) */
@@ -903,7 +911,7 @@
                     </div>
                     <div class="wearme-content"></div>
                     <div class="wearme-footer"></div>
-                    <img src="https://wearme.vercel.app/wedigi.webp" alt="WeDigital" style="" />
+                    <img class="wearme-logo-wedigi" src="http://localhost:3000/wedigi.webp" alt="WeDigital" style="position: absolute; top: 101%; right: 0; pointer-events: none;" />
                 </div>
             `;
 
