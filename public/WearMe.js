@@ -911,7 +911,7 @@
                     </div>
                     <div class="wearme-content"></div>
                     <div class="wearme-footer"></div>
-                    <img class="wearme-logo-wedigi" src="http://localhost:3000/wedigi.webp" alt="WeDigital" style="position: absolute; top: 101%; right: 0; pointer-events: none;" />
+                    <img class="wearme-logo-wedigi" src="https://wearme.vercel.app/wedigi.webp" alt="WeDigital" style="position: absolute; top: 101%; right: 0; pointer-events: none;" />
                 </div>
             `;
 
