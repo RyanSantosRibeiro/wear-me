@@ -1168,22 +1168,35 @@
 
             this.elements.footer.innerHTML = '';
 
-            this.elements.content.querySelector('#wearme-reset-btn').onclick = () => {
-                // Remove cached result so it doesn't auto-load next time
-                WearMeDB.delete(this.config.productImage);
+            const resetBtn = this.elements.content.querySelector('#wearme-reset-btn');
+            if (resetBtn) {
+                resetBtn.onclick = () => {
+                    // Remove cached result so it doesn't auto-load next time
+                    WearMeDB.delete(this.config.productImage);
 
-                this.setState({
-                    status: 'idle',
-                    userImage: null,
-                    previewUrl: null,
-                    resultImage: null,
-                    processingStep: 0
-                });
-            };
+                    this.setState({
+                        status: 'idle',
+                        userImage: null,
+                        previewUrl: null,
+                        resultImage: null,
+                        processingStep: 0
+                    });
+                };
+            }
 
-            this.elements.content.querySelector('#wearme-download-btn').onclick = () => {
-                downloadBase64AsPng(this.state.resultImage, `look-wearme-${Date.now()}.png`);
-            };
+            const downloadBtn = this.elements.content.querySelector('#wearme-download-btn');
+            if (downloadBtn) {
+                downloadBtn.onclick = () => {
+                    downloadBase64AsPng(this.state.resultImage, `look-wearme-${Date.now()}.png`);
+                };
+            }
+
+            const buyBtn = this.elements.content.querySelector('#wearme-buy-btn');
+            if (buyBtn) {
+                buyBtn.onclick = () => {
+                    this.close();
+                };
+            }
         },
 
         async startProcessing() {
