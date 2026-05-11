@@ -172,7 +172,7 @@
             justify-content: space-between;
             position: absolute;
             top: 0;
-            right: 10px;
+            right: 0px;
 
             @media (max-width: 1400px) {
                 padding: 0.25;
@@ -587,6 +587,7 @@
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
+            margin-top: 18px;
 
             @media screen and (max-width: 1400px) {
                 gap: .75rem;
