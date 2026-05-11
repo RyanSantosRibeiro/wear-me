@@ -156,15 +156,25 @@
             transform: scale(1);
         }
 
+        .wearme-version-wedigi{
+            position: absolute;
+            top: 101%;
+            left: 0px;
+            color: #ffffff;
+            opacity: 0.6;
+        }
+
         .wearme-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #f3f4f6;
+            padding: .5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            position: absolute;
+            top: 0;
+            right: 10px;
 
             @media (max-width: 1400px) {
-                padding: 0.5rem .75rem;
+                padding: 0.25;
             }
         }
 
@@ -900,18 +910,12 @@
                 <div class="wearme-modal" onclick="event.stopPropagation()">
                     ${this.config.logoUrl ? `<img src="${this.config.logoUrl}" class="wearme-modal-logo" />` : ''}
                     <div class="wearme-header">
-                        <div class="wearme-logo-group">
-                            <div class="wearme-logo-icon">${SVG_ICONS.sparkles.replace('width="24" height="24"', 'width="16" height="16"')}</div>
-                            <div>
-                                <h3>Provador Virtual</h3>
-                                <p>${this.config.brandName}</p>
-                            </div>
-                        </div>
                         <button class="wearme-close">${SVG_ICONS.x.replace('width="24" height="24"', 'width="20" height="20"')}</button>
                     </div>
                     <div class="wearme-content"></div>
                     <div class="wearme-footer"></div>
-                    <img class="wearme-logo-wedigi" src="https://wearme.vercel.app/wedigi.webp" alt="WeDigital" style="position: absolute; top: 101%; right: 10px; pointer-events: none;" />
+                    <p class="wearme-version-wedigi">${this.config.brandName}</p>
+                    <img class="wearme-logo-wedigi" src="https://deco-sites-assets.s3.sa-east-1.amazonaws.com/we-digi/a2f70dcc-036b-4c0d-a710-339c400ecd09/logo-wedigi.svg" alt="WeDigital" style="position: absolute; top: 101%; right: 10px; pointer-events: none;" />
                 </div>
             `;
 
