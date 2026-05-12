@@ -44,7 +44,7 @@ export default function HomePage() {
 
   const [copied, setCopied] = useState(false)
   const installScript = `<!-- Wearme Size Finder & Chart -->
-<div id="wearme-size-widget"></div>
+<div id="wearme-size-widget">aqui</div>
 <div id="wearme-chart-widget"></div>
 
 <script src="https://wearme.vercel.app/WearMeFindMySize.js"></script>

@@ -741,6 +741,7 @@
         config: {
             apiKey: '',
             productImage: '',
+            buttonInsert: '',
             buttonSelector: '',
             apiUrl: 'https://wearme.vercel.app/api/wearme/generate', // Fallback to production URL
             brandName: 'Wearme AI v2.0.1',
@@ -868,7 +869,24 @@
         },
 
         setupTrigger() {
-            const container = document.querySelector(this.config.buttonSelector);
+            if (this.config.buttonSelector) {
+                const customBtns = document.querySelectorAll(this.config.buttonSelector);
+                customBtns.forEach(customBtn => {
+                    if (!customBtn.dataset.wearmeInit) {
+                        customBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            console.log("WearMe image: ", this.config.productImage);
+                            this.open();
+                        });
+                        customBtn.dataset.wearmeInit = 'true';
+                    }
+                });
+                return;
+            }
+
+            if (!this.config.buttonInsert) return;
+
+            const container = document.querySelector(this.config.buttonInsert);
             if (!container) return;
 
             const btn = document.createElement('button');
