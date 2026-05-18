@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
             console.log("Origin:", origin);
             console.log("Site URL:", config.site_url);
             // Simple inclusion check to handle protocol variations (http/https)
-            if (origin !== "http://localhost:3000" && !origin?.includes("myvtex") && (!origin || !origin.includes(config.site_url))) {
+            if (origin !== "http://localhost:3000" && !origin?.includes("myvtex") && !origin?.includes("cloude") && (!origin || !origin.includes(config.site_url))) {
                 console.warn(`Blocked request from unauthorized origin: ${origin} (Expected: ${config.site_url})`);
                 return withCORS(req, NextResponse.json({ error: "Unauthorized Domain" }, { status: 403 }));
             }

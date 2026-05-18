@@ -189,7 +189,7 @@ export const HeroSection = () => {
 
                   {/* The "Try On" Button - Standalone JS Widget */}
                   <div className="pt-2">
-                    <div id="wearme-btn" ref={wearmeBtnRef}></div>
+                    <div id="wearme-btn" ref={wearmeBtnRef}>aqui</div>
 
                     <Script src="/WearMe.js" strategy="afterInteractive" onLoad={() => {
                       // @ts-ignore
@@ -200,7 +200,7 @@ export const HeroSection = () => {
                           highlightColor: '#ff92b5',
                           // productImage: 'https://www.zenoficial.com.br/cdn/shop/files/11573_002_AnaPaula1.jpg?v=1760753084&width=823',
                           productImage: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop',
-                          buttonSelector: '#wearme-btn'
+                          buttonInsert: '#wearme-btn'
                         });
                       }
                     }} />
