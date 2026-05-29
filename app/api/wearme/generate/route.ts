@@ -19,7 +19,7 @@ export async function OPTIONS(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    console.log("--- VTON Generation Started ---");
+    console.log("--- VTON Generation Started v3 ---");
     try {
         const formData = await req.formData();
         const productImage = formData.get("productImage") as string;
@@ -27,6 +27,9 @@ export async function POST(req: NextRequest) {
         const userImage = (userImageRaw instanceof File && userImageRaw.size > 0) ? userImageRaw : null;
         const mode = formData.get("mode-old") as string;
         const clientApiKey = formData.get("apiKey") as string;
+        // Optional: caller can request a specific prompt variant (0-3). Defaults to 0 (PRIMARY).
+        const promptIndexRaw = formData.get("promptIndex");
+        const promptIndex = promptIndexRaw !== null ? Math.min(Math.max(parseInt(promptIndexRaw as string, 10), 0), MODERATE_PROMPT.length - 1) : 0;
 
         console.log("Request Data:", {
             mode,
@@ -120,11 +123,17 @@ export async function POST(req: NextRequest) {
             console.error("Error fetching product image:", e);
         }
 
-        let prompt = MODERATE_PROMPT[0];
-        // if (mode === 'angles') {
-        //     prompt += " Generate a collage showing the person from front, side, and back views.";
-        // }
-        console.log("Final Prompt:", prompt);
+        /**
+         * PROMPT SELECTION STRATEGY
+         * [0] PRIMARY       — Default: best overall VTON quality with body-fidelity enforcement.
+         * [1] BODY_LOCK      — Use when user body proportions must be preserved with extra strictness.
+         * [2] GARMENT_DETAIL — Use when the garment has complex prints, textures, or patterns.
+         * [3] STUDIO_FALLBACK— Use when Reference 2 is a flat-lay, ghost mannequin, or product-only image.
+         *
+         * The caller can pass `promptIndex` in the form data to override the default selection.
+         */
+        const prompt = MODERATE_PROMPT[promptIndex];
+        console.log(`Using prompt index [${promptIndex}]:`, prompt.substring(0, 120) + "...");
 
         const requestParts: any[] = [
             prompt,
@@ -194,7 +203,8 @@ export async function POST(req: NextRequest) {
         return withCORS(req, NextResponse.json({
             success: true,
             imageUrl: resultImageUrl,
-            analysis: analysisText
+            analysis: analysisText,
+            promptIndex, // inform the caller which prompt was used
         }));
 
     } catch (error: any) {

@@ -189,7 +189,7 @@ export const HeroSection = () => {
 
                   {/* The "Try On" Button - Standalone JS Widget */}
                   <div className="pt-2">
-                    <div id="wearme-btn" ref={wearmeBtnRef}>aqui</div>
+                    <div id="wearme-btn" ref={wearmeBtnRef}></div>
 
                     <Script src="/WearMe.js" strategy="afterInteractive" onLoad={() => {
                       // @ts-ignore

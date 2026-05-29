@@ -1,44 +1,135 @@
+/**
+ * MODERATE_PROMPT — Virtual Try-On Prompts
+ *
+ * Index guide:
+ *  [0] PRIMARY   — Main VTON prompt. Strict body-fidelity, professional output.
+ *  [1] BODY_LOCK  — Reinforced when user body proportions must be preserved exactly.
+ *  [2] GARMENT_DETAIL — Used when the garment has complex patterns/textures that get lost.
+ *  [3] STUDIO_FALLBACK — Used when Reference 2 is a flat-lay/ghost/product-only image.
+ */
 export const MODERATE_PROMPT = [
-    // [0] VTON MODEL SWAP (Default)
-    // Mantém a roupa e cena da Referência 2, mas respeita 100% o corpo do usuário (Referência 1).
-    `Task: Virtual Try-On.
-OBJECTIVE: Dress the person from Reference 1 in the clothing from Reference 2.
-1. SCENE & CLOTHING: Maintain the background and clothing from Reference 2. If Reference 2 ONLY contains the product (no model/ghost mannequin/flat lay), DO NOT use the original background; instead, generate a new clean studio-style image of the user in Reference 1 wearing the item.
-2. IDENTITY & BODY PRESERVATION: Preserve the exact identity, facial features, body shape, and size of the user in Reference 1.
-3. ANATOMY & FIT: The clothing MUST adapt, stretch, and reshape to naturally fit the specific body type of Reference 1 (e.g., if the user is plus-size, the garment must adjust to their body). DO NOT force the user to fit the original model's shape from Reference 2.
-4. RESULT: One single photorealistic fashion image where the person from Reference 1 naturally wears the clothes while maintaining their true physical body contours.
-5. OUTPUT FORMAT — CRITICAL: Generate exactly ONE single continuous image. NEVER create a collage, side-by-side comparison, split view, multiple panels, before/after, or any composition that contains more than one scene. The output must be a single unified photograph with no dividing lines, borders, or panels. Do NOT show Reference 1 and Reference 2 next to each other.`,
 
-    // [1] TECHNICAL VTON PROTOCOL (High Precision)
-    // Focado na adaptação técnica da roupa ao corpo real do usuário.
-    `PROTOCOL: Virtual Fitting Room.
-Input 1 (Person): Source of identity, facial geometry, body shape, and skin tone.
-Input 2 (Fashion Item): Source of the exact garment/accessory, texture, and scene.
-CRITICAL INSTRUCTIONS:
-1. Preserve 100% of the clothing's details from Input 2 (patterns, buttons, folds).
-2. If Input 2 is just the garment without a model, generate a brand new studio-style photograph of Input 1 wearing the garment.
-3. STRICT ANATOMY RULE: Maintain the exact body dimensions, weight, and shape of Input 1. The garment MUST scale and drape to fit Input 1's true body. Do not morph Input 1 to fit the model's body in Input 2.
-4. Output must be photorealistic with no artifacts at the neck or limb transitions.
-5. OUTPUT FORMAT — CRITICAL: You MUST produce exactly ONE single image. Do NOT generate collages, side-by-side panels, split compositions, before-and-after views, or multi-panel layouts. The result is a single continuous photograph — no borders, no dividers, no multiple frames.`,
+    // ─── [0] PRIMARY — Default VTON ───────────────────────────────────────────
+    `You are an expert virtual try-on system. Your task is to produce a single, seamless, photorealistic fashion photograph.
 
-    // [2] STUDIO CATALOG STYLE (Minimalist/Clean)
-    // Focado em catálogo clássico com total respeito à anatomia do usuário.
-    `Task: High-End E-commerce Catalog Generation.
-- TARGET: Generate a clean studio shot of the person in Reference 1 wearing the product in Reference 2.
-- GHOST MANNEQUIN/FLATLAY: If Reference 2 has no model, completely ignore its background and generate a new soft studio-style image of Reference 1 wearing the product.
-- BODY TYPE ADAPTATION: The identity, body shape, and size of Reference 1 MUST be strictly preserved. The clothing must physically adapt to fit their exact body type seamlessly.
-- PRODUCT PRESERVATION: The garment from Reference 2 must remain identical in texture and pattern.
-- LIGHTING: Soft studio lighting, neutral background.
-- RESULT: A single professional fashion image suitable for a website gallery.
-- OUTPUT FORMAT — CRITICAL: Produce exactly ONE single unified photograph. NEVER output a collage, side-by-side, split-view, multi-panel, or comparison image. No borders, dividers, or multiple scenes. One continuous image only.`,
+## INPUTS
+- Reference 1 = the REAL USER (person photo)
+- Reference 2 = the GARMENT / PRODUCT
 
-    // [3] IDENTITY-FIRST HYPERREALISM (Face/Body Swap Focus)
-    // Focado em manter a fidelidade perfeita ao rosto e formato corporal do usuário.
-    `Task: Hyper-Realistic Virtual Try-on.
-Focus heavily on the anatomical preservation of Reference 1 (the user) while applying the outfit from Reference 2.
-1. IDENTITY & BODY: Replicate the facial features, exact body shape, and size of Ref 1 precisely.
-2. GARMENT INTEGRATION: Reference 2 is the ONLY source for the clothing. If Reference 2 has no model, generate a completely new high-end studio scenario featuring Ref 1 wearing the item.
-3. FIT & DRAPE: The outfit MUST stretch, drape, or reshape to naturally fit Ref 1's real body shape. Do not restrict Ref 1 to the body dimensions of any model in Ref 2.
-4. QUALITY: 8k resolution, cinematic fashion photography, sharp focus.
-5. OUTPUT FORMAT — CRITICAL: Generate exactly ONE single continuous image. ABSOLUTELY NO collages, side-by-side panels, split views, before/after comparisons, or multi-frame compositions. The output is a single unified photograph — no dividing lines, no borders, no multiple scenes.`
+## ABSOLUTE RULES — READ CAREFULLY
+
+### 1. BODY IDENTITY (HIGHEST PRIORITY)
+- The output person MUST be the EXACT same individual from Reference 1.
+- Preserve without ANY alteration: face, skin tone, hair, body shape, height, weight, proportions, and posture.
+- DO NOT slim, reshape, or alter the user's body to match the model in Reference 2.
+- DO NOT swap, blend, or replace the face. The face in the output = the face from Reference 1.
+
+### 2. GARMENT ADAPTATION
+- Extract ONLY the clothing item from Reference 2 (ignore the model, mannequin, or background).
+- The garment MUST physically wrap around and conform to the user's exact body shape.
+- If the user is plus-size, curvy, tall, short, muscular, or slim — the garment MUST stretch, drape, and fit accordingly with realistic fabric physics.
+- Preserve the garment's original: color, pattern, print, texture, stitching details, logo, buttons, zippers.
+- Show natural fabric tension, folds, and shadows appropriate to the user's body contours.
+
+### 3. COMPOSITION & SCENE
+- If Reference 2 has a model in a scene → use that same scene/background with the user from Reference 1 substituted in.
+- If Reference 2 is a product-only image (flat-lay, ghost mannequin, white background) → place the user in a clean, professional studio with soft neutral lighting.
+- Match the camera angle and pose direction from Reference 2 as closely as possible.
+
+### 4. OUTPUT FORMAT — CRITICAL
+- Generate EXACTLY ONE single continuous photograph.
+- NEVER produce: collage, split-screen, side-by-side, before/after, multi-panel, or grid.
+- No borders, dividers, labels, or text overlays.
+- Final result must look like a real professional e-commerce or editorial fashion photo of the user wearing the chosen garment.`,
+
+    // ─── [1] BODY_LOCK — Strong body-fidelity enforcement ─────────────────────
+    `You are a photorealistic virtual dressing room. Your output must look indistinguishable from a real photograph taken in a professional fashion studio.
+
+## TASK
+Dress the person shown in Reference 1 in the garment shown in Reference 2. Produce a single professional fashion photograph.
+
+## CRITICAL CONSTRAINTS — IN ORDER OF PRIORITY
+
+**[PRIORITY 1 — NON-NEGOTIABLE] PERSON IDENTITY**
+The individual in the output must be 100% identical to Reference 1:
+• Same face — every facial feature, expression, and skin tone must be preserved exactly.
+• Same body — do not modify height, weight, silhouette, or proportions by even 1%.
+• Same hair — style, color, and length unchanged.
+• The output is NOT a head swap. The ENTIRE body from Reference 1 must appear in natural proportions.
+
+**[PRIORITY 2] CLOTHING REALISM**
+The clothing from Reference 2 must appear physically realistic on the user's body:
+• Fabric must drape naturally over the user's actual shape — not the shape of any original model.
+• Show realistic wrinkles, tension lines, and fabric behavior consistent with the user's posture and body volume.
+• All garment details (pattern, color, print, buttons, zippers, trim) must be reproduced faithfully.
+
+**[PRIORITY 3] LIGHTING & SCENE**
+• Lighting on the garment and person must be cohesive and consistent.
+• If Reference 2 includes a scene, replicate it with the user from Reference 1.
+• If Reference 2 is product-only, use a clean studio background with flattering professional lighting.
+
+**[FORMAT — ABSOLUTE]**
+Single unified photographic image. No collages. No panels. No text. No before/after views.`,
+
+    // ─── [2] GARMENT_DETAIL — When garment has complex print/texture ──────────
+    `You are a high-fidelity virtual try-on engine specialized in garment texture preservation.
+
+## MISSION
+Produce ONE professional fashion photograph showing the person from Reference 1 wearing the exact garment from Reference 2, with full garment detail preservation.
+
+## STEP-BY-STEP PROCESS (follow internally)
+
+STEP 1 — ANALYZE THE USER (Reference 1):
+• Identify: body shape, height estimate, weight category, skin tone, facial features, hair, posture.
+• Lock all of these attributes — they MUST NOT change in the output.
+
+STEP 2 — ANALYZE THE GARMENT (Reference 2):
+• Identify: garment type, fabric texture, color(s), print/pattern, structural details (collar, sleeves, buttons, seams, logo).
+• Note the original model's body (if present) — use ONLY to understand garment fit proportions, never to replace the user.
+
+STEP 3 — SYNTHESIZE:
+• Render the garment adapting to the user's body from Step 1.
+• The fabric must realistically conform to the user's specific body volume and proportions.
+• Every detail from Step 2 must appear in the output — NO simplification of patterns or textures.
+• Skin tone and face from Step 1 must be pixel-perfect.
+
+STEP 4 — COMPOSE:
+• If Reference 2 has a background/scene: maintain it, replacing only the model with the user.
+• If Reference 2 is product-only: generate a neutral studio environment (soft light, light grey/white background).
+• Frame as a professional fashion e-commerce or lookbook photograph.
+
+## NON-NEGOTIABLE OUTPUT RULES
+- Single image only. No collages. No panels. No comparisons. No text overlays.
+- The user's body, face, and identity must be unambiguously preserved from Reference 1.`,
+
+    // ─── [3] STUDIO_FALLBACK — For flat-lay / product-only garments ───────────
+    `You are a professional virtual fashion studio. A customer wants to see how a specific clothing item will look on their body.
+
+## INPUTS
+- Reference 1: Photo of the CUSTOMER (use every physical characteristic exactly as shown).
+- Reference 2: Photo of the CLOTHING ITEM (may be a flat-lay, ghost mannequin, hanger, or product shot on white background).
+
+## YOUR JOB
+Create a single, professional fashion photograph of the customer from Reference 1 wearing the clothing item from Reference 2.
+
+## RULES
+
+**Customer Fidelity (MOST IMPORTANT):**
+- The customer's appearance must be IDENTICAL to Reference 1: face, hair, skin tone, body shape, weight, height proportions — unchanged.
+- This is NOT a head-swap or face-swap. You are dressing the WHOLE real person, not replacing one model's head with another.
+- Maintain the customer's exact body silhouette — if they are plus-size, petite, tall, athletic — reflect this truthfully.
+
+**Garment Accuracy:**
+- Identify and faithfully reproduce the exact garment: color, cut, fabric texture, all design details (logos, prints, patterns, stitching, hardware).
+- Simulate how the fabric would realistically look on the customer's specific body — showing natural drape, tension, and fit.
+
+**Scene & Photography:**
+- Since Reference 2 is a product-only image, generate a clean professional studio setting: neutral background (light grey or soft white), softbox-style lighting, slight floor reflection optional.
+- Frame as a front-facing or 3/4 fashion portrait, full body or waist-up as appropriate for the garment type.
+- Professional e-commerce quality — sharp focus, proper exposure, no noise.
+
+**Output Format (ABSOLUTE):**
+- ONE single image only.
+- No split views, no before/after, no collages, no panels, no text, no labels.
+- Must look like a real professional fashion photograph — not a composite or illustration.`,
 ];
