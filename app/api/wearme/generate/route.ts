@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
             console.warn("Using Mock Response (No GEMINI_API_KEY)");
             return withCORS(req, NextResponse.json({
                 success: true,
-                imageUrl: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
+                imageUrl: productImage,
                 analysis: "Simulated analysis: Fit looks perfect."
             }));
         }
@@ -219,7 +219,6 @@ export async function POST(req: NextRequest) {
             console.warn("Quota limit reached (429)");
             return withCORS(req, NextResponse.json({
                 success: true,
-                imageUrl: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
                 analysis: "O limite de uso diário foi atingido. Mostrando o produto original como referência."
             }));
         }
