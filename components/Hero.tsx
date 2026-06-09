@@ -11,7 +11,7 @@ import imgCasual from "@/assets/img/casual.png"
 
 export const HeroSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<'sport' | 'casual' | 'accessories'>("sport")
+  const [selectedCategory, setSelectedCategory] = useState<'sport' | 'casual' | 'accessories'>("casual")
   const [out, setOut] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -199,7 +199,7 @@ export const HeroSection = () => {
                           apiKey: '023ec83bdbf73177a680807fc144bfea',
                           highlightColor: '#ff92b5',
                           // productImage: 'https://www.zenoficial.com.br/cdn/shop/files/11573_002_AnaPaula1.jpg?v=1760753084&width=823',
-                          productImage: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop',
+                          productImage: categoryImage[selectedCategory],
                           buttonInsert: '#wearme-btn'
                         });
                       }
